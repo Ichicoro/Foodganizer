@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %} Test! {% endblock %}
+
+{% block head%}
+<script type="module">
+    import { html, render, useState } from 'https://unpkg.com/htm/preact/standalone.module.js'
+
+    const TestC = () => {
+        const [test, setTest] = useState(0)
+        return html`<div>
+            <button onClick=${() => setTest(x => x + 1)}>amount?</button> -> ${test}
+        <//>`
+    }
+
+    render(html`<div>
+        rendered with preact @ <b>${new Date().toLocaleString()}</b> :)
+        <${TestC} />
+    </div>`, document.getElementById("preact-test"))
+</script>
+{% endblock %}
+
+{% block body %}
+    <h1>testerino</h1>
+    <div id="preact-test"></div>
+{% endblock %}

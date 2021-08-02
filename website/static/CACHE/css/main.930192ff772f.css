@@ -1,0 +1,11 @@
+/* line 1, website/static/css/header.sass */
+.fg-header {
+  background-color: red;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0; }
+  /* line 8, website/static/css/header.sass */
+  .fg-header > span {
+    padding: 10px;
+    color: white; }

@@ -1,0 +1,94 @@
+.fg-header
+  background-color: rgba(0,0,0,0.1)
+  backdrop-filter: blur(10px)
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  height: 44px
+  vertical-align: center
+  padding: 10px 12.5px
+  display: flex
+  justify-content: space-between
+  align-items: center
+
+  & a
+    text-decoration: none
+    color: var(--text-color-main)
+    transition: 0.3s
+    cursor: pointer
+
+    &:hover
+      color: var(--text-color-hover)
+
+.fg-header_container
+  flex-grow: 1
+
+.fg-header_title
+  font-weight: 600
+  font-size: 18px
+
+  &:hover
+    font-weight: 800
+
+.fg-header_separator
+  padding-left: 5px
+  padding-right: 5px
+
+.fg-header_links
+  color: indianred
+  & > ul
+    padding: 0
+    margin-bottom: 0
+    display: inline-block
+
+    & > li
+      display: inline-block
+      font-size: 0
+
+      & a
+        font-size: 16px
+        letter-spacing: 0.335px
+        &:hover
+          font-weight: bold
+          letter-spacing: 0
+        &::before
+          display: block
+          content: attr(title)
+          font-weight: bold
+          height: 0
+          overflow: hidden
+          visibility: hidden
+
+.fg-header_user-btn
+  display: inline-flex
+  position: relative
+  justify-content: flex-end
+
+.fg-header_ham
+  display: none
+  //color: indianred
+  //width: 24px
+  //height: 32px
+  margin-right: 8px
+  font-size: 22px
+
+.fg-header_link
+  color: white
+  cursor: pointer
+  transition: .05s
+  display: inline
+  list-style-type: none
+
+  &:hover
+    font-weight: 700
+
+@media (max-width: 480px)
+  .fg-header_ham
+    display: block
+
+  .fg-header_links
+    display: none
+
+  .fg-header
+    padding: 10px

@@ -1,0 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap");
+@media (prefers-color-scheme: dark) {
+  /* line 2, website/static/css/colors.sass */
+  body {
+    --bg-color-main: #1d1c24;
+    --text-color-main: white; } }
+
+@media (prefers-color-scheme: light) {
+  /* line 7, website/static/css/colors.sass */
+  body {
+    --bg-color-main: white;
+    --text-color-main: #1d1c24; } }
+
+/* line 1, website/static/css/header.sass */
+.fg-header {
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  vertical-align: center;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between; }
+  /* line 14, website/static/css/header.sass */
+  .fg-header > .fg-header_container {
+    flex-grow: 1; }
+  /* line 17, website/static/css/header.sass */
+  .fg-header > .fg-header_user-btn {
+    display: inline-flex;
+    position: relative;
+    justify-content: flex-end; }
+
+/* line 12, website/static/css/main.sass */
+body {
+  color: var(--text-color-main);
+  background-color: var(--bg-color-main); }

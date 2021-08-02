@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#1d1c24" /> <!-- TODO: CHANGE ME -->
+
+        <!--<link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">-->
+
+        {% include "css-imports.html" %}
+        {% block head %}{% endblock %}
+    </head>
+    <body>
+        {% include "components/header.html" %}
+        {% block body %}{% endblock %}
+    </body>
+</html>

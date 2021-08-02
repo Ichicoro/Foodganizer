@@ -1,0 +1,31 @@
+<header class="fg-header">
+    <span class="fg-header_ham">
+        <i class="bi bi-list"></i>
+    </span>
+    <span class="fg-header_container">
+        <span class="fg-header_title">Foodganizer</span>
+        <span class="fg-header_links">
+            <span class="fg-header_separator">//</span>
+            <ul>
+                <li class="fg-header_link" title="Home">
+                    <a href="#">Home</a>
+                </li>
+                /
+                <li class="fg-header_link" title="Home">
+                    <a href="#">Home</a>
+                </li>
+                /
+                <li class="fg-header_link" title="Home">
+                    <a href="#">Home</a>
+                </li>
+            </ul>
+        </span>
+    </span>
+    <a class="fg-header_user-btn">
+        {% if user.is_authenticated %}
+            Exit
+        {% else %}
+            Login
+        {% endif %}
+    </a>
+</header>

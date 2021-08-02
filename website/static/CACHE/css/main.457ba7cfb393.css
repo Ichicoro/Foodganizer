@@ -1,0 +1,34 @@
+@media (prefers-color-scheme: dark) {
+  /* line 2, website/static/css/colors.sass */
+  body {
+    --bg-color-main: #1d1c24;
+    --text-color-main: white; } }
+
+@media (prefers-color-scheme: light) {
+  /* line 7, website/static/css/colors.sass */
+  body {
+    --bg-color-main: white;
+    --text-color-main: #1d1c24; } }
+
+/* line 1, website/static/css/header.sass */
+.fg-header {
+  background-color: rgba(255, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  vertical-align: center;
+  padding: 10px;
+  display: flex; }
+  /* line 13, website/static/css/header.sass */
+  .fg-header > .fg-header_title {
+    color: white;
+    height: 100%; }
+
+/* line 4, website/static/css/main.sass */
+body {
+  color: var(--text-color-main);
+  background-color: var(--bg-color-main);
+  padding-top: 52px; }
