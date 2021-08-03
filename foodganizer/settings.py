@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-i+2)cp^x@5qdtrpls!zno(i*+2p09a0+cc-$=cxg7-62uq0u-h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'solfubook-pro.local',
+    'localhost',
+    '127.0.0.1'
+]
 
 
 # Application definition

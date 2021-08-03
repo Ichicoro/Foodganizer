@@ -1,25 +1,30 @@
 .fg-header
   background-color: rgba(0,0,0,0.1)
   backdrop-filter: blur(10px)
+  --webkit-backdrop-filter: blur(10px)
   position: fixed
-  top: 0
-  left: 0
-  right: 0
-  height: 44px
-  vertical-align: center
-  padding: 10px 12.5px
-  display: flex
-  justify-content: space-between
-  align-items: center
+  //top: 0
+  //left: 0
+  //right: 0
+  //height: 44px
+  //vertical-align: center
+  //padding: 0 5px
+  //display: flex
+  //justify-content: space-between
+  //align-items: center
+  //z-index: 99999
+.navbar-toggler
+  border: 0
 
-  & a
-    text-decoration: none
-    color: var(--text-color-main)
-    transition: 0.3s
-    cursor: pointer
 
-    &:hover
-      color: var(--text-color-hover)
+  //& a
+  //  text-decoration: none
+  //  color: var(--text-color-main)
+  //  transition: 0.3s
+  //  cursor: pointer
+  //
+  //  &:hover
+  //    color: var(--text-color-hover)
 
 .fg-header_container
   flex-grow: 1
@@ -72,6 +77,9 @@
   //height: 32px
   margin-right: 8px
   font-size: 22px
+
+.fg-header_brand-fix
+  transform: translateY(-1.25px)
 
 .fg-header_link
   color: white

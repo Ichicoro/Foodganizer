@@ -1,31 +1,27 @@
-<header class="fg-header">
-    <span class="fg-header_ham">
-        <i class="bi bi-list"></i>
-    </span>
-    <span class="fg-header_container">
-        <span class="fg-header_title">Foodganizer</span>
-        <span class="fg-header_links">
-            <span class="fg-header_separator">//</span>
-            <ul>
-                <li class="fg-header_link" title="Home">
-                    <a href="#">Home</a>
-                </li>
-                /
-                <li class="fg-header_link" title="Home">
-                    <a href="#">Home</a>
-                </li>
-                /
-                <li class="fg-header_link" title="Home">
-                    <a href="#">Home</a>
-                </li>
-            </ul>
-        </span>
-    </span>
-    <a class="fg-header_user-btn">
-        {% if user.is_authenticated %}
-            Exit
-        {% else %}
-            Login
-        {% endif %}
-    </a>
-</header>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top fg-header py-1">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bolder fg-header_brand-fix" href="/">
+           {% comment %} <img src="https://getbootstrap.com/docs/5.0/assets/brand/bootstrap-logo.svg" height="24" class="d-inline-block align-text-top" alt="">{% endcomment %}
+            Foodganizer
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <div class="navbar-nav me-auto">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+                <a class="nav-link" href="#">Features</a>
+                <a class="nav-link" href="#">Pricing</a>
+                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="#" style="padding-right: 0">{{ user.username }}</a>
+                {% else %}
+                    <a class="nav-link" href="/login" style="padding-right: 0">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
