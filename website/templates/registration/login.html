@@ -1,37 +1,57 @@
 {% extends "base.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block body %}
 
-    {% if form.errors %}
-        <p>Your username and password didn't match. Please try again.</p>
-    {% endif %}
+    {% block head %}
+        {% include "csvalidation.html" %}
+    {% endblock %}
 
-    {% if next %}
-        {% if user.is_authenticated %}
-            <p>Your account doesn't have access to this page. To proceed,
-                please login with an account that has access.</p>
-        {% else %}
-            <p>Please login to see this page.</p>
-        {% endif %}
-    {% endif %}
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-sm-12">
+                <form novalidate method="post" class="rounded border p-3 needs-validation" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <h2 class="mb-3">Login</h2>
+                    {% comment %} TODO: Fix this {% endcomment %}
+                    {% comment %}{% if next %}
+                        {% if user.is_authenticated %}
+                            <p>Your account doesn't have access to this page. To proceed,
+                                please login with an account that has access.</p>
+                        {% else %}
+                            <p>Please login to see this page.</p>
+                        {% endif %}
+                    {% endif %}{% endcomment %}
+                    <div class="mb-3">
+                        <label for="{{ form.username.name }}" class="form-label">Username</label>
 
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        <table>
-            <tr>
-                <td>{{ form.username.label_tag }}</td>
-                <td>{{ form.username }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.password.label_tag }}</td>
-                <td>{{ form.password }}</td>
-            </tr>
-        </table>
-        <input type="submit" value="login" />
-        <input type="hidden" name="next" value="{{ next }}" />
-    </form>
-
-    {# Assumes you setup the password_reset view in your URLconf #}
-    {% comment %}<p><a href="{% url 'password_reset' %}">Lost password?</a></p>{% endcomment %}
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend">@</span>
+                            <input class="form-control" name="{{ form.username.name }}" id="{{ form.username.name }}" aria-describedby="usernameHelp" required>
+                            <div class="invalid-feedback">
+                                Missing username
+                            </div>
+                        </div>
+                        {% comment %}<div id="usernameHelp" class="form-text">The username you used when signing up</div>{% endcomment %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.password.name }}" class="form-label">Password</label>
+                        <input type="password" class="form-control" name="{{ form.password.name }}" id="{{ form.password.name }}" required>
+                        <div class="invalid-feedback">
+                            Missing password
+                        </div>
+                    </div>
+                    {% if form.errors %}
+                        <div class="mb-3">
+                            <p class="text-danger">Wrong username or password</p>
+                        </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-success w-100 mt-2">Login</button>
+                    <input type="hidden" name="next" value="{{ next }}" />
+                </form>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}

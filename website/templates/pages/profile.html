@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 
 {% block body %}
-    <div class="container-fluid container-lg">
-        <p><a href="{% url 'logout' %}">Log out</a></p>
+    <div class="container-lg container-fluid">
+        <div class="row">
+            <div class="col-sm-3">
+                <img src="https://picsum.photos/400" class="w-100 rounded-circle" />
+            </div>
+            <div class="col-sm-9">
+                <h1>{{ user.username }}</h1>
+                <a href="{% url 'logout' %}"><button type="button" class="btn btn-danger">Log out</button></a>
+            </div>
+        </div>
     </div>
 {% endblock %}
