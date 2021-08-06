@@ -1,27 +1,68 @@
 {% extends "base.html" %}
 
+{% block head %}
+    {% include "csvalidation.html" %}
+{% endblock %}
+
 {% block body %}
-    <div class="container-lg container-fluid">
-        <div class="row">
-            <div class="col-sm-3">
-                <img src="https://picsum.photos/400" class="w-100 rounded-circle" />
+    <div class="container-fluid mw-md">
+        <div class="mb-3"></div>
+        <div class="row {% comment %}me-lg-4 {% endcomment %}">
+            <div class="col-md-3 col-sm-12 d-flex justify-content-center">
+                <div>
+                    <img src="https://picsum.photos/400" class="mb-4 w-100 rounded-circle h-auto ratio-1x1" style="max-width: 250px" />
+                </div>
             </div>
-            <div class="col-sm-9">
+            <div class="col-md-9 col-sm-12 mb-5">
                 <h1>{{ user.username }}</h1>
-                <p>Email: {{ user.email }}</p>
                 <form novalidate method="post" class="needs-validation" action="{% url 'profile' %}">
                     {% csrf_token %}
 
-                    <div class="mb-3">
-                        <label for="{{ form.email.name }}" class="form-label">Email</label>
-                        <input type="email" class="form-control" name="{{ form.email.name }}" id="{{ form.email.name }}" value="{{ form.email.current }}" required>
+                    <div class="mb-2">
+                        <label for="{{ user_form.first_name.name }}" class="form-label">Full name</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="{{ user_form.first_name.name }}" id="{{ user_form.first_name.name }}" placeholder="First name" value="{{ user_form.first_name.initial }}" required>
+                            <input type="text" class="form-control" name="{{ user_form.last_name.name }}" id="{{ user_form.last_name.name }}" placeholder="Last name" value="{{ user_form.last_name.initial }}" required>
+                        </div>
+                        <div class="form-text mt-2">This is optional, and it'll be publicly shown to other users</div>
                         <div class="invalid-feedback">
-                            Missing or invalid email
+                            Missing or invalid name
                         </div>
                     </div>
 
+                    <div class="mb-2">
+                        <label for="{{ user_form.email.name }}" class="form-label">Email</label>
+                        <input type="email" class="form-control" name="{{ user_form.email.name }}" id="{{ user_form.email.name }}" value="{{ user_form.email.initial }}" required>
+                        <div class="invalid-feedback">
+                            Missing or invalid email
+                        </div>
+                        <div class="form-text mt-2">This is used for password resets</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ profile_form.bio.name }}" class="form-label">Bio</label>
+                        <textarea type="text" class="form-control" name="{{ profile_form.bio.name }}" id="{{ profile_form.bio.name }}" rows="6">{% firstof profile_form.bio.initial "" %}</textarea>
+                        <div class="invalid-feedback">
+                            Invalid bio
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ profile_form.birth_date.name }}" class="form-label">Birth date</label>
+                        <input type="date" class="form-control" name="{{ profile_form.birth_date.name }}" id="{{ profile_form.birth_date.name }}" value="{{ profile_form.birth_date.initial }}">
+                        <div class="invalid-feedback">
+                            Missing or invalid birth date
+                        </div>
+                        <div class="form-text mt-2">This is optional, and the day and month will be shown publicly</div>
+                    </div>
+
+                    <input type="hidden" name="next" value="{{ next }}" />
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success mb-3">Update profile</button>
+                        <a href="{% url 'logout' %}"><button type="button" class="btn btn-danger">Log out</button></a>
+                    </div>
+
                 </form>
-                <a href="{% url 'logout' %}"><button type="button" class="btn btn-danger">Log out</button></a>
             </div>
         </div>
     </div>

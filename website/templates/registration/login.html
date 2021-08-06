@@ -2,11 +2,11 @@
 
 {% load crispy_forms_tags %}
 
-{% block body %}
+{% block head %}
+    {% include "csvalidation.html" %}
+{% endblock %}
 
-    {% block head %}
-        {% include "csvalidation.html" %}
-    {% endblock %}
+{% block body %}
 
     <div class="container-fluid">
         <div class="row justify-content-center">
