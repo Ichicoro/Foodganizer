@@ -8,6 +8,19 @@
             </div>
             <div class="col-sm-9">
                 <h1>{{ user.username }}</h1>
+                <p>Email: {{ user.email }}</p>
+                <form novalidate method="post" class="needs-validation" action="{% url 'profile' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.email.name }}" class="form-label">Email</label>
+                        <input type="email" class="form-control" name="{{ form.email.name }}" id="{{ form.email.name }}" value="{{ form.email.current }}" required>
+                        <div class="invalid-feedback">
+                            Missing or invalid email
+                        </div>
+                    </div>
+
+                </form>
                 <a href="{% url 'logout' %}"><button type="button" class="btn btn-danger">Log out</button></a>
             </div>
         </div>

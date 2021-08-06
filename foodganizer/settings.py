@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'compressor',
     'crispy_forms',
-    'crispy_bootstrap5'
+    'crispy_bootstrap5',
+
+    'website'
 ]
 
 MIDDLEWARE = [
@@ -151,4 +153,4 @@ LOGOUT_REDIRECT_URL = '/'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# AUTH_USER_MODEL = 'website.User'
+AUTH_USER_MODEL = 'website.User'
