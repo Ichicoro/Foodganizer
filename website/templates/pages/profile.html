@@ -10,12 +10,12 @@
         <div class="row {% comment %}me-lg-4 {% endcomment %}">
             <div class="col-md-3 col-sm-12 d-flex justify-content-center">
                 <div>
-                    <img src="https://picsum.photos/400" class="mb-4 w-100 rounded-circle border-5 h-auto ratio-1x1" style="max-width: 250px" />
+                    <img src="/static/media/{{ user.profile_pic }}" class="mb-4 w-100 rounded-circle border-5 h-auto ratio-1x1" style="max-width: 250px" />
                 </div>
             </div>
             <div class="col-md-9 col-sm-12 mb-5">
                 <h1>{{ user.username }}</h1>
-                <form novalidate method="post" class="needs-validation" action="{% url 'profile' %}">
+                <form novalidate method="post" class="needs-validation" enctype="multipart/form-data" action="{% url 'profile' %}">
                     {% csrf_token %}
 
                     <div class="mb-2">
@@ -40,20 +40,20 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="{{ profile_form.bio.name }}" class="form-label">Bio</label>
-                        <textarea type="text" class="form-control" name="{{ profile_form.bio.name }}" id="{{ profile_form.bio.name }}" rows="6">{% firstof profile_form.bio.initial "" %}</textarea>
+                        <label for="{{ user_form.bio.name }}" class="form-label">Bio</label>
+                        <textarea type="text" class="form-control" name="{{ user_form.bio.name }}" id="{{ user_form.bio.name }}" rows="6">{% firstof user_form.bio.initial "" %}</textarea>
                         <div class="invalid-feedback">
                             Invalid bio
                         </div>
+                        <div class="form-text mt-2">Wanna flex? This is the place</div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="{{ profile_form.birth_date.name }}" class="form-label">Birth date</label>
-                        <input type="date" class="form-control" name="{{ profile_form.birth_date.name }}" id="{{ profile_form.birth_date.name }}" value="{{ profile_form.birth_date.initial }}">
+                        <label for="{{ user_form.profile_pic.name }}" class="form-label">Profile pic</label>
+                        <input type="file" class="form-control" name="{{ user_form.profile_pic.name }}" id="{{ user_form.profile_pic.name }}">{% firstof user_form.profile_pic.initial "" %}</input>
                         <div class="invalid-feedback">
-                            Missing or invalid birth date
+                            Error.
                         </div>
-                        <div class="form-text mt-2">This is optional, and the day and month will be shown publicly</div>
                     </div>
 
                     <input type="hidden" name="next" value="{{ next }}" />

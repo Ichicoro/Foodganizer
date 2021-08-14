@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 # Create your views here.
-from website.forms import UpdateProfileForm, UpdateUserForm
+from website.forms import UpdateUserForm
 
 
 def index(request):
@@ -12,16 +12,13 @@ def index(request):
 @login_required
 def profile(request):
     if request.method == 'POST':
-        user_form = UpdateUserForm(data=request.POST, instance=request.user)
-        profile_form = UpdateProfileForm(data=request.POST, instance=request.user.profile)
-        if user_form.is_valid() and profile_form.is_valid():
+        user_form = UpdateUserForm(data=request.POST, instance=request.user, files=request.FILES)
+        if user_form.is_valid():
             user_form.save()
-            profile_form.save()
     else:
         user_form = UpdateUserForm(instance=request.user)
-        profile_form = UpdateProfileForm(instance=request.user.profile)
-    print(f"{user_form.is_valid()=} {profile_form.__dict__=}")
+    print(f"{user_form.files=}")   # TODO: Remove me
+    print(f"{user_form.is_valid()=}")   # TODO: Remove me
     return render(request, "pages/profile.html", {
         'user_form': user_form,
-        'profile_form': profile_form
     })
