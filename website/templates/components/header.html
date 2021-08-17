@@ -31,7 +31,8 @@
                         </ul>
                     </span>
                 {% else %}
-                    <a class="nav-link" href="/login" style="padding-right: 0">Login</a>
+                    <a class="nav-link" href="{% url 'login' %}" style="padding-right: 0">Login</a>
+                    <a class="nav-link" href="{% url 'signup' %}" style="padding-right: 0">Sign Up</a>
                 {% endif %}
             </div>
         </div>
