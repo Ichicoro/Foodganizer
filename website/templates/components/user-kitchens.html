@@ -1,0 +1,15 @@
+<h2>Your kitchens</h2>
+{% if kitchens %}
+    <ul>
+    {% for k in kitchens %}
+        <li>
+        {% comment %} TODO: link to kitchen page {% endcomment %}
+        <a href="{% url 'kitchen' id=k.id %}"> 
+            {{ k.name }}
+        </a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p> No kitchens yet... <a href="{% url 'new_kitchen' %}">create one!</a> </p>
+{% endif %}

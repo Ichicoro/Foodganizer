@@ -49,10 +49,25 @@ class StoredItem(models.Model):
     note = models.TextField(max_length=500, blank=True)
 
 class Kitchen(models.Model):
+    name = models.CharField(max_length=255)
     # need related_name for backward link https://stackoverflow.com/questions/2606194/django-error-message-add-a-related-name-argument-to-the-definition/44398542
-    users = ManyToManyField(User, related_name="kitchen_users")
-    admins = ManyToManyField(User, related_name="kitchen_admins") # TODO: are admins inside users list?
-    stored_items = ManyToManyField(StoredItem)
+    users = ManyToManyField(User, through='Membership')
+    stored_items = ManyToManyField(StoredItem, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class Membership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    kitchen = _getKitchenForeignKey()
+    is_admin = models.BooleanField(default=False)
+
+    def __str__(self):
+        if self.is_admin:
+            return f"@{self.user} admin of {self.kitchen}" 
+        else:
+            return f"@{self.user} member of {self.kitchen}" 
+        
 
 class PostIt(models.Model):
     text = models.TextField(max_length=1000)

@@ -14,6 +14,8 @@ urlpatterns = [
             'next': '/',
         },
     ), name='logout'),
+    path('kitchens/new', views.new_kitchen, name='new_kitchen'),
+    path('kitchens/<int:id>', views.kitchen, name='kitchen'),
     # # ex: /polls/5/
     # path('<int:question_id>/', views., name='detail'),
     # # ex: /polls/5/results/

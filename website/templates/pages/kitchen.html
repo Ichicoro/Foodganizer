@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {% include "csvalidation.html" %}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ kitchen.name }}</h1>
+    <h3>Members:</h3>
+    <ul>
+        {% for m in members %}
+            <li>
+                @{{ m.user.username }} 
+                {% if m.user.first_name or m.user.last_name %}
+                    - {{ m.user.first_name }} {{m.user.last_name}}
+                {% endif %}
+                {% if m.user.email %}
+                    - {{ m.user.email }}
+                {% endif %}
+                {% if m.is_admin %}
+                    (Admin)
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <h3>Items:</h3>
+    <ul>
+        {% for si in stored_items %}
+            <li>
+                {{ si }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
