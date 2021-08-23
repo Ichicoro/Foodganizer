@@ -5,17 +5,12 @@ from .models import Kitchen, Membership, User
 
 # Create your views here.
 from website.forms import UpdateUserForm
-from .forms import NewKitchenForm, UserRegisterForm 
+from .forms import NewKitchenForm, UserRegisterForm
 
 
 def index(request):
-    user = request.user
-    kitchens = []
-    if user.is_authenticated:
-        # for some reason this returns an empty queryset
-        kitchens = user.kitchen_set.all()
+    return render(request, "pages/index.html")
 
-    return render(request, "pages/index.html", {'kitchens': kitchens})
 
 def signup(request):
     if request.method == 'POST':
@@ -29,6 +24,11 @@ def signup(request):
         form = UserRegisterForm()
     return render(request, 'registration/signup.html', {'form': form})
 
+
+def quaggatest(request):
+    return render(request, "pages/quaggatest.html", {})
+
+
 @login_required
 def profile(request):
     if request.method == 'POST':
@@ -39,7 +39,7 @@ def profile(request):
         user_form = UpdateUserForm(instance=request.user)
     print(f"{user_form.files=}")   # TODO: Remove me
     print(f"{user_form.is_valid()=}")   # TODO: Remove me
-    return render(request, "pages/profile.html", {
+    return render(request, "pages/own_profile.html", {
         'user_form': user_form,
     })
 
@@ -70,7 +70,17 @@ def kitchen(request, id):
         for u in users:
             m = memberships.get(user=u)
             members.append({ "user": u, "is_admin": m.is_admin })
-        
+
         return render(request, 'pages/kitchen.html', {'kitchen': k, 'members': members})
     else:
         return redirect('index')
+
+@login_required
+def kitchens(request):
+    user = request.user
+    kitchens = []
+    if user.is_authenticated:
+        # for some reason this returns an empty queryset
+        kitchens = user.kitchen_set.all()
+
+    return render(request, "pages/kitchens.html", {'kitchens': kitchens})

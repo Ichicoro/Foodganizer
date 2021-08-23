@@ -5,12 +5,11 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container-fluid mw-md">
-        <div class="mb-3"></div>
+    <div class="container-fluid mw-md pt-3">
         <div class="row {% comment %}me-lg-4 {% endcomment %}">
             <div class="col-md-3 col-sm-12 d-flex justify-content-center">
-                <div>
-                    <img src="/static/media/{{ user.profile_pic }}" class="mb-4 w-100 rounded-circle border-5 h-auto ratio-1x1" style="max-width: 250px" />
+                <div class="rounded-pic-container">
+                    <img src="/static/media/{{ user.profile_pic }}" />
                 </div>
             </div>
             <div class="col-md-9 col-sm-12 mb-5">

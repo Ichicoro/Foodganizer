@@ -9,11 +9,14 @@ urlpatterns = [
     path('signup', views.signup, name='signup'),
     path('login', auth_views.LoginView.as_view(), name='login'),
     path('profile', views.profile, name='profile'),
+    # path('profile/<string:username>', views.profile, name='otherprofile'),
+    path('quaggatest', views.quaggatest, name='quaggatest'),
     path('logout', auth_views.LogoutView.as_view(
         extra_context={
             'next': '/',
         },
     ), name='logout'),
+    path('kitchens', views.kitchens, name='kitchens'),
     path('kitchens/new', views.new_kitchen, name='new_kitchen'),
     path('kitchens/<int:id>', views.kitchen, name='kitchen'),
     # # ex: /polls/5/

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %} Foodganizer {% endblock %}
+
+{% block head%}
+
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid mw-sm">
+        {% if kitchens %}
+            <h1 class="mb-3">Your kitchens</h1>
+            <div class="list-group">
+                {% for k in kitchens %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'kitchen' id=k.id %}">
+                        {# TODO: link to kitchen page #}
+                        {{ k.name }}
+                    </a>
+                {% endfor %}
+                <a class="list-group-item list-group-item-success" href="{% url 'new_kitchen' %}">
+                    <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add new kitchen
+                </a>
+            </div>
+        {% else %}
+            <div class="d-flex justify-content-center">
+                <div class="rounded border p-4 d-inline-block text-center" style="min-width: 500px;">
+                    <h2 class="d-inline-block mb-4">No kitchens yet...</h2><br />
+                    <a href="{% url 'new_kitchen' %}">
+                        <button class="btn btn-success w-100">Create one!</button>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

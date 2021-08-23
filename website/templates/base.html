@@ -11,6 +11,10 @@
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">-->
 
         {% include "css-imports.html" %}
+        <script>
+            window.$$ = document.querySelector.bind( document );
+            window.$$onReady = (func) => document.addEventListener("DOMContentLoaded", func)
+        </script>
         {% block head %}{% endblock %}
     </head>
     <body>

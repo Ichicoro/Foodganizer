@@ -7,26 +7,28 @@
 {% endblock %}
 
 {% block body %}
-    <div class="row justify-content-center">
-        <div class="col-10 col-sm-9 col-md-5 col-lg-4 col-xl-3 col-xxl-2"> 
-            <div class="content-section">
-                <form method="POST">
-                    {% csrf_token %}
-                    <fieldset class="form-group">
-                        <legend class="border-bottom mb-4">Create a new kitchen</legend>
-                        {{ form|crispy }}
-                    </fieldset>
-                    <div class="form-group">
-                        <button class="btn btn-outline-info" type="submit">Create</button>
-                    </div>
-                </form>
-                {% comment %}
-                TODO: magari facciamo in modo che se ci sono richieste in sospeso vengano visualizzate qui
-                <div class="border-top pt-3">
-                    <small class="text-muted">
-                        Joining a friend? 
-                    </small>
-                </div> {% endcomment %}
+    <div class="container-fluid mw-sm">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-sm-12">
+                <div class="content-section">
+                    <form method="POST" novalidate class="rounded border p-3 needs-validation">
+                        {% csrf_token %}
+                        <fieldset class="form-group">
+                            <h2 class="mb-4">Create a new kitchen</h2>
+                            {{ form|crispy }}
+                        </fieldset>
+                        <div class="form-group">
+                            <button class="btn btn-outline-info" type="submit">Create</button>
+                        </div>
+                    </form>
+                    {% comment %}
+                    TODO: magari facciamo in modo che se ci sono richieste in sospeso vengano visualizzate qui
+                    <div class="border-top pt-3">
+                        <small class="text-muted">
+                            Joining a friend?
+                        </small>
+                    </div> {% endcomment %}
+                </div>
             </div>
         </div>
     </div>

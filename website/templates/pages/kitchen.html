@@ -5,30 +5,42 @@
 {% endblock %}
 
 {% block body %}
-    <h1>{{ kitchen.name }}</h1>
-    <h3>Members:</h3>
-    <ul>
-        {% for m in members %}
-            <li>
-                @{{ m.user.username }} 
-                {% if m.user.first_name or m.user.last_name %}
-                    - {{ m.user.first_name }} {{m.user.last_name}}
-                {% endif %}
-                {% if m.user.email %}
-                    - {{ m.user.email }}
-                {% endif %}
-                {% if m.is_admin %}
-                    (Admin)
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-    <h3>Items:</h3>
-    <ul>
+    <div class="container-fluid mw-md">
+        <h1>{{ kitchen.name }}</h1>
+        <h3>Members:</h3>
+        <ul class="list-group mb-3">
+            {% for m in members %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="me-auto">
+                        <div class="fw-bold mb-1">@{{ m.user.username }}</div>
+                        {% if m.user.first_name or m.user.last_name %}
+                            <span>Full name: {{ m.user.first_name }} {{m.user.last_name}}</span><br />
+                        {% endif %}
+                        {% if m.user.email %}
+                            <span>Email: {{ m.user.email }}</span>
+                        {% endif %}
+                    </div>
+                    {% if m.is_admin %}
+                        <span class="badge rounded-pill bg-danger">Admin</span>
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li class="list-group-item">
+                    No users
+                </li>
+            {% endfor %}
+        </ul>
+        <h3>Items:</h3>
+        <ul class="list-group">
         {% for si in stored_items %}
-            <li>
+            <li class="list-group-item">
                 {{ si }}
             </li>
+        {% empty %}
+            <li class="list-group-item">
+                No items
+            </li>
         {% endfor %}
-    </ul>
+        </ul>
+    </div>
 {% endblock %}
