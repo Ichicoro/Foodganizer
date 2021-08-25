@@ -69,11 +69,15 @@ def kitchen(request, id):
         members = []
         for u in users:
             m = memberships.get(user=u)
-            members.append({ "user": u, "is_admin": m.is_admin })
+            members.append({"user": u, "is_admin": m.is_admin})
 
         return render(request, 'pages/kitchen.html', {'kitchen': k, 'members': members})
     else:
         return redirect('index')
+
+@login_required
+def add_item_kitchen(request, id):
+    return render(request, "pages/add-item-kitchen.html", {'form': None})
 
 @login_required
 def kitchens(request):

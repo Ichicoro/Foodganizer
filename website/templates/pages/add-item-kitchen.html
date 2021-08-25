@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block head %}
+    {% include "csvalidation.html" %}
+    <style>
+        #item-add_search-bar-absolute {
+            position: absolute;
+            width: 100%;
+            min-height: 64px;
+            top: 38px;
+            z-index: 1001;
+            border-style: solid;
+            display: none;
+        }
+        #item-add_search-bar-absolute--no-results {
+            height: 64px;
+        }
+    </style>
+    <script>
+        $$onReady(() => {
+            $$("#item-add_search-bar").addEventListener("input", evt => {
+                const text = evt.target.value
+                console.log(text)
+
+                if (text.length > 0) {
+                    console.log($$("#item-add_search-bar-absolute"))
+                    $$("#item-add_search-bar-absolute").style.display = "block"
+                } else {
+                    $$("#item-add_search-bar-absolute").style.display = "none"
+                }
+            })
+        })
+    </script>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid mw-sm">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-sm-12">
+                <div class="content-section">
+                    <h2>Add item to kitchen</h2>
+                    <div class="my-2 mb-4">
+                        <label for="item-add_search-bar" class="form-label">Search any item by name</label>
+                        <div class="position-relative">
+                            <div class="input-group flex-nowrap">
+                                <input type="text" id="item-add_search-bar" class="form-control has-clear" />
+                                <button class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                            <div id="item-add_search-bar-absolute" class="border-1 shadow border-secondary bg-body rounded">
+                                <div class="position-relative h-100 w-100">
+                                    <div id="item-add_search-bar-absolute--no-results" class="w-100 d-flex justify-content-center align-items-center">
+                                        <span class="text-center">
+                                            <i class="text-muted">No results...</i><br/>
+                                            <a class="text-muted small" href="#">Clear text</a>
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="item-add_search-bar" class="form-label">Scan a barcode <span class="small text-muted">(or input an EAN-13 code)</span></label>
+                        <div class="input-group">
+                            <button class="btn btn-warning">
+                                <i class="bi bi-upc-scan"></i>{% comment %}&nbsp;&nbsp;Scan{% endcomment %}
+                            </button>
+                            <input type="text" id="item-add_search-bar" class="form-control" />
+                            <button class="btn btn-primary">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Choose from your own (kitchen-specific) items</p>
+                        <div class="list-group list-group-item-action">
+                            {% for si in stored_items %}
+                                <a class="list-group-item">
+                                    {{ si }}
+                                </a>
+                            {% empty %}
+                                <a class="list-group-item text-center">
+                                    <i class="text-muted"><i class="bi bi-"></i>No items</i>
+                                </a>
+                            {% endfor %}
+                            <a class="list-group-item list-group-item-success text-center" href="{% url 'new_kitchen' %}">
+                                <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Create new item
+                            </a>
+                        </div>
+                    </div>
+                    {% comment %}<form method="POST" novalidate class="needs-validation">
+                        {% csrf_token %}
+                        <fieldset class="form-group">
+                            <h2 class="mb-4">Create a new kitchen</h2>
+                            {{ form|crispy }}
+                        </fieldset>
+                        <div class="form-group">
+                            <button class="btn btn-outline-info" type="submit">Create</button>
+                        </div>
+                    </form>{% endcomment %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

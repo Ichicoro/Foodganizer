@@ -32,15 +32,15 @@
         </ul>
         <h3>Items:</h3>
         <ul class="list-group">
-        {% for si in stored_items %}
-            <li class="list-group-item">
-                {{ si }}
-            </li>
-        {% empty %}
-            <li class="list-group-item">
-                No items
-            </li>
-        {% endfor %}
+            {% for si in stored_items %}
+                <li class="list-group-item">
+                    {{ si }}
+                </li>
+            {% empty %}
+                <li class="list-group-item">
+                    No items
+                </li>
+            {% endfor %}
         </ul>
     </div>
 {% endblock %}

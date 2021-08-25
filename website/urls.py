@@ -19,6 +19,7 @@ urlpatterns = [
     path('kitchens', views.kitchens, name='kitchens'),
     path('kitchens/new', views.new_kitchen, name='new_kitchen'),
     path('kitchens/<int:id>', views.kitchen, name='kitchen'),
+    path('kitchens/<int:id>/add', views.add_item_kitchen, name='add_item_kitchen'),
     # # ex: /polls/5/
     # path('<int:question_id>/', views., name='detail'),
     # # ex: /polls/5/results/

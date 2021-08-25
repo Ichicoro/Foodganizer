@@ -12,8 +12,11 @@
 
         {% include "css-imports.html" %}
         <script>
-            window.$$ = document.querySelector.bind( document );
-            window.$$onReady = (func) => document.addEventListener("DOMContentLoaded", func)
+            {#window.$$ = document.querySelector.bind( document );#}
+            doc = document
+            window.$$ = document.querySelector.bind(document)
+            window.$$all = document.querySelectorAll.bind(document)
+            window.$$onReady = (func) => doc.addEventListener("DOMContentLoaded", func)
         </script>
         {% block head %}{% endblock %}
     </head>
