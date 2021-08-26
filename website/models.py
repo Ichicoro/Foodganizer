@@ -28,7 +28,7 @@ class User(AbstractUser):
     profile_pic = models.ImageField(upload_to='profile_images', blank=True)
 
 class Item(models.Model):
-    upc = models.CharField(max_length=12) 
+    upc = models.CharField(max_length=12, blank=True) 
     # TODO: create form validation for integer only https://stackoverflow.com/questions/60966095/django-charfield-accepting-only-numbers
     # TODO: accept only upc_a or upc_e https://en.wikipedia.org/wiki/Universal_Product_Code
     title = models.CharField(max_length=255)
@@ -37,10 +37,18 @@ class Item(models.Model):
     added_by = _getAddedBy()
     last_update = _getLastUpdate()
     created_at = _getCreatedAt()
-    kitchen = _getKitchenForeignKey()
+    custom_item_kitchen = models.ForeignKey('Kitchen', on_delete=models.CASCADE, null=True, default=None) 
+
+    def __str__(self):
+        str = self.title
+        if self.upc:
+           str = f"{str} - {self.upc}" 
+        return str
+            
 
 class StoredItem(models.Model):
     item = _getItemForeignKey()
+    kitchen = _getKitchenForeignKey()
     added_by = _getAddedBy()
     last_update = _getLastUpdate()
     created_at = _getCreatedAt()
@@ -52,7 +60,7 @@ class Kitchen(models.Model):
     name = models.CharField(max_length=255)
     # need related_name for backward link https://stackoverflow.com/questions/2606194/django-error-message-add-a-related-name-argument-to-the-definition/44398542
     users = ManyToManyField(User, through='Membership')
-    stored_items = ManyToManyField(StoredItem, blank=True)
+    stored_items = ManyToManyField(Item, through='StoredItem',blank=True)
 
     def __str__(self):
         return self.name

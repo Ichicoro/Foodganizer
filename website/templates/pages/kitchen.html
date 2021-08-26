@@ -30,17 +30,20 @@
                 </li>
             {% endfor %}
         </ul>
-        <h3>Items:</h3>
-        <ul class="list-group">
+        <h3>Items:</h3>        
+        <div class="list-group list-group-item-action">
             {% for si in stored_items %}
-                <li class="list-group-item">
+                <a class="list-group-item">
                     {{ si }}
-                </li>
+                </a>
             {% empty %}
-                <li class="list-group-item">
-                    No items
-                </li>
+                <a class="list-group-item text-center">
+                    <i class="text-muted"><i class="bi bi-"></i>No items</i>
+                </a>
             {% endfor %}
-        </ul>
+            <a class="list-group-item list-group-item-success text-center" href="{% url 'add_item_kitchen' id=kitchen.id %}">
+                <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add item
+            </a>
+        </div>
     </div>
 {% endblock %}

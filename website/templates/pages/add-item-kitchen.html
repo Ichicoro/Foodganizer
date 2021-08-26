@@ -80,16 +80,16 @@
                     <div class="mb-3">
                         <p class="form-label">Choose from your own (kitchen-specific) items</p>
                         <div class="list-group list-group-item-action">
-                            {% for si in stored_items %}
+                            {% for ci in custom_items %}
                                 <a class="list-group-item">
-                                    {{ si }}
+                                    {{ ci }}
                                 </a>
                             {% empty %}
                                 <a class="list-group-item text-center">
                                     <i class="text-muted"><i class="bi bi-"></i>No items</i>
                                 </a>
                             {% endfor %}
-                            <a class="list-group-item list-group-item-success text-center" href="{% url 'new_kitchen' %}">
+                            <a class="list-group-item list-group-item-success text-center" href="{% url 'new_kitchen_item' id=kitchen.id %}">
                                 <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Create new item
                             </a>
                         </div>

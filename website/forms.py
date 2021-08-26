@@ -1,4 +1,4 @@
-from .models import Kitchen, User
+from .models import Item, Kitchen, User
 from django.forms import ModelForm
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -57,3 +57,8 @@ class NewKitchenForm(ModelForm):
     class Meta:
         model = Kitchen
         fields = ['name', 'invite_other_users']
+
+class NewKitchenItemForm(ModelForm):
+    class Meta:
+        model = Item
+        fields = ['title', 'description', 'image']

@@ -1,11 +1,16 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.contrib import messages
-from .models import Kitchen, Membership, User
+from .models import Item, Kitchen, Membership, StoredItem, User
 
 # Create your views here.
 from website.forms import UpdateUserForm
-from .forms import NewKitchenForm, UserRegisterForm
+from .forms import NewKitchenForm, NewKitchenItemForm, UserRegisterForm
+
+def _getKitchen(request, id):
+    if request.user.is_anonymous:
+        return None
+    return request.user.kitchen_set.get(id=id)
 
 
 def index(request):
@@ -62,29 +67,52 @@ def new_kitchen(request):
 
 @login_required
 def kitchen(request, id):
-    k = request.user.kitchen_set.get(id=id)
-    if k:
-        users = k.users.all()
-        memberships = k.membership_set.all()
-        members = []
-        for u in users:
-            m = memberships.get(user=u)
-            members.append({"user": u, "is_admin": m.is_admin})
+    k = _getKitchen(request, id)
+    if not k:
+        return redirect('kitchens')
 
-        return render(request, 'pages/kitchen.html', {'kitchen': k, 'members': members})
-    else:
-        return redirect('index')
+    users = k.users.all()
+    memberships = k.membership_set.all()
+    members = []
+    for u in users:
+        m = memberships.get(user=u)
+        members.append({"user": u, "is_admin": m.is_admin})
+    return render(request, 'pages/kitchen.html', {'kitchen': k, 'members': members})
+
 
 @login_required
 def add_item_kitchen(request, id):
-    return render(request, "pages/add-item-kitchen.html", {'form': None})
+    k = _getKitchen(request, id)    
+    if not k:
+        return redirect('kitchens')
+    custom_items = k.item_set.all() # foreign key Item.custom_item_kitchen
+    return render(request, "pages/add-item-kitchen.html", {'form': None, 'kitchen': k, 'custom_items': custom_items})
+
 
 @login_required
 def kitchens(request):
     user = request.user
     kitchens = []
     if user.is_authenticated:
-        # for some reason this returns an empty queryset
         kitchens = user.kitchen_set.all()
 
     return render(request, "pages/kitchens.html", {'kitchens': kitchens})
+
+@login_required
+def new_kitchen_item(request, id):
+    k = _getKitchen(request, id)
+    if not k:
+        return redirect('kitchens')
+
+    if request.method == 'POST':
+        form = NewKitchenItemForm(request.POST)
+        if form.is_valid():
+            i = form.save(commit=False)  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
+            i.added_by = request.user
+            i.custom_item_kitchen = k
+            i.save()
+            messages.success(request, f'Item {i} added successfully to {k}!')
+            return redirect('add_item_kitchen', id=id)
+    else:
+        form = NewKitchenItemForm()
+    return render(request, 'pages/new-kitchen-item.html', {'form': form})
