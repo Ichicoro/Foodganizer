@@ -81,15 +81,6 @@ def kitchen(request, id):
 
 
 @login_required
-def add_item_kitchen(request, id):
-    k = _getKitchen(request, id)    
-    if not k:
-        return redirect('kitchens')
-    custom_items = k.item_set.all() # foreign key Item.custom_item_kitchen
-    return render(request, "pages/add-item-kitchen.html", {'form': None, 'kitchen': k, 'custom_items': custom_items})
-
-
-@login_required
 def kitchens(request):
     user = request.user
     kitchens = []
@@ -97,6 +88,21 @@ def kitchens(request):
         kitchens = user.kitchen_set.all()
 
     return render(request, "pages/kitchens.html", {'kitchens': kitchens})
+
+
+@login_required
+def add_item_kitchen(request, id):
+    k = _getKitchen(request, id)
+    if not k:
+        return redirect('kitchens')
+    custom_items = k.item_set.all() # foreign key Item.custom_item_kitchen
+    return render(request, "pages/add-item-kitchen.html", {
+        'form': None,
+        'kitchen': k,
+        'custom_items': custom_items,
+        'new_custom_item_form': NewKitchenItemForm()
+    })
+
 
 @login_required
 def new_kitchen_item(request, id):
@@ -113,6 +119,6 @@ def new_kitchen_item(request, id):
             i.save()
             messages.success(request, f'Item {i} added successfully to {k}!')
             return redirect('add_item_kitchen', id=id)
-    else:
-        form = NewKitchenItemForm()
-    return render(request, 'pages/new-kitchen-item.html', {'form': form})
+    # else:
+    #     form = NewKitchenItemForm()
+    # return render(request, 'pages/new-kitchen-item.html', {'form': form})

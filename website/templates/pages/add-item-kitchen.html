@@ -4,33 +4,116 @@
 
 {% block head %}
     {% include "csvalidation.html" %}
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <style>
         #item-add_search-bar-absolute {
             position: absolute;
             width: 100%;
             min-height: 64px;
             top: 38px;
-            z-index: 1001;
             border-style: solid;
             display: none;
+            z-index: 503;
         }
         #item-add_search-bar-absolute--no-results {
             height: 64px;
         }
     </style>
-    <script>
-        $$onReady(() => {
-            $$("#item-add_search-bar").addEventListener("input", evt => {
-                const text = evt.target.value
-                console.log(text)
+    <script type="module">
+        const App = {
+            _scanner: null,
+            init: function() { App.attachListeners() },
+            decode: function(src) {
+                const self = this
 
-                if (text.length > 0) {
-                    console.log($$("#item-add_search-bar-absolute"))
-                    $$("#item-add_search-bar-absolute").style.display = "block"
-                } else {
-                    $$("#item-add_search-bar-absolute").style.display = "none"
+                console.log(src)
+
+                Quagga.decodeSingle({
+                    ...self.config,
+                    src,
+                }, function(result) {
+                    console.log({
+                        result,
+                        isNull: !result
+                    })
+                });
+            },
+            attachListeners: function() {
+                $$("#scan-file-input").addEventListener("change", function(e) {
+                    if (e.target.files && e.target.files.length) {
+                        const url = URL.createObjectURL(e.target.files[0])
+                        console.log(url)
+                        App.decode(url)
+                    }
+                });
+
+                $$("#scan-btn").addEventListener("click", e => {
+                    $$("#scan-file-input").click()
+                })
+
+                $$("#codeNotFoundModalSuccessButton").addEventListener("click", evt => {
+                    new bootstrap.Modal($$("#codeNotFoundModal")).hide()
+                    $$("#scan-file-input").click()
+                })
+            },
+            config: {
+                inputStream: {
+                    size: 800,
+                    singleChannel: false
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                decoder: {
+                    readers: [
+                        { format: "ean_reader", config: {} }
+                    ]
+                },
+                locate: true,
+                src: null
+            },
+            inputMapper: {
+                inputStream: {
+                    size: function(value){
+                        return parseInt(value);
+                    }
+                },
+                numOfWorkers: function(value) {
+                    return parseInt(value);
                 }
-            })
+            }
+        }
+        App.init();
+
+        Quagga.onProcessed(result => {
+            const code = result?.codeResult?.code;
+            if (!!result && !!code) {
+                $$("#item-add_barcode-input").value = `${code}`
+            } else {
+                new bootstrap.Modal($$("#codeNotFoundModal")).show()
+            }
+        })
+
+        const setIsSearchBarVisible = status =>
+            $$("#item-add_search-bar-absolute").style.display = status ? "block" : "none"
+
+        $$("#item-add_search-bar").addEventListener("input", evt => {
+            const text = evt.target.value
+            setIsSearchBarVisible(text.length > 0)
+        })
+        $$("#item-add_search-bar").addEventListener("focus", evt => {
+            if (evt.target.value.length > 0) setIsSearchBarVisible(true)
+        })
+
+        $$("#clear-input-btn").addEventListener("click", _ => {
+            $$("#item-add_search-bar").value = ""
+            setIsSearchBarVisible(false)
+        })
+        $$("#hide-me-btn").addEventListener("click", _ => setIsSearchBarVisible(false))
+
+        $$("#create-private-item-btn").addEventListener("click", _ => {
+            new bootstrap.Modal($$("#addItemModal")).show()
         })
     </script>
 {% endblock %}
@@ -43,23 +126,26 @@
                     <h2>Add item to kitchen</h2>
                     <div class="my-2 mb-4">
                         <label for="item-add_search-bar" class="form-label">Search any item by name</label>
-                        <div class="position-relative">
+                        <div class="position-relative" id="item-add_search-bar-wrap">
                             <div class="input-group flex-nowrap">
                                 <input type="text" id="item-add_search-bar" class="form-control has-clear" />
-                                <button class="btn btn-primary">
+                                {% comment %}<button class="btn btn-primary">
                                     <i class="bi bi-search"></i>
-                                </button>
+                                </button>{% endcomment %}
                             </div>
                             <div id="item-add_search-bar-absolute" class="border-1 shadow border-secondary bg-body rounded">
                                 <div class="position-relative h-100 w-100">
                                     <div id="item-add_search-bar-absolute--no-results" class="w-100 d-flex justify-content-center align-items-center">
                                         <span class="text-center">
                                             <i class="text-muted">No results...</i><br/>
-                                            <a class="text-muted small" href="#">Clear text</a>
+                                            <span class="small">
+                                                <a id="clear-input-btn" class="text-muted cursor-pointer">Clear text</a>
+                                                &nbsp;or&nbsp;
+                                                <a id="hide-me-btn" class="text-muted cursor-pointer">Hide me</a>
+                                            </span>
                                         </span>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -67,10 +153,11 @@
                     <div class="mb-4">
                         <label for="item-add_search-bar" class="form-label">Scan a barcode <span class="small text-muted">(or input an EAN-13 code)</span></label>
                         <div class="input-group">
-                            <button class="btn btn-warning">
-                                <i class="bi bi-upc-scan"></i>{% comment %}&nbsp;&nbsp;Scan{% endcomment %}
+                            <button class="btn btn-warning" id="scan-btn">
+                                <i class="bi bi-upc-scan"></i>
                             </button>
-                            <input type="text" id="item-add_search-bar" class="form-control" />
+                            <input class="form-control d-none" type="file" accept="image/*" capture="camera" id="scan-file-input" />
+                            <input type="text" id="item-add_barcode-input" class="form-control monospaced" />
                             <button class="btn btn-primary">
                                 <i class="bi bi-search"></i>
                             </button>
@@ -89,22 +176,56 @@
                                     <i class="text-muted"><i class="bi bi-"></i>No items</i>
                                 </a>
                             {% endfor %}
-                            <a class="list-group-item list-group-item-success text-center" href="{% url 'new_kitchen_item' id=kitchen.id %}">
+                            <a class="list-group-item list-group-item-success text-center" id="create-private-item-btn">
                                 <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Create new item
                             </a>
                         </div>
                     </div>
-                    {% comment %}<form method="POST" novalidate class="needs-validation">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Code not found modal #}
+    <div class="modal fade" id="codeNotFoundModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Unable to extract code from image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Retry?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" id="codeNotFoundModalSuccessButton">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Add private item modal #}
+    <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <form method="POST" action="{% url 'new_kitchen_item' id=kitchen.id %}" novalidate class="needs-validation">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add custom item</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
                         {% csrf_token %}
                         <fieldset class="form-group">
-                            <h2 class="mb-4">Create a new kitchen</h2>
-                            {{ form|crispy }}
+                            <h2 class="mb-3">Create new item</h2>
+                            {{ new_custom_item_form|crispy }}
                         </fieldset>
-                        <div class="form-group">
-                            <button class="btn btn-outline-info" type="submit">Create</button>
-                        </div>
-                    </form>{% endcomment %}
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
+                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal" id="codeNotFoundModalSuccessButton">Create</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
