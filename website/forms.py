@@ -1,4 +1,7 @@
-from .models import Item, Kitchen, User
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Field, Fieldset
+
+from .models import Item, Kitchen, User, StoredItem
 from django.forms import ModelForm
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -52,13 +55,27 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
+
 class NewKitchenForm(ModelForm):
     invite_other_users = MultiEmailField(widget=forms.Textarea, required=False)
+
     class Meta:
         model = Kitchen
         fields = ['name', 'invite_other_users']
+
 
 class NewKitchenItemForm(ModelForm):
     class Meta:
         model = Item
         fields = ['title', 'description', 'image']
+
+
+class AddStoredItemForm(ModelForm):
+    Field('item', type="hidden"),
+
+    class Meta:
+        model = StoredItem
+        widgets = {
+            'expiry_date': forms.DateInput(attrs={'type': 'date'})
+        }
+        fields = ['item', 'quantity', 'expiry_date', 'note']

@@ -21,13 +21,15 @@
     </head>
     <body>
         {% include "components/header.html" %}
-        {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-              </div>
-            {% endfor %}
-        {% endif %}
+        <div class="container-fluid">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
         {% block body %}{% endblock %}
     </body>
 </html>

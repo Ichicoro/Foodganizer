@@ -56,14 +56,19 @@ class StoredItem(models.Model):
     expiry_date = models.DateField(null=True, default=None)
     note = models.TextField(max_length=500, blank=True)
 
+    def __str__(self):
+        return f"{self.item}"
+
+
 class Kitchen(models.Model):
     name = models.CharField(max_length=255)
     # need related_name for backward link https://stackoverflow.com/questions/2606194/django-error-message-add-a-related-name-argument-to-the-definition/44398542
     users = ManyToManyField(User, through='Membership')
-    stored_items = ManyToManyField(Item, through='StoredItem',blank=True)
+    stored_items = ManyToManyField(Item, through='StoredItem', blank=True)
 
     def __str__(self):
         return self.name
+
 
 class Membership(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -84,6 +89,7 @@ class PostIt(models.Model):
     last_update = _getLastUpdate()
     created_at = _getCreatedAt()
 
+
 class ShoppingCartItem(models.Model):
     kitchen = _getKitchenForeignKey()
     item = _getItemForeignKey()
@@ -91,4 +97,3 @@ class ShoppingCartItem(models.Model):
     quantity = _getProductQuantity()
     last_update = _getLastUpdate()
     created_at = _getCreatedAt()
-    

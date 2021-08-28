@@ -4,7 +4,7 @@ from django.contrib import messages
 from .models import Item, Kitchen, Membership, StoredItem, User
 
 # Create your views here.
-from website.forms import UpdateUserForm
+from website.forms import UpdateUserForm, AddStoredItemForm
 from .forms import NewKitchenForm, NewKitchenItemForm, UserRegisterForm
 
 def _getKitchen(request, id):
@@ -59,7 +59,7 @@ def new_kitchen(request):
             kitchen_name = form.cleaned_data.get('name')
             invite_other_users = form.cleaned_data.get('invite_other_users')
             # TODO: idk send an email to this addresses or something
-            messages.success(request, f'Kitchen {kitchen_name} created successfully!')
+            messages.success(request, f'Kitchen "{kitchen_name}" created successfully!')
             return redirect('index')
     else:
         form = NewKitchenForm()
@@ -74,10 +74,15 @@ def kitchen(request, id):
     users = k.users.all()
     memberships = k.membership_set.all()
     members = []
+    stored_items = k.stored_items.all()
     for u in users:
         m = memberships.get(user=u)
         members.append({"user": u, "is_admin": m.is_admin})
-    return render(request, 'pages/kitchen.html', {'kitchen': k, 'members': members})
+    return render(request, 'pages/kitchen.html', {
+        'kitchen': k,
+        'members': members,
+        'stored_items': stored_items
+    })
 
 
 @login_required
@@ -95,13 +100,37 @@ def add_item_kitchen(request, id):
     k = _getKitchen(request, id)
     if not k:
         return redirect('kitchens')
-    custom_items = k.item_set.all() # foreign key Item.custom_item_kitchen
-    return render(request, "pages/add-item-kitchen.html", {
-        'form': None,
-        'kitchen': k,
-        'custom_items': custom_items,
-        'new_custom_item_form': NewKitchenItemForm()
-    })
+    custom_items = k.item_set.all()     # foreign key Item.custom_item_kitchen
+    if request.method == 'POST':
+        form = AddStoredItemForm(request.POST)
+        if form.is_valid():
+            si = form.save(commit=False)
+            si.added_by = request.user
+            si.kitchen = k
+            si.save()
+            messages.success(request, f'Item "{si}" added successfully!')
+            return redirect('kitchen', id=id)
+        else:
+            messages.error(request, 'Error, check console.')
+            print(form.is_valid())
+            print(form.fields['item'])
+            print(f"{form.errors=}")
+            print(f"{form.non_field_errors()=}")
+            return render(request, "pages/add-item-kitchen.html", {
+                'form': None,
+                'kitchen': k,
+                'custom_items': custom_items,
+                'add_item_form': form,
+                'new_custom_item_form': NewKitchenItemForm()
+            })
+    else:
+        return render(request, "pages/add-item-kitchen.html", {
+            'form': None,
+            'kitchen': k,
+            'custom_items': custom_items,
+            'add_item_form': AddStoredItemForm(),
+            'new_custom_item_form': NewKitchenItemForm()
+        })
 
 
 @login_required

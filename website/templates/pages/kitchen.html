@@ -17,7 +17,7 @@
                             <span>Full name: {{ m.user.first_name }} {{m.user.last_name}}</span><br />
                         {% endif %}
                         {% if m.user.email %}
-                            <span>Email: {{ m.user.email }}</span>
+                            <span>Email: <span class="monospaced">{{ m.user.email }}</span></span>
                         {% endif %}
                     </div>
                     {% if m.is_admin %}
