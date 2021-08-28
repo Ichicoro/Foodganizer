@@ -20,7 +20,7 @@
         {% block head %}{% endblock %}
     </head>
     <body>
-        {% include "components/header.html" %}
+        {% include "components/header.html" with back=back %}
         <div class="container-fluid">
             {% if messages %}
                 {% for message in messages %}

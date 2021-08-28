@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top fg-header py-1">
     <div class="container-fluid">
         <a class="navbar-brand fw-bolder fg-header_brand-fix" href="/">
-           {% comment %} <img src="https://getbootstrap.com/docs/5.0/assets/brand/bootstrap-logo.svg" height="24" class="d-inline-block align-text-top" alt="">{% endcomment %}
+            {% comment %} <img src="https://getbootstrap.com/docs/5.0/assets/brand/bootstrap-logo.svg" height="24" class="d-inline-block align-text-top" alt="">{% endcomment %}
             Foodganizer
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -10,8 +10,8 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
             <div class="navbar-nav me-auto">
                 <a class="nav-link {% if not user.is_authenticated %}disabled{% endif %}" aria-current="page" href="{% url 'kitchens' %}">My kitchens</a>
-                 {# <a class="nav-link" href="#">Features</a> #}
-                 {# <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a> #}
+                {# <a class="nav-link" href="#">Features</a> #}
+                {# <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a> #}
             </div>
             <div class="dropdown-divider"></div>
             <div class="navbar-nav ms-auto">
@@ -38,3 +38,18 @@
         </div>
     </div>
 </nav>
+{% if back %}
+    <a class="text-decoration-none text-muted" href="{{ back }}">
+        <nav style="margin-top: -16px; margin-bottom: 16px" class="py-2 py-md-1 fg-back-bar">
+            <div class="text-center">
+                <div class="fg-header-backbutton fs-6">
+                    <i class="bi bi-chevron-left"></i>&nbsp;Back
+                </div>
+                <div class="d-none d-md-block">
+                </div>
+                <div class="d-block d-md-none">
+                </div>
+            </div>
+        </nav>
+    </a>
+{% endif %}

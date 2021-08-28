@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.contrib import messages
+from django.urls import reverse
+
 from .models import Item, Kitchen, Membership, StoredItem, User
 
 # Create your views here.
@@ -123,7 +125,8 @@ def add_item_kitchen(request, id):
                 'kitchen': k,
                 'custom_items': custom_items,
                 'add_item_form': form,
-                'new_custom_item_form': NewKitchenItemForm()
+                'new_custom_item_form': NewKitchenItemForm(),
+                'back': reverse('kitchen', args=[id])
             })
     else:
         return render(request, "pages/add-item-kitchen.html", {
@@ -131,7 +134,8 @@ def add_item_kitchen(request, id):
             'kitchen': k,
             'custom_items': custom_items,
             'add_item_form': AddStoredItemForm(),
-            'new_custom_item_form': NewKitchenItemForm()
+            'new_custom_item_form': NewKitchenItemForm(),
+            'back': reverse('kitchen', args=[id])
         })
 
 
