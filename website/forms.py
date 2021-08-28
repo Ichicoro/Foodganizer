@@ -71,7 +71,7 @@ class NewKitchenItemForm(ModelForm):
 
 
 class AddStoredItemForm(ModelForm):
-    Field('item', type="hidden"),
+    Field('item', type="hidden")
 
     class Meta:
         model = StoredItem

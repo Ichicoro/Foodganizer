@@ -119,9 +119,13 @@
             new bootstrap.Modal($$("#newItemModal")).show()
         })
 
-        $$all(".add-item-btn").forEach(item => item.addEventListener("click", evt => {
+        $$all(".add-item-btn").forEach(item => item.addEventListener("click", _ => {
             $$("#id_item").value = item.dataset.itemId
-            $$("#addItemModal .modal-title").textContent = `Add ${item.dataset.itemIsCustom ? "custom " : ""}item "${item.dataset.itemName}"`
+            $$("#addItemModal .modal-title").textContent = `Add ${
+                item.dataset.itemIsCustom
+                    ? "custom item" : "item"}
+                    "${item.dataset.itemName
+            }"`
             new bootstrap.Modal($$("#addItemModal")).show()
         }))
     </script>
@@ -132,8 +136,8 @@
         <div class="row justify-content-center">
             <div class="col-md-8 col-sm-12">
                 <div class="content-section">
-                    <h2>Add item to kitchen</h2>
-                    <div class="my-2 mb-4">
+                    <h2>Add item to "<a class="text-muted" href="{% url "kitchen" id=kitchen.id %}">{{ kitchen.name }}</a>"</h2>
+                    <div class="my-3 mb-4">
                         <label for="item-add_search-bar" class="form-label">Search any item by name</label>
                         <div class="position-relative" id="item-add_search-bar-wrap">
                             <div class="input-group flex-nowrap">
@@ -166,7 +170,7 @@
                                 <i class="bi bi-upc-scan"></i>
                             </button>
                             <input class="form-control d-none" type="file" accept="image/*" capture="camera" id="scan-file-input" />
-                            <input type="text" id="item-add_barcode-input" class="form-control monospaced" />
+                            <input type="number" min="0" id="item-add_barcode-input" oninput="validity.valid||(value='');" class="form-control monospaced" />
                             <button class="btn btn-primary">
                                 <i class="bi bi-search"></i>
                             </button>
@@ -232,7 +236,7 @@
                     </div>
                     <div class="modal-footer d-flex-grow-1-child">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
-                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal" id="codeNotFoundModalSuccessButton">Create</button>
+                        <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Create</button>
                     </div>
                 </form>
             </div>
@@ -257,7 +261,7 @@
                     </div>
                     <div class="modal-footer d-flex-grow-1-child">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
-                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal" id="codeNotFoundModalSuccessButton">Create</button>
+                        <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Create</button>
                     </div>
                 </form>
             </div>

@@ -75,13 +75,15 @@ def kitchen(request, id):
     memberships = k.membership_set.all()
     members = []
     stored_items = k.stored_items.all()
+    postit = k.postit_set.all()
     for u in users:
         m = memberships.get(user=u)
         members.append({"user": u, "is_admin": m.is_admin})
     return render(request, 'pages/kitchen.html', {
         'kitchen': k,
         'members': members,
-        'stored_items': stored_items
+        'stored_items': stored_items,
+        'postit': postit
     })
 
 
