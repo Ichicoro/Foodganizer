@@ -146,7 +146,7 @@ def new_kitchen_item(request, id):
         return redirect('kitchens')
 
     if request.method == 'POST':
-        form = NewKitchenItemForm(request.POST)
+        form = NewKitchenItemForm(request.POST, files=request.FILES)
         if form.is_valid():
             i = form.save(commit=False)  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
             i.added_by = request.user

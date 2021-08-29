@@ -5,23 +5,6 @@
 {% block head %}
     {% include "csvalidation.html" %}
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
-    <style>
-        #item-add_search-bar-absolute {
-            position: absolute;
-            width: 100%;
-            min-height: 64px;
-            top: 38px;
-            border-style: solid;
-            display: none;
-            z-index: 503;
-        }
-        #item-add_search-bar-absolute--no-results {
-            height: 64px;
-        }
-        #div_id_item {
-            display: none !important;
-        }
-    </style>
     <script type="module">
         const App = {
             _scanner: null,
@@ -182,7 +165,13 @@
                         <div class="list-group">
                             {% for ci in custom_items %}
                                 <a class="list-group-item list-group-item-action add-item-btn" data-item-id="{{ ci.id }}" data-item-is-custom="true" data-item-name="{{ ci }}">
-                                    {{ ci }}
+                                    <div class="d-flex my-1">
+                                        <img src="/static/media/{% firstof ci.image "profile_images/blank.png" %}" alt="item image" class="me-3 mt-1 rounded ratio-1x1" style="width: 48px; height: 48px">
+                                        <div class="">
+                                            <div class="fw-bold mb-1">{{ ci.title }}</div>
+                                            <div class="text-muted small">{{ ci.description }}</div>
+                                        </div>
+                                    </div>
                                 </a>
                             {% empty %}
                                 <a class="list-group-item text-center">
@@ -249,7 +238,7 @@
             <div class="modal-content">
                 <form method="POST" action="{% url 'add_item_kitchen' id=kitchen.id %}" class="needs-validation">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add < item ""</h5>
+                        <h5 class="modal-title">Add custom item "eccecc"</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
