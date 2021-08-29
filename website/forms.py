@@ -1,7 +1,7 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Fieldset
+from crispy_forms.layout import Field
 
-from .models import Item, Kitchen, User, StoredItem
+from django.forms import ModelForm, widgets, forms
+from .models import Item, Kitchen, Membership, User, StoredItem
 from django.forms import ModelForm, widgets
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -11,28 +11,67 @@ from django.core.exceptions import ValidationError
 
 ## CUSTOM FIELDS ##
 
-class MultiEmailField(forms.Field):
+class MultiUserField(forms.Field):
     def to_python(self, value):
         """Normalize data to a list of strings."""
         # Return an empty list if no input was given.
         if not value:
             return []
-        return value.replace(";", " ").replace(",", " ").split()
+        
+        contacts = value.replace(";", " ").replace(",", " ").split()
+        users = []
+        data = []
+        for c in contacts:
+            try:
+                validate_email(c)
+                try:
+                    u = User.objects.get(email=c)
+                except User.DoesNotExist:
+                    u = None
+                if u not in users:
+                    users.append(u)
+                    data.append({"value": c, "is_email": True, "User": u})
+            except ValidationError:
+                try:                            
+                    u = User.objects.get(username=c)
+                except User.DoesNotExist:                
+                    u = None                                
+                if c.startswith('@'):
+                    c = c[1:]
+                if u not in users:
+                    users.append(u)    
+                    data.append({"value": c, "is_email": False, "User": u})
+        return data
 
     def validate(self, value):
         super().validate(value)
         incorrect_emails = []
-        for email in value:
-            try:
-                validate_email(email)
-            except ValidationError:
-                incorrect_emails.append(email)
-        if incorrect_emails: 
-            if (len(incorrect_emails) == 1):  
-                raise ValidationError(f"{incorrect_emails[0]} is not a valid email address")
-            else:  
-                incorrect_emails = ", ".join(incorrect_emails)
-                raise ValidationError(f"{incorrect_emails} are not valid email addresses")
+        incorrect_usernames = []
+        for c in value:
+            if not c["User"]:
+                if c["is_email"]:
+                    incorrect_emails.append(c["value"])
+                else:
+                    incorrect_usernames.append(c["value"])
+                
+        error_messages = []
+
+        for ie in incorrect_emails:
+            error_messages.append(f"{ie}: We couldn't find a user with this email address")
+        
+        for iu in incorrect_usernames:
+            error_messages.append(f"@{iu}: We couldn't find a user with this username")
+
+        if error_messages:
+            raise ValidationError("\n".join(error_messages))
+
+
+
+            # if (len(incorrect_emails) == 1):  
+            #     raise ValidationError(f"{incorrect_emails[0]} is not a valid email address")
+            # else:  
+            #     incorrect_emails = ", ".join(incorrect_emails)
+            #     raise ValidationError(f"{incorrect_emails} are not valid email addresses")
 
 
 
@@ -57,7 +96,7 @@ class UserRegisterForm(UserCreationForm):
 
 
 class NewKitchenForm(ModelForm):
-    invite_other_users = MultiEmailField(widget=forms.Textarea, required=False)
+    invite_other_users = MultiUserField(widget=forms.Textarea, required=False)
 
     class Meta:
         model = Kitchen
@@ -103,3 +142,9 @@ class UpdateStoredItemForm(ModelForm):
             'quantity': forms.NumberInput(attrs={'min': 1})
         }
         fields = ['quantity', 'note', 'expiry_date']
+
+class InviteExistingUsers(forms.Form):
+    invite_other_users = MultiUserField(widget=forms.Textarea, required=False)
+
+
+        

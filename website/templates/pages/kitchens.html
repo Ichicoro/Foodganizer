@@ -31,5 +31,18 @@
                 </div>
             </div>
         {% endif %}
+        
+        {% if pending_kitchens %}
+            <div class="d-flex justify-content-center mt-3">
+                <div class="rounded border p-4 d-inline-block text-center" style="min-width: 500px;">
+                    <h2 class="d-inline-block mb-4">You have been invited...</h2><br />
+                    {% for k in pending_kitchens %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'join_kitchen' id=k.id %}">
+                        Join {{ k.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

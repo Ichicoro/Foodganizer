@@ -1,23 +1,70 @@
 import json
 
+from urllib.parse import urlencode
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.urls import reverse
+from django.db.utils import IntegrityError
+from .models import Item, Kitchen, Membership, StoredItem, User, MembershipStatus
 from django.forms.models import model_to_dict
-
-from .models import Item, Kitchen, Membership, StoredItem, User
 
 # Create your views here.
 from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm
-from .forms import NewKitchenForm, NewKitchenItemForm, UserRegisterForm
+from .forms import NewKitchenForm, NewKitchenItemForm, UserRegisterForm, InviteExistingUsers
 
+def _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP):
+    return _getAllKitchens(request, status=status).get(id=id)
 
-def _getKitchen(request, id):
+def _getAllKitchens(request, status=MembershipStatus.ACTIVE_MEMBERSHIP):
     if request.user.is_anonymous:
         return None
-    return request.user.kitchen_set.get(id=id)
+    return request.user.kitchen_set.filter(membership__status=status)
+        
 
+def _inviteUsersToKitchen(request, k: Kitchen, users: list[User]):
+    warning_messages = []
+    success_messages = []
+
+    already_members = []
+    invited_users = []
+    joined_users = []
+    for u in users:
+        try:
+            m = Membership(user=u, kitchen=k, status=MembershipStatus.PENDING_INVITATION)
+            m.save()
+            invited_users.append(u)
+        except IntegrityError:
+            if u == request.user:
+                warning_messages.append("You cannot invite yourself")
+            else:
+                m = Membership.objects.get(user=u, kitchen=k)
+                if m.status == MembershipStatus.ACTIVE_MEMBERSHIP:
+                    already_members.append(u)
+                elif m.status == MembershipStatus.PENDING_INVITATION:
+                    invited_users.append(u)
+                elif m.status == MembershipStatus.PENDING_JOIN_REQUEST:
+                    m.status == MembershipStatus.ACTIVE_MEMBERSHIP
+                    m.save()
+                    joined_users.append(u)
+    
+    if len(already_members) == 1:
+        warning_messages.append(f"@{already_members[0]} is already a member of {k.name}")
+    elif len(already_members) > 1:
+        warning_messages.append(", ".join([f"@{user.username}" for user in already_members]) + f" are already members of {k.name}")
+
+    if len(invited_users) == 1:
+        success_messages.append(f"@{invited_users[0]} has been invited")
+    elif len(invited_users) > 1:
+        success_messages.append(", ".join([f"@{user.username}" for user in invited_users]) + f" have been invited")
+
+    if len(joined_users) == 1:
+        success_messages.append(f"@{joined_users[0]} joined now")
+    elif len(joined_users) > 1:
+        success_messages.append(", ".join([f"@{user.username}" for user in joined_users]) + f" joined now")
+  
+    return success_messages, warning_messages
+    
 
 def index(request):
     return render(request, "pages/index.html")
@@ -66,14 +113,18 @@ def new_kitchen(request):
     if request.method == 'POST':
         form = NewKitchenForm(request.POST)
         if form.is_valid():
-            k = form.save()  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
+            k = form.save() # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
+            
             m = Membership(user=request.user, kitchen=k, is_admin=True)
             m.save()
-            kitchen_name = form.cleaned_data.get('name')
-            invite_other_users = form.cleaned_data.get('invite_other_users')
-            # TODO: idk send an email to this addresses or something
-            messages.success(request, f'Kitchen "{kitchen_name}" created successfully!')
-            return redirect('index')
+            
+            users = [data['User'] for data in form.cleaned_data.get('invite_other_users')]
+            success_messages, warning_messages = _inviteUsersToKitchen(request, k, users)
+            for sm in success_messages: 
+                messages.success(request, sm)
+            for wm in warning_messages:
+                messages.warning(request, wm)
+            return redirect('kitchens')
     else:
         form = NewKitchenForm()
     return render(request, 'pages/new-kitchen.html', {'form': form})
@@ -85,33 +136,37 @@ def kitchen(request, id):
     if not k:
         return redirect('kitchens')
 
-    users = k.users.all()
-    memberships = k.membership_set.all()
-    members = []
-    stored_items = k.storeditem_set.all()
-    print(stored_items[0].quantity)
+    memberships = k.membership_set.filter(status=MembershipStatus.ACTIVE_MEMBERSHIP)
+    stored_items = k.stored_items.all()
     postit = k.postit_set.all()
-    for u in users:
-        m = memberships.get(user=u)
-        members.append({"user": u, "is_admin": m.is_admin})
+
+    if 'invite_other_users_post' in request.session:
+        invite_other_users = request.session['invite_other_users_post']
+        del request.session['invite_other_users_post']
+        invite_users_form = InviteExistingUsers({ **request.POST, "invite_other_users": invite_other_users })
+        invite_users_form_open = True
+    else: 
+        invite_users_form = InviteExistingUsers()
+        invite_users_form_open = False
+
     return render(request, 'pages/kitchen.html', {
         'kitchen': k,
-        'members': members,
+        'memberships': memberships,
         'stored_items': stored_items,
         'remove_item_form': RemoveStoredItemForm(item_set=stored_items),
         'update_item_form': UpdateStoredItemForm(),
-        'postit': postit
+        'postit': postit,
+        'invite_users_form': invite_users_form,
+        'invite_users_form_open': invite_users_form_open
     })
 
 
 @login_required
 def kitchens(request):
-    user = request.user
-    kitchens = []
-    if user.is_authenticated:
-        kitchens = user.kitchen_set.all()
-
-    return render(request, "pages/kitchens.html", {'kitchens': kitchens})
+    kitchens = _getAllKitchens(request)
+    pending_kitchens = _getAllKitchens(request, status=MembershipStatus.PENDING_INVITATION)
+    print(pending_kitchens)
+    return render(request, "pages/kitchens.html", {'kitchens': kitchens, 'pending_kitchens': pending_kitchens})
 
 
 @login_required
@@ -212,3 +267,43 @@ def new_kitchen_item(request, id):
     # else:
     #     form = NewKitchenItemForm()
     # return render(request, 'pages/new-kitchen-item.html', {'form': form})
+
+@login_required
+def invite_users(request, id):
+    k = _getKitchen(request, id)
+    if not k:
+        return redirect('kitchens')
+
+    if request.method == 'POST':
+        form = InviteExistingUsers(request.POST)
+        print("POST", (request.POST))
+        print("form", form)
+        print("errors", form.errors)
+        print("cleaned data", form.cleaned_data.get('invite_other_users'))
+        if form.is_valid():
+            users = [data['User'] for data in form.cleaned_data.get('invite_other_users')]
+            success_messages, warning_messages = _inviteUsersToKitchen(request, k, users)
+            for sm in success_messages: 
+                messages.success(request, sm)
+            for wm in warning_messages:
+                messages.warning(request, wm) 
+        else:
+            request.session['invite_other_users_post'] = request.POST["invite_other_users"]
+
+    return redirect('kitchen', id=id)
+
+@login_required
+def join_kitchen(request, id):
+    k = _getKitchen(request, id, status=MembershipStatus.PENDING_INVITATION)
+    if not k:
+        messages.error("Kitchen not found")
+        return redirect('kitchens')
+    
+    m = request.user.membership_set.get(kitchen=k)
+    if m.status == MembershipStatus.PENDING_INVITATION:
+        m.status = MembershipStatus.ACTIVE_MEMBERSHIP
+        m.save()
+        messages.success(request, f"Joined kitchen {k.name}")
+        return redirect('kitchens')
+    messages.error(request, "Generic error, cannot join kitchen")
+    return redirect('kitchens')

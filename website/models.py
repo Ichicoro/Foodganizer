@@ -73,23 +73,45 @@ class StoredItem(models.Model):
 class Kitchen(models.Model):
     name = models.CharField(max_length=255)
     # need related_name for backward link https://stackoverflow.com/questions/2606194/django-error-message-add-a-related-name-argument-to-the-definition/44398542
-    users = ManyToManyField(User, through='Membership')
+    users = ManyToManyField(User, through='Membership', through_fields=('kitchen', 'user'))
     stored_items = ManyToManyField(Item, through='StoredItem', blank=True)
-
+    public_access_uuid = models.UUIDField(null=True, default=None)
+    join_confirmation = models.BooleanField(default=False)
     def __str__(self):
         return self.name
 
+class MembershipStatus(models.TextChoices):
+    PENDING_JOIN_REQUEST = 'PJR'
+    PENDING_INVITATION = 'PI'
+    ACTIVE_MEMBERSHIP = 'AM'
 
 class Membership(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     kitchen = _getKitchenForeignKey()
     is_admin = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=3,
+        choices=MembershipStatus.choices,
+        default=MembershipStatus.ACTIVE_MEMBERSHIP,
+    )
+    invited_by = models.ForeignKey(User, on_delete=models.SET_NULL, default=None, null=True, related_name="invites_set")
 
     def __str__(self):
-        if self.is_admin:
-            return f"@{self.user} admin of {self.kitchen}" 
+        if self.status == MembershipStatus.PENDING_INVITATION:
+            message = f"@{self.user} invited in {self.kitchen}" 
+        elif self.status == MembershipStatus.PENDING_JOIN_REQUEST:
+            message = f"@{self.user} requested to join {self.kitchen}" 
+        elif self.status == MembershipStatus.ACTIVE_MEMBERSHIP:
+            message = f"@{self.user} member of {self.kitchen}" 
         else:
-            return f"@{self.user} member of {self.kitchen}" 
+            message = f"@{self.user} > {self.status} > {self.kitchen}" 
+        
+        if self.is_admin:
+            message += f" (admin)" 
+        return message
+
+    class Meta:
+        unique_together = [['user', 'kitchen']]
         
 
 class PostIt(models.Model):
