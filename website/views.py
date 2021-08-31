@@ -1,7 +1,10 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.urls import reverse
+from django.forms.models import model_to_dict
 
 from .models import Item, Kitchen, Membership, StoredItem, User
 
@@ -85,6 +88,7 @@ def kitchen(request, id):
         'kitchen': k,
         'members': members,
         'stored_items': stored_items,
+        # 'stored_items_json': json.dumps([model_to_dict(i) for i in stored_items]),
         'postit': postit
     })
 

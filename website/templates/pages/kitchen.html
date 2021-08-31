@@ -1,11 +1,24 @@
 {% extends "base.html" %}
+{% load jsondumps %}
 
 {% block head %}
     {% include "csvalidation.html" %}
+    <script type="module">
+        $$all(".stored-item-btn").forEach(item => item.addEventListener("click", _ => {
+            const jsonData = JSON.parse(item.dataset.itemJson)
+
+            $$("#itemInfoModal .item-name").textContent = jsonData["title"]
+            $$("#itemInfoModal .item-desc").textContent = jsonData["description"]
+
+            new bootstrap.Modal($$("#itemInfoModal")).show()
+        }))
+    </script>
 {% endblock %}
 
 {% block body %}
     <div class="container-fluid mw-md mb-5">
+{#        <code>{{ stored_items_json|escapejs }}</code>#}
+{#        {{ stored_items|json }}#}
         <h1 class="mb-3">{{ kitchen.name }}</h1>
         <div class="row">
             <div class="col-md-6 col-sm-12 mb-4">
@@ -58,8 +71,19 @@
                 <h3>Items</h3>
                 <div class="list-group list-group-item-action">
                     {% for si in stored_items %}
-                        <a class="list-group-item list-group-item-action ">
-                            {{ si }}
+                        <a class="list-group-item list-group-item-action stored-item-btn" data-item-id="{{ si.id }}" data-item-is-custom="true" data-item-json="{{ si|json }}" data-item-name="{{ ci }}">
+                            <div class="d-flex my-1">
+                                <span>
+                                    <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="me-3 {% comment %}my-1{% endcomment %} rounded ratio-1x1" style="width: 48px; height: 48px; object-fit: cover">
+                                    <span class="badge rounded-pill bg-danger">3</span>
+                                </span>
+                                <div>
+                                    <div class="fw-bold mb-1">
+                                        {{ si.title }}
+                                    </div><div class="mb-1">Amount: {% firstof si.quantity 1 %}</div>
+                                    <div class="text-muted fst-italic small">{{ si.description }}</div>
+                                </div>
+                            </div>
                         </a>
                     {% empty %}
                         <a class="list-group-item text-center">
@@ -69,6 +93,20 @@
                     <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_item_kitchen' id=kitchen.id %}">
                         <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add item
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="itemInfoModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title item-name">Item info</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <span class="text-muted fst-italic item-desc"></span>
                 </div>
             </div>
         </div>

@@ -1,3 +1,5 @@
+import json
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.fields.related import ForeignKey, ManyToManyField
@@ -27,6 +29,7 @@ class User(AbstractUser):
     bio = models.TextField(max_length=1000, blank=True)
     profile_pic = models.ImageField(upload_to='profile_images', blank=True)
 
+
 class Item(models.Model):
     upc = models.CharField(max_length=12, blank=True) 
     # TODO: create form validation for integer only https://stackoverflow.com/questions/60966095/django-charfield-accepting-only-numbers
@@ -44,6 +47,9 @@ class Item(models.Model):
         if self.upc:
            str = f"{str} - {self.upc}" 
         return str
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
             
 
 class StoredItem(models.Model):
@@ -58,6 +64,10 @@ class StoredItem(models.Model):
 
     def __str__(self):
         return f"{self.item}"
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)
 
 
 class Kitchen(models.Model):
