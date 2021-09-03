@@ -9,8 +9,9 @@ from django.forms.models import model_to_dict
 from .models import Item, Kitchen, Membership, StoredItem, User
 
 # Create your views here.
-from website.forms import UpdateUserForm, AddStoredItemForm
+from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm
 from .forms import NewKitchenForm, NewKitchenItemForm, UserRegisterForm
+
 
 def _getKitchen(request, id):
     if request.user.is_anonymous:
@@ -47,18 +48,19 @@ def profile(request):
             user_form.save()
     else:
         user_form = UpdateUserForm(instance=request.user)
-    print(f"{user_form.files=}")   # TODO: Remove me
-    print(f"{user_form.is_valid()=}")   # TODO: Remove me
+    print(f"{user_form.files=}")  # TODO: Remove me
+    print(f"{user_form.is_valid()=}")  # TODO: Remove me
     return render(request, "pages/own_profile.html", {
         'user_form': user_form,
     })
+
 
 @login_required
 def new_kitchen(request):
     if request.method == 'POST':
         form = NewKitchenForm(request.POST)
         if form.is_valid():
-            k = form.save() # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
+            k = form.save()  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
             m = Membership(user=request.user, kitchen=k, is_admin=True)
             m.save()
             kitchen_name = form.cleaned_data.get('name')
@@ -70,6 +72,7 @@ def new_kitchen(request):
         form = NewKitchenForm()
     return render(request, 'pages/new-kitchen.html', {'form': form})
 
+
 @login_required
 def kitchen(request, id):
     k = _getKitchen(request, id)
@@ -79,7 +82,8 @@ def kitchen(request, id):
     users = k.users.all()
     memberships = k.membership_set.all()
     members = []
-    stored_items = k.stored_items.all()
+    stored_items = k.storeditem_set.all()
+    print(stored_items[0].quantity)
     postit = k.postit_set.all()
     for u in users:
         m = memberships.get(user=u)
@@ -88,7 +92,8 @@ def kitchen(request, id):
         'kitchen': k,
         'members': members,
         'stored_items': stored_items,
-        # 'stored_items_json': json.dumps([model_to_dict(i) for i in stored_items]),
+        'remove_item_form': RemoveStoredItemForm(item_set=stored_items),
+        'update_item_form': UpdateStoredItemForm(),
         'postit': postit
     })
 
@@ -108,7 +113,7 @@ def add_item_kitchen(request, id):
     k = _getKitchen(request, id)
     if not k:
         return redirect('kitchens')
-    custom_items = k.item_set.all()     # foreign key Item.custom_item_kitchen
+    custom_items = k.item_set.all()  # foreign key Item.custom_item_kitchen
     if request.method == 'POST':
         form = AddStoredItemForm(request.POST)
         if form.is_valid():
@@ -132,6 +137,8 @@ def add_item_kitchen(request, id):
                 'new_custom_item_form': NewKitchenItemForm(),
                 'back': reverse('kitchen', args=[id])
             })
+    elif request.method == 'PUT':
+        pass
     else:
         return render(request, "pages/add-item-kitchen.html", {
             'form': None,
@@ -141,6 +148,44 @@ def add_item_kitchen(request, id):
             'new_custom_item_form': NewKitchenItemForm(),
             'back': reverse('kitchen', args=[id])
         })
+
+
+@login_required
+def delete_item_kitchen(request, id):
+    k = _getKitchen(request, id)
+    if not k:
+        return redirect('kitchens')
+    if request.method == 'POST':
+        print(k.storeditem_set.all())
+        form = RemoveStoredItemForm(request.POST, item_set=k.storeditem_set.all())
+        print(form.data)
+        if form.is_valid():
+            custom_items = form.cleaned_data.get("item").delete()
+            messages.success(request, "Item deleted successfully!")
+            return redirect('kitchen', id=id)
+        else:
+            print(form.errors)
+            messages.error(request, "Error, please check console :(")
+            return redirect('kitchen', id=id)
+
+
+@login_required
+def update_item_kitchen(request, id, item_id):
+    k = _getKitchen(request, id)
+    if not k:
+        return redirect('kitchens')
+    if request.method == 'POST':
+        instance = k.storeditem_set.get(id=item_id)
+        form = UpdateStoredItemForm(request.POST or None, instance=instance)
+        print(form.data)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Item updated successfully!")
+            return redirect('kitchen', id=id)
+        else:
+            print(form.errors)
+            messages.error(request, "Error, please check console :(")
+            return redirect('kitchen', id=id)
 
 
 @login_required
