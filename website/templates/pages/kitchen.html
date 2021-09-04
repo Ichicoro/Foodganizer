@@ -1,24 +1,42 @@
 {% extends "base.html" %}
 {% load jsondumps %}
+{% load crispy_forms_tags %}
 
 {% block head %}
     {% include "csvalidation.html" %}
+    <style>
+        #div_id_item { position: absolute; visibility:hidden; }
+        #div_id_expiry_date { margin-bottom: 10px !important; }
+    </style>
+    <script src="/static/js/Card3D.js" type="module"></script>
     <script type="module">
         $$all(".stored-item-btn").forEach(item => item.addEventListener("click", _ => {
-            const jsonData = JSON.parse(item.dataset.itemJson)
+            const itemJsonData = JSON.parse(item.dataset.itemJson)
+            const instanceJsonData = JSON.parse(item.dataset.storedItemJson)
+            console.log(item.dataset)
 
-            $$("#itemInfoModal .item-name").textContent = jsonData["title"]
-            $$("#itemInfoModal .item-desc").textContent = jsonData["description"]
+            // $$("#itemInfoModal form").action = `/kitchens/{{ kitchen.id }}/update/${item.dataset.itemId}`
+
+
+            $$("#itemInfoModal form").action = "{% url "update_item_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+
+            $$all("#itemInfoModal #item-name, #removeItemModal #item-name").forEach(_ => _.textContent = itemJsonData["title"])
+            $$("#itemInfoModal #item-desc").textContent = itemJsonData["description"]
+            $$("#itemInfoModal #item-added-by").textContent = itemJsonData["added_by"][0]
+            $$("#itemInfoModal #item-added-by").href = `/profile/${itemJsonData["added_by"][0]}`
+            $$("#itemInfoModal #id_quantity").value = instanceJsonData["quantity"]
+            $$("#itemInfoModal #id_note").textContent = instanceJsonData["note"]
+            $$("#itemInfoModal #id_expiry_date").value = instanceJsonData["expiry_date"]
+            $$("#removeItemModal #id_item").value = parseInt(item.dataset.itemId)
 
             new bootstrap.Modal($$("#itemInfoModal")).show()
         }))
+        {#$$all(".stored-item-btn")[0].click()#}
     </script>
 {% endblock %}
 
 {% block body %}
     <div class="container-fluid mw-md mb-5">
-{#        <code>{{ stored_items_json|escapejs }}</code>#}
-{#        {{ stored_items|json }}#}
         <h1 class="mb-3">{{ kitchen.name }}</h1>
         <div class="row">
             <div class="col-md-6 col-sm-12 mb-4">
@@ -27,9 +45,9 @@
                     {% for m in members %}
                         <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
                             <div class="me-auto">
-                                <div class="fw-bold mb-1">@{{ m.user.username }}</div>
+                                <div class="fw-bold mb-0">@{{ m.user.username }}</div>
                                 {% if m.user.first_name or m.user.last_name %}
-                                    <span>Full name: {{ m.user.first_name }} {{m.user.last_name}}</span><br />
+                                    <span>Full name: <b>{{ m.user.first_name }} {{m.user.last_name}}</b></span><br />
                                 {% endif %}
                                 {% if m.user.email %}
                                     <span>Email: <span class="monospaced">{{ m.user.email }}</span></span>
@@ -71,17 +89,20 @@
                 <h3>Items</h3>
                 <div class="list-group list-group-item-action">
                     {% for si in stored_items %}
-                        <a class="list-group-item list-group-item-action stored-item-btn" data-item-id="{{ si.id }}" data-item-is-custom="true" data-item-json="{{ si|json }}" data-item-name="{{ ci }}">
+                        <a class="list-group-item list-group-item-action stored-item-btn" data-item-id="{{ si.id }}" data-item-is-custom="true" data-item-json="{{ si.item|json }}" data-stored-item-json="{{ si|json }}" data-item-name="{{ si }}">
                             <div class="d-flex my-1">
-                                <span>
+                                <div class="card3d">
                                     <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="me-3 {% comment %}my-1{% endcomment %} rounded ratio-1x1" style="width: 48px; height: 48px; object-fit: cover">
-                                    <span class="badge rounded-pill bg-danger">3</span>
-                                </span>
-                                <div>
+                                </div>
+                                <div class="me-auto">
                                     <div class="fw-bold mb-1">
-                                        {{ si.title }}
-                                    </div><div class="mb-1">Amount: {% firstof si.quantity 1 %}</div>
-                                    <div class="text-muted fst-italic small">{{ si.description }}</div>
+                                        {{ si.item.title }}
+                                    </div>
+                                    <div class="text-muted fst-italic small">{% firstof si.note si.item.description "No description..." %}</div>
+                                </div>
+                                <div style="margin-top: -2.5px; width: 48px; height: 48px" class="text-center font-iosevka {% comment %}mb-2{% endcomment %}">
+                                    <p class="small text-muted {% comment %}mt-3{% endcomment %} mb-0">AMOUNT</p>
+                                    <b style="font-size: 24px">{{ si.quantity }}</b>
                                 </div>
                             </div>
                         </a>
@@ -101,13 +122,58 @@
     <div class="modal fade" id="itemInfoModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title item-name">Item info</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <span class="text-muted fst-italic item-desc"></span>
-                </div>
+                <form novalidate method="POST">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="item-name">Item info</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-muted mb-3">
+                            <p class="text-muted fst-italic mb-0" id="item-desc"></p>
+                            &ndash;&nbsp;<a class="fst-italic" id="item-added-by" href="/profile"></a>
+                        </div>
+                        {% comment %}<label for="id_quantity" class="form-label mt-3">Quantity</label>
+                        <input required type="number" class="form-control" id="id_quantity" min="0" oninput="validity.valid||(value='');" />
+
+                        <label for="id_note" class="form-label mt-3">Note</label>
+                        <textarea type="text" class="form-control fst-italic" id="id_note"></textarea>{% endcomment %}
+
+                        {{ update_item_form|crispy }}
+                    </div>
+                    <div class="modal-footer d-flex">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removeItemModal"><i class="bi bi-trash-fill flex-grow-0"></i>{% comment %}&nbsp;&nbsp;Remove{% endcomment %}</button>
+                        <button type="submit" class="btn btn-success flex-grow-1">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="removeItemModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <form method="POST" action="{% url "delete_item_kitchen" id=kitchen.id %}" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="item-name">Delete item?</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body pb-0 overflow-hidden">
+                        <div class="mb-2">Are you sure you want to delete <b id="item-name"></b>?</div>
+                        {% comment %}<div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="should-add-to-shoplist">
+                            <label class="form-check-label" for="should-add-to-shoplist">
+                                Add to shopping list
+                            </label>
+                        </div>{% endcomment %}
+                        {{ remove_item_form|crispy }}
+                    </div>
+                    <div class="modal-footer d-flex-grow-1-child">
+                        <button type="button" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#itemInfoModal" class="btn btn-outline-secondary">Do not delete</button>
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-trash-fill"></i>&nbsp;&nbsp;Remove</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

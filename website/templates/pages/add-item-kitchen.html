@@ -111,6 +111,13 @@
             }"`
             new bootstrap.Modal($$("#addItemModal")).show()
         }))
+
+        $$("#item-add_barcode-search").addEventListener("click", _ => {
+            // $$("#item-add_barcode-input").value
+            new bootstrap.Modal($$("#newGlobalItemModal")).show()
+        })
+
+        $$("#newGlobalItemModal")
     </script>
 {% endblock %}
 
@@ -154,7 +161,7 @@
                             </button>
                             <input class="form-control d-none" type="file" accept="image/*" capture="camera" id="scan-file-input" />
                             <input type="number" min="0" id="item-add_barcode-input" oninput="validity.valid||(value='');" class="form-control monospaced" />
-                            <button class="btn btn-primary">
+                            <button class="btn btn-primary" id="item-add_barcode-search">
                                 <i class="bi bi-search"></i>
                             </button>
                         </div>
@@ -219,13 +226,36 @@
                     <div class="modal-body">
                         {% csrf_token %}
                         <fieldset class="form-group">
-                            <h2 class="mb-3">Create new item</h2>
                             {{ new_custom_item_form|crispy }}
                         </fieldset>
                     </div>
                     <div class="modal-footer d-flex-grow-1-child">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
                         <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Add global item modal #}
+    <div class="modal fade" id="newGlobalItemModal" tabindex="-1" aria-labelledby="newItemModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <form method="POST" action="{% url 'new_kitchen_item' id=kitchen.id %}" novalidate class="needs-validation">
+                    <div class="modal-header">
+                        <h5 class="modal-title">New global item</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <fieldset class="form-group">
+                            {{ new_global_item_form|crispy }}
+                        </fieldset>
+                    </div>
+                    <div class="modal-footer d-flex-grow-1-child">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
+                        <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Create (and add)</button>
                     </div>
                 </form>
             </div>

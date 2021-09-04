@@ -2,7 +2,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Fieldset
 
 from .models import Item, Kitchen, User, StoredItem
-from django.forms import ModelForm
+from django.forms import ModelForm, widgets
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import validate_email
@@ -79,3 +79,27 @@ class AddStoredItemForm(ModelForm):
             'expiry_date': forms.DateInput(attrs={'type': 'date'})
         }
         fields = ['item', 'quantity', 'expiry_date', 'note']
+
+
+class RemoveStoredItemForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        item_set = kwargs.pop('item_set')
+        super(RemoveStoredItemForm, self).__init__(*args, **kwargs)
+        self.fields['item'].queryset = item_set
+
+    Field('item', type="hidden")
+
+    item = forms.ModelChoiceField(queryset=None, required=True)
+    add_to_shopping_list = forms.BooleanField(required=False)
+
+
+class UpdateStoredItemForm(ModelForm):
+    Field('quantity', type="hidden")
+
+    class Meta:
+        model = StoredItem
+        widgets = {
+            'expiry_date': forms.DateInput(attrs={'type': 'date'}),
+            'quantity': forms.NumberInput(attrs={'min': 1})
+        }
+        fields = ['quantity', 'note', 'expiry_date']

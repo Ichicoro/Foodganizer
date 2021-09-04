@@ -20,6 +20,8 @@ urlpatterns = [
     path('kitchens/new', views.new_kitchen, name='new_kitchen'),
     path('kitchens/<int:id>', views.kitchen, name='kitchen'),
     path('kitchens/<int:id>/add', views.add_item_kitchen, name='add_item_kitchen'),
+    path('kitchens/<int:id>/delete', views.delete_item_kitchen, name='delete_item_kitchen'),
+    path('kitchens/<int:id>/update/<int:item_id>', views.update_item_kitchen, name='update_item_kitchen'),
     path('kitchens/<int:id>/new', views.new_kitchen_item, name='new_kitchen_item'),
 
     path('products/search', api_endpoints.search_products, name='search_products_api')

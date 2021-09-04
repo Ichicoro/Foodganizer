@@ -7,7 +7,7 @@ register = template.Library()
 @register.filter(name='json')
 def json_dumps(data):
     is_list: bool = isinstance(data, list)
-    json_string: str = serializers.serialize("json", data if is_list else [data])
+    json_string: str = serializers.serialize("json", data if is_list else [data], use_natural_foreign_keys=True, use_natural_primary_keys=True)
     data = json.loads(json_string)
 
     for d in data:
