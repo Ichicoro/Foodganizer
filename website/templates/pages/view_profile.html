@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid mw-md pt-3">
+        <div class="row {% comment %}me-lg-4 {% endcomment %}">
+            <div class="col-md-3 col-sm-12 d-flex justify-content-center">
+                <div class="rounded-pic-container">
+                    <img src="/static/media/{{ user.profile_pic }}" />
+                </div>
+            </div>
+            <div class="col-md-9 col-sm-12 mb-5">
+                <h1>{{ user.username }}</h1>
+
+                <div class="mb-2">
+                    <p class="form-label">Full name</p>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="No first name" value="{{ user.first_name }}" disabled>
+                        <input type="text" class="form-control" placeholder="No last name" value="{{ user.last_name }}" disabled>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <p class="form-label">Bio</p>
+                    <textarea type="text" class="form-control" disabled rows="6">{{ user.bio }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

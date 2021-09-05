@@ -55,6 +55,12 @@ def profile(request):
     })
 
 
+def view_profile(request, username):
+    return render(request, "pages/view_profile.html", {
+        'user': User.objects.get(username=username)
+    })
+
+
 @login_required
 def new_kitchen(request):
     if request.method == 'POST':

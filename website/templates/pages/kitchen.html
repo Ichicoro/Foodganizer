@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 {% load jsondumps %}
 {% load crispy_forms_tags %}
+{% load tz %}
+
+{% now "d-m-yy" as today_date %}
 
 {% block head %}
     {% include "csvalidation.html" %}
     <style>
         #div_id_item { position: absolute; visibility:hidden; }
         #div_id_expiry_date { margin-bottom: 10px !important; }
+        .si-image {
+            flex-shrink: 1;
+            max-width: 48px;
+            margin-right: 16px;
+            max-height: 48px;
+        }
     </style>
     <script src="/static/js/Card3D.js" type="module"></script>
     <script type="module">
@@ -91,14 +100,17 @@
                     {% for si in stored_items %}
                         <a class="list-group-item list-group-item-action stored-item-btn" data-item-id="{{ si.id }}" data-item-is-custom="true" data-item-json="{{ si.item|json }}" data-stored-item-json="{{ si|json }}" data-item-name="{{ si }}">
                             <div class="d-flex my-1">
-                                <div class="card3d">
-                                    <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="me-3 {% comment %}my-1{% endcomment %} rounded ratio-1x1" style="width: 48px; height: 48px; object-fit: cover">
+                                <div class="card3d si-image me-3">
+                                    <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="{% comment %}my-1{% endcomment %} rounded ratio-1x1" style="width: 48px; height: 48px; object-fit: cover">
                                 </div>
                                 <div class="me-auto">
                                     <div class="fw-bold mb-1">
                                         {{ si.item.title }}
                                     </div>
-                                    <div class="text-muted fst-italic small">{% firstof si.note si.item.description "No description..." %}</div>
+                                    <div class="text-muted fst-italic mb-1">{% firstof si.note si.item.description "No description..." %}</div>
+                                    <div class="text-muted small{% if si.expiry_date|utc < now|utc %} text-danger{% endif %}">
+                                        Expires on {{ si.expiry_date|date:"d-m-yy" }}
+                                    </div>
                                 </div>
                                 <div style="margin-top: -2.5px; width: 48px; height: 48px" class="text-center font-iosevka {% comment %}mb-2{% endcomment %}">
                                     <p class="small text-muted {% comment %}mt-3{% endcomment %} mb-0">AMOUNT</p>
