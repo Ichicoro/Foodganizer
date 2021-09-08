@@ -6,15 +6,19 @@ register = template.Library()
 
 @register.filter(name='json')
 def json_dumps(data):
-    is_list: bool = isinstance(data, list)
-    json_string: str = serializers.serialize("json", data if is_list else [data], use_natural_foreign_keys=True, use_natural_primary_keys=True)
-    data = json.loads(json_string)
+    try:
+        is_list: bool = isinstance(data, list)
+        json_string: str = serializers.serialize("json", data if is_list else [data], use_natural_foreign_keys=True, use_natural_primary_keys=True)
+        data = json.loads(json_string)
 
-    for d in data:
-        del d['pk']
-        del d['model']
+        for d in data:
+            del d['pk']
+            del d['model']
 
-    data = [d['fields'] for d in data]
+        data = [d['fields'] for d in data]
 
-    json_string = json.dumps(data if is_list else data[0])
-    return json_string
+        json_string = json.dumps(data if is_list else data[0])
+        return json_string
+    except Exception:
+        print("error")
+        return "{}"

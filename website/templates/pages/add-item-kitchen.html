@@ -99,6 +99,9 @@
         $$("#hide-me-btn").addEventListener("click", _ => setIsSearchBarVisible(false))
 
         $$("#create-private-item-btn").addEventListener("click", _ => {
+            $$(".customItemSpan").style.display = ""
+            $$("#id_upc").value = undefined
+            $$("#div_id_upc").style.display = "none"
             new bootstrap.Modal($$("#newItemModal")).show()
         })
 
@@ -114,7 +117,10 @@
 
         $$("#item-add_barcode-search").addEventListener("click", _ => {
             // $$("#item-add_barcode-input").value
-            new bootstrap.Modal($$("#newGlobalItemModal")).show()
+            $$(".customItemSpan").style.display = "none"
+            $$("#id_upc").value = $$("#item-add_barcode-input").value
+            $$("#div_id_upc").style.display = ""
+            new bootstrap.Modal($$("#newItemModal")).show()
         })
 
         $$("#newGlobalItemModal")
@@ -220,7 +226,7 @@
             <div class="modal-content">
                 <form method="POST" action="{% url 'new_kitchen_item' id=kitchen.id %}" novalidate class="needs-validation">
                     <div class="modal-header">
-                        <h5 class="modal-title">New custom item</h5>
+                        <h5 class="modal-title">New<span class="customItemSpan">&nbsp;custom</span> item</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -239,7 +245,7 @@
     </div>
 
     {# Add global item modal #}
-    <div class="modal fade" id="newGlobalItemModal" tabindex="-1" aria-labelledby="newItemModal" aria-hidden="true">
+    {% comment %}<div class="modal fade" id="newGlobalItemModal" tabindex="-1" aria-labelledby="newItemModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <form method="POST" action="{% url 'new_kitchen_item' id=kitchen.id %}" novalidate class="needs-validation">
@@ -260,7 +266,7 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div>{% endcomment %}
 
     {# Add private item modal #}
     <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModal" aria-hidden="true">

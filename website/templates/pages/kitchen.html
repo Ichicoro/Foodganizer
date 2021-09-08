@@ -28,7 +28,7 @@
         $$all(".stored-item-btn").forEach(item => item.addEventListener("click", _ => {
             const itemJsonData = JSON.parse(item.dataset.itemJson)
             const instanceJsonData = JSON.parse(item.dataset.storedItemJson)
-            console.log(item.dataset)
+            console.log({ itemJsonData, instanceJsonData })
 
             // $$("#itemInfoModal form").action = `/kitchens/{{ kitchen.id }}/update/${item.dataset.itemId}`
 
@@ -137,87 +137,9 @@
         </div>
     </div>
 
-    <div class="modal fade" id="itemInfoModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <form novalidate method="POST">
-                    {% csrf_token %}
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="item-name">Item info</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="text-muted mb-3">
-                            <p class="text-muted fst-italic mb-0" id="item-desc"></p>
-                            &ndash;&nbsp;<a class="fst-italic" id="item-added-by" href="/profile"></a>
-                        </div>
-                        {% comment %}<label for="id_quantity" class="form-label mt-3">Quantity</label>
-                        <input required type="number" class="form-control" id="id_quantity" min="0" oninput="validity.valid||(value='');" />
+    {% include "components/item-info-modal.html" with kitchen=kitchen update_item_form=update_item_form %}
 
-                        <label for="id_note" class="form-label mt-3">Note</label>
-                        <textarea type="text" class="form-control fst-italic" id="id_note"></textarea>{% endcomment %}
+    {% include "components/remove-item-modal.html" with kitchen=kitchen remove_item_form=remove_item_form %}
 
-                        {{ update_item_form|crispy }}
-                    </div>
-                    <div class="modal-footer d-flex">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removeItemModal"><i class="bi bi-trash-fill flex-grow-0"></i>{% comment %}&nbsp;&nbsp;Remove{% endcomment %}</button>
-                        <button type="submit" class="btn btn-success flex-grow-1">Update</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="removeItemModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <form method="POST" action="{% url "delete_item_kitchen" id=kitchen.id %}" novalidate>
-                    {% csrf_token %}
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="item-name">Delete item?</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body pb-0 overflow-hidden">
-                        <div class="mb-2">Are you sure you want to delete <b id="item-name"></b>?</div>
-                        {% comment %}<div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="should-add-to-shoplist">
-                            <label class="form-check-label" for="should-add-to-shoplist">
-                                Add to shopping list
-                            </label>
-                        </div>{% endcomment %}
-                        {{ remove_item_form|crispy }}
-                    </div>
-                    <div class="modal-footer d-flex-grow-1-child">
-                        <button type="button" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#itemInfoModal" class="btn btn-outline-secondary">Do not delete</button>
-                        <button type="submit" class="btn btn-danger"><i class="bi bi-trash-fill"></i>&nbsp;&nbsp;Remove</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-    {# invite users modal #}
-    <div class="modal fade" id="inviteUsersModal" tabindex="-1" aria-labelledby="inviteUsersModal" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <form method="POST" action="{% url 'kitchen_invite_users' id=kitchen.id %}" novalidate class="needs-validation">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Invite users</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        {% csrf_token %}
-                        <fieldset class="form-group">
-                            {{ invite_users_form|crispy }}
-                        </fieldset>
-                    </div>
-                    <div class="modal-footer d-flex-grow-1-child">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
-                        <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Invite</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    {% include "components/invite-users-modal.html" with invite_users_form=invite_users_form kitchen=kitchen %}
 {% endblock %}

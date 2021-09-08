@@ -137,7 +137,7 @@ def kitchen(request, id):
         return redirect('kitchens')
 
     memberships = k.membership_set.filter(status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    stored_items = k.stored_items.all()
+    stored_items = k.storeditem_set.all()
     postit = k.postit_set.all()
 
     if 'invite_other_users_post' in request.session:
@@ -307,3 +307,8 @@ def join_kitchen(request, id):
         return redirect('kitchens')
     messages.error(request, "Generic error, cannot join kitchen")
     return redirect('kitchens')
+
+
+def search_item(request):
+    pass
+    # request

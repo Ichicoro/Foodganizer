@@ -1,8 +1,7 @@
 from crispy_forms.layout import Field
 
-from django.forms import ModelForm, widgets, forms
-from .models import Item, Kitchen, Membership, User, StoredItem
-from django.forms import ModelForm, widgets
+from .models import Item, Kitchen, User, StoredItem
+from django.forms import ModelForm
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import validate_email
@@ -104,9 +103,15 @@ class NewKitchenForm(ModelForm):
 
 
 class NewKitchenItemForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(NewKitchenItemForm, self).__init__(*args, **kwargs)
+        self.fields['upc'].label = "EAN-13 / UPC"
+
+    upc = forms.CharField(max_length=12, required=False)
+
     class Meta:
         model = Item
-        fields = ['title', 'description', 'image']
+        fields = ['upc', 'title', 'description', 'image']
 
 
 class AddStoredItemForm(ModelForm):
@@ -143,8 +148,6 @@ class UpdateStoredItemForm(ModelForm):
         }
         fields = ['quantity', 'note', 'expiry_date']
 
+
 class InviteExistingUsers(forms.Form):
     invite_other_users = MultiUserField(widget=forms.Textarea, required=False)
-
-
-        
