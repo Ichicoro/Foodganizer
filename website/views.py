@@ -31,7 +31,7 @@ def _inviteUsersToKitchen(request, k: Kitchen, users: list[User]):
     joined_users = []
     for u in users:
         try:
-            m = Membership(user=u, kitchen=k, status=MembershipStatus.PENDING_INVITATION)
+            m = Membership(user=u, kitchen=k, status=MembershipStatus.PENDING_INVITATION, invited_by=request.user)
             m.save()
             invited_users.append(u)
         except IntegrityError:
@@ -44,7 +44,8 @@ def _inviteUsersToKitchen(request, k: Kitchen, users: list[User]):
                 elif m.status == MembershipStatus.PENDING_INVITATION:
                     invited_users.append(u)
                 elif m.status == MembershipStatus.PENDING_JOIN_REQUEST:
-                    m.status == MembershipStatus.ACTIVE_MEMBERSHIP
+                    m.status = MembershipStatus.ACTIVE_MEMBERSHIP
+                    m.invited_by = request.user
                     m.save()
                     joined_users.append(u)
     
@@ -164,9 +165,8 @@ def kitchen(request, id):
 @login_required
 def kitchens(request):
     kitchens = _getAllKitchens(request)
-    pending_kitchens = _getAllKitchens(request, status=MembershipStatus.PENDING_INVITATION)
-    print(pending_kitchens)
-    return render(request, "pages/kitchens.html", {'kitchens': kitchens, 'pending_kitchens': pending_kitchens})
+    invitations = request.user.membership_set.filter(status=MembershipStatus.PENDING_INVITATION)
+    return render(request, "pages/kitchens.html", {'kitchens': kitchens, 'invitations': invitations})
 
 
 @login_required
