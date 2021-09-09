@@ -101,7 +101,7 @@ class Membership(models.Model):
 
     def __str__(self):
         if self.status == MembershipStatus.PENDING_INVITATION:
-            message = f"@{self.user} invited in {self.kitchen}" 
+            message = f"@{self.invited_by} invited @{self.user} in {self.kitchen}" 
         elif self.status == MembershipStatus.PENDING_JOIN_REQUEST:
             message = f"@{self.user} requested to join {self.kitchen}" 
         elif self.status == MembershipStatus.ACTIVE_MEMBERSHIP:
