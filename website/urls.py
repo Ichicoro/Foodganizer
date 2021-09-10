@@ -26,7 +26,8 @@ urlpatterns = [
     path('kitchens/<int:id>/update/<int:item_id>', views.update_item_kitchen, name='update_item_kitchen'),
     path('kitchens/<int:id>/new', views.new_kitchen_item, name='new_kitchen_item'),
 
-    path('products/search', api_endpoints.search_products, name='search_products_api')
+    path('/api/products/search', api_endpoints.search_products, name='search_products_api'),
+    path('/api/product/search', api_endpoints.get_product_by_code, name='check_product_exists_api')
     # # ex: /polls/5/
     # path('<int:question_id>/', views., name='detail'),
     # # ex: /polls/5/results/

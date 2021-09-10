@@ -260,13 +260,15 @@ def new_kitchen_item(request, id):
         if form.is_valid():
             i = form.save(commit=False)  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
             i.added_by = request.user
-            i.custom_item_kitchen = k
+            if form.cleaned_data.get("upc") is None:
+                i.custom_item_kitchen = k
             i.save()
             messages.success(request, f'Item {i} added successfully to {k}!')
             return redirect('add_item_kitchen', id=id)
     # else:
     #     form = NewKitchenItemForm()
     # return render(request, 'pages/new-kitchen-item.html', {'form': form})
+
 
 @login_required
 def invite_users(request, id):
@@ -292,6 +294,7 @@ def invite_users(request, id):
 
     return redirect('kitchen', id=id)
 
+
 @login_required
 def join_kitchen(request, id):
     k = _getKitchen(request, id, status=MembershipStatus.PENDING_INVITATION)
@@ -308,7 +311,3 @@ def join_kitchen(request, id):
     messages.error(request, "Generic error, cannot join kitchen")
     return redirect('kitchens')
 
-
-def search_item(request):
-    pass
-    # request

@@ -120,7 +120,8 @@ class AddStoredItemForm(ModelForm):
     class Meta:
         model = StoredItem
         widgets = {
-            'expiry_date': forms.DateInput(attrs={'type': 'date'})
+            'expiry_date': forms.DateInput(attrs={'type': 'date'}),
+            'item': forms.HiddenInput()
         }
         fields = ['item', 'quantity', 'expiry_date', 'note']
 

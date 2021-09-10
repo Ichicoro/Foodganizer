@@ -84,19 +84,54 @@
         const setIsSearchBarVisible = status =>
             $$("#item-add_search-bar-absolute").style.display = status ? "block" : "none"
 
-        $$("#item-add_search-bar").addEventListener("input", evt => {
+        $$("#item-add_search-bar").addEventListener("input", async evt => {
             const text = evt.target.value
             setIsSearchBarVisible(text.length > 0)
+
+            if (text.length <= 0) {
+                return
+            }
+            // TODO: setIsLoading
+            try {
+                const data = await (await fetch(`{% url "search_products_api" %}?text=${encodeURIComponent(text)}`)).json()
+                console.log(data)
+                console.log($$("#item-add_search-bar-absolute--results-found"))
+                $$("#item-add_search-bar-absolute--no-results").style.display = data.length === 0 ? "flex" : "none"
+                $$("#item-add_search-bar-absolute--results-found").style.display = data.length !== 0 ? "block" : "none"
+                if (data.length !== 0) {
+                    // Show items :)
+                    const views = data.map(item => {
+                        return `<a class="list-group-item list-group-item-action add-item-btn" data-item-id="${item.pk}" data-item-name="${item.fields.title}" ${!item.fields.upc ? "data-item-is-custom=\"true\"" : ""}>
+                            <div class="d-flex my-1">
+                                <img src="/static/media/question_mark.png" alt="item image" class="me-3 {% comment %}my-1{% endcomment %} rounded ratio-1x1" style="width: 48px; height: 48px; object-fit: cover">
+                                <div>
+                                    <div class="fw-bold mb-1">${item.fields.title}</div>
+                                    <div class="text-muted small">${item.fields.description}</div>
+                                </div>
+                            </div>
+                        </a>`
+                    })
+                    $$("#item-search-results-container").innerHTML = views.join("\n")
+                    setupItemClickHandlers()
+                } else {
+
+                }
+            } catch (ex) {
+                console.error(ex)
+                $$("#item-add_search-bar-absolute--no-results").style.display = "flex"
+                $$("#item-add_search-bar-absolute--results-found").style.display = "none"
+            }
+            // TODO: setIsNotLoading
         })
         $$("#item-add_search-bar").addEventListener("focus", evt => {
             if (evt.target.value.length > 0) setIsSearchBarVisible(true)
         })
 
-        $$("#clear-input-btn").addEventListener("click", _ => {
+        $$all(".clear-input-btn").forEach(_ => _.addEventListener("click", _ => {
             $$("#item-add_search-bar").value = ""
             setIsSearchBarVisible(false)
-        })
-        $$("#hide-me-btn").addEventListener("click", _ => setIsSearchBarVisible(false))
+        }))
+        $$all(".hide-me-btn").forEach(_ => _.addEventListener("click", _ => setIsSearchBarVisible(false)))
 
         $$("#create-private-item-btn").addEventListener("click", _ => {
             $$(".customItemSpan").style.display = ""
@@ -105,22 +140,57 @@
             new bootstrap.Modal($$("#newItemModal")).show()
         })
 
-        $$all(".add-item-btn").forEach(item => item.addEventListener("click", _ => {
-            $$("#id_item").value = item.dataset.itemId
-            $$("#addItemModal .modal-title").textContent = `Add ${
-                item.dataset.itemIsCustom
-                    ? "custom item" : "item"}
+        const itemClickHandlerFunc = (item) => {
+            return () => {
+                $$("#id_item").value = item.dataset.itemId
+                $$("#addItemModal .modal-title").textContent = `Add ${
+                    item.dataset.itemIsCustom
+                        ? "custom item" : "item"}
                     "${item.dataset.itemName
-            }"`
-            new bootstrap.Modal($$("#addItemModal")).show()
-        }))
+                }"`
+                new bootstrap.Modal($$("#addItemModal")).show()
+            }
+        }
 
-        $$("#item-add_barcode-search").addEventListener("click", _ => {
-            // $$("#item-add_barcode-input").value
-            $$(".customItemSpan").style.display = "none"
-            $$("#id_upc").value = $$("#item-add_barcode-input").value
+        const setupItemClickHandlers = () => {
+            $$all(".add-item-btn").forEach(item => {
+                const func = itemClickHandlerFunc(item)
+                item.removeEventListener("click", func)
+                item.addEventListener("click", func)
+            })
+        }
+        setupItemClickHandlers()
+
+        $$("#item-add_barcode-search").addEventListener("click", async _ => {
+            const code = $$("#item-add_barcode-input").value
+            if (code.length === 0) {
+                return
+            }
+
+            {% comment %}$$(".customItemSpan").style.display = "none"
+            $$("#id_upc").value = code
             $$("#div_id_upc").style.display = ""
-            new bootstrap.Modal($$("#newItemModal")).show()
+            new bootstrap.Modal($$("#newItemModal")).show(){% endcomment %}
+
+            const req = await fetch(`{% url "check_product_exists_api" %}?code=${code}`)
+            const status = req.status
+            if (status === 200) {
+                const itemData = (await req.json())[0]
+                console.log(itemData)
+
+                $$("#id_item").value = itemData.pk
+                $$("#addItemModal .modal-title").textContent = `Add item "${itemData.fields.title}"`
+                new bootstrap.Modal($$("#addItemModal")).show()
+
+            } else if (status === 204) {
+                $$(".customItemSpan").style.display = "none"
+                $$("#id_upc").value = code
+                $$("#div_id_upc").style.display = ""
+                new bootstrap.Modal($$("#newItemModal")).show()
+            } else {
+                console.log(req.status)
+                {#alert("we pirla scrivi un barcode :)")      // TODO: Remove me#}
+            }
         })
 
         $$("#newGlobalItemModal")
@@ -144,15 +214,25 @@
                             </div>
                             <div id="item-add_search-bar-absolute" class="border-1 shadow border-secondary bg-body rounded">
                                 <div class="position-relative h-100 w-100">
-                                    <div id="item-add_search-bar-absolute--no-results" class="w-100 d-flex justify-content-center align-items-center">
+                                    <div id="item-add_search-bar-absolute--no-results" style="display: flex" class="w-100 justify-content-center align-items-center">
                                         <span class="text-center">
                                             <i class="text-muted">No results...</i><br/>
                                             <span class="small">
-                                                <a id="clear-input-btn" class="text-muted cursor-pointer">Clear text</a>
+                                                <a class="text-muted cursor-pointer clear-input-btn">Clear text</a>
                                                 &nbsp;or&nbsp;
-                                                <a id="hide-me-btn" class="text-muted cursor-pointer">Hide me</a>
+                                                <a class="text-muted cursor-pointer hide-me-btn">Hide me</a>
                                             </span>
                                         </span>
+                                    </div>
+                                    <div id="item-add_search-bar-absolute--results-found" style="display: none" class="w-100">
+                                        <span class="justify-content-center align-items-center my-2 d-flex">
+                                            <span class="small">
+                                                <a class="text-muted cursor-pointer clear-input-btn">Clear text</a>
+                                                &nbsp;or&nbsp;
+                                                <a class="text-muted cursor-pointer hide-me-btn">Hide me</a>
+                                            </span>
+                                        </span>
+                                        <span id="item-search-results-container"></span>
                                     </div>
                                 </div>
                             </div>
@@ -177,7 +257,7 @@
                         <p class="form-label">Choose from your own (kitchen-specific) items</p>
                         <div class="list-group">
                             {% for ci in custom_items %}
-                                <a class="list-group-item list-group-item-action add-item-btn" data-item-id="{{ ci.id }}" data-item-name="{{ ci }}">
+                                <a class="list-group-item list-group-item-action add-item-btn" data-item-id="{{ ci.id }}" data-item-name="{{ ci }}" data-item-is-custom="true">
                                     <div class="d-flex my-1">
                                         <img src="/static/media/{% firstof ci.image "question_mark.png" %}" alt="item image" class="me-3 {% comment %}my-1{% endcomment %} rounded ratio-1x1" style="width: 48px; height: 48px; object-fit: cover">
                                         <div>
@@ -220,7 +300,7 @@
         </div>
     </div>
 
-    {# Add private item modal #}
+    {# New item modal #}
     <div class="modal fade" id="newItemModal" tabindex="-1" aria-labelledby="newItemModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
@@ -268,7 +348,7 @@
         </div>
     </div>{% endcomment %}
 
-    {# Add private item modal #}
+    {# Add item modal #}
     <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
