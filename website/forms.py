@@ -1,3 +1,4 @@
+from django.forms.fields import BooleanField
 from crispy_forms.layout import Field
 
 from .models import Item, Kitchen, User, StoredItem, PostIt
@@ -152,6 +153,10 @@ class UpdateStoredItemForm(ModelForm):
 
 class InviteExistingUsers(forms.Form):
     invite_other_users = MultiUserField(widget=forms.Textarea, required=False)
+
+class ShareKitchenForm(forms.Form):
+    enable_kitchen_sharing_link = BooleanField(required=False)
+    join_confirmation_needed = BooleanField(required=False)
 
 
 class NewPostItForm(ModelForm):

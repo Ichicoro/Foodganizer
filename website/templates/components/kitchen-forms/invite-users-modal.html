@@ -14,11 +14,33 @@
                         {{ invite_users_form|crispy }}
                     </fieldset>
                 </div>
-                <div class="modal-footer d-flex-grow-1-child">
+                <div class="modal-footer d-flex-grow-1-child border-0 border-bottom">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
                     <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Invite</button>
+                </div>
+            </form>
+            <form id="set_kitchen_sharing_form" method="POST" action="{% url 'set_kitchen_sharing' id=kitchen.id %}" novalidate class="needs-validation">
+                <div class="modal-body  mt-5 py-0">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        {{ share_kitchen_form|crispy }}
+                    </fieldset>
+                    {% if kitchen.public_access_uuid %}
+                        <fieldset class="form-group">
+                            <a href="{% url 'share_kitchen_link' share_uuid=kitchen.public_access_uuid %}">{% url 'share_kitchen_link' share_uuid=kitchen.public_access_uuid %}</a>
+                        </fieldset>
+                    {% endif %}
+                </div>
+                <div class="modal-footer d-flex-grow-1-child border-0 border-bottom">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
+                    <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Save</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script> 
+    $$('#inviteUsersModal').addEventListener('hidden.bs.modal', function (e) {
+        $$('#set_kitchen_sharing_form').reset()
+    })
+</script>

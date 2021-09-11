@@ -38,7 +38,7 @@
                     <h2 class="d-inline-block mb-4">You have been invited...</h2><br />
                     {% for i in invitations %}
                     <a class="list-group-item list-group-item-action" href="{% url 'join_kitchen' id=i.kitchen.id %}">
-                        {{ i.invited_by }} wants you to join {{ i.kitchen.name }}
+                        @{{ i.invited_by }} wants you to join their kitchen "{{ i.kitchen.name }}"
                     </a>
                     {% endfor %}
                 </div>
