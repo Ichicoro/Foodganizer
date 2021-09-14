@@ -261,7 +261,10 @@ def new_kitchen_item(request, id):
         if form.is_valid():
             i = form.save(commit=False)  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
             i.added_by = request.user
-            if form.cleaned_data.get("upc") is None:
+            print(form.cleaned_data)
+            upc_data = form.data["upc"]
+            print(upc_data)
+            if upc_data is None or upc_data == "undefined":
                 i.custom_item_kitchen = k
             i.save()
             messages.success(request, f'Item {i} added successfully to {k}!')

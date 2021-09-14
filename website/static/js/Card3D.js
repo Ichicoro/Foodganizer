@@ -17,17 +17,23 @@ function Card3D(card, ev) {
     img.style.filter = `brightness(${brightness})`;
 }
 
-const cards = $$all('.card3d');
-
-cards.forEach((card) => {
-    card.addEventListener('mousemove', (ev) => {
+const setupEventListeners = card => {
+    card.addEventListener('mousemove', ev => {
         Card3D(card, ev);
-    });
+    })
 
-    card.addEventListener('mouseleave', (ev) => {
+    card.addEventListener('mouseleave', ev => {
         let img = card.querySelector('img');
 
         img.style.transform = 'rotateX(0deg) rotateY(0deg)';
         img.style.filter = 'brightness(1)';
-    });
-});
+    })
+}
+
+const setup = () => $$all('.card3d').forEach(setupEventListeners)
+
+export {
+    Card3D,
+    setup,
+    setupEventListeners
+}

@@ -6,6 +6,9 @@
     {% include "csvalidation.html" %}
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <script type="module">
+        import { setup, setupEventListeners } from "/static/js/Card3D.js"
+        setup()
+
         const App = {
             _scanner: null,
             init: function() { App.attachListeners() },
@@ -103,7 +106,9 @@
                     const views = data.map(item => {
                         return `<a class="list-group-item list-group-item-action add-item-btn" data-item-id="${item.pk}" data-item-name="${item.fields.title}" ${!item.fields.upc ? "data-item-is-custom=\"true\"" : ""}>
                             <div class="d-flex my-1">
-                                <img src="/static/media/question_mark.png" alt="item image" class="me-3 {% comment %}my-1{% endcomment %} rounded ratio-1x1" style="width: 48px; height: 48px; object-fit: cover">
+                                <div class="card3d si-image me-3">
+                                    <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
+                                </div>
                                 <div>
                                     <div class="fw-bold mb-1">${item.fields.title}</div>
                                     <div class="text-muted small">${item.fields.description}</div>
@@ -157,6 +162,8 @@
                 const func = itemClickHandlerFunc(item)
                 item.removeEventListener("click", func)
                 item.addEventListener("click", func)
+
+                setupEventListeners(item.querySelector(".card3d"))
             })
         }
         setupItemClickHandlers()
@@ -259,7 +266,9 @@
                             {% for ci in custom_items %}
                                 <a class="list-group-item list-group-item-action add-item-btn" data-item-id="{{ ci.id }}" data-item-name="{{ ci }}" data-item-is-custom="true">
                                     <div class="d-flex my-1">
-                                        <img src="/static/media/{% firstof ci.image "question_mark.png" %}" alt="item image" class="me-3 {% comment %}my-1{% endcomment %} rounded ratio-1x1" style="width: 48px; height: 48px; object-fit: cover">
+                                        <div class="card3d si-image me-3">
+                                            <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
+                                        </div>
                                         <div>
                                             <div class="fw-bold mb-1">{{ ci.title }}</div>
                                             <div class="text-muted small">{{ ci.description }}</div>
