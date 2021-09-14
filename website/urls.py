@@ -25,6 +25,9 @@ urlpatterns = [
     path('kitchens/<int:id>/delete', views.delete_item_kitchen, name='delete_item_kitchen'),
     path('kitchens/<int:id>/update/<int:item_id>', views.update_item_kitchen, name='update_item_kitchen'),
     path('kitchens/<int:id>/new', views.new_kitchen_item, name='new_kitchen_item'),
+    path('kitchens/<int:id>/postit/new', views.create_postit, name='create_postit'),
+    path('kitchens/<int:id>/postit/edit/<int:postit_id>', views.edit_postit, name='edit_postit'),
+    path('kitchens/<int:id>/postit/delete/<int:postit_id>', views.delete_postit, name='delete_postit'),
 
     path('/api/products/search', api_endpoints.search_products, name='search_products_api'),
     path('/api/product/search', api_endpoints.get_product_by_code, name='check_product_exists_api')

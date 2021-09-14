@@ -18,6 +18,9 @@ def _getProductQuantity():
 def _getAddedBy():
     return models.ForeignKey('User', on_delete=models.SET_NULL, null=True)
 
+def _getLastEditedBy(related_name=None):
+    return models.ForeignKey('User', on_delete=models.SET_NULL, null=True, related_name=related_name)
+
 def _getKitchenForeignKey():
     return models.ForeignKey('Kitchen', on_delete=models.CASCADE)  # class Kitchen is not defined yet, must use a string
 
@@ -117,6 +120,7 @@ class Membership(models.Model):
 class PostIt(models.Model):
     text = models.TextField(max_length=1000)
     author = _getAddedBy()
+    last_edited_by = _getLastEditedBy('+')
     kitchen = _getKitchenForeignKey()
     last_update = _getLastUpdate()
     created_at = _getCreatedAt()

@@ -1,0 +1,22 @@
+{% load crispy_forms_tags %}
+
+<div class="modal fade" id="removePostitModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form method="POST" action="" novalidate>
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="item-name">Delete item?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body overflow-hidden">
+                    <div class="mb-2">Are you sure you want to delete the <b>PostIt</b>?</div>
+                </div>
+                <div class="modal-footer d-flex-grow-1-child">
+                    <button type="button" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#newPostitModal" class="btn btn-outline-secondary">Do not delete</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash-fill"></i>&nbsp;&nbsp;Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

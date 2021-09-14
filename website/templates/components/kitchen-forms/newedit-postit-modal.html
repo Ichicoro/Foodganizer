@@ -1,0 +1,25 @@
+{% load crispy_forms_tags %}
+
+<div class="modal fade" id="newPostitModal" tabindex="-1" aria-labelledby="newPostitModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form method="POST" action="{% url "create_postit" id=kitchen.id %}" novalidate class="needs-validation">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create PostIt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        {{ new_postit_form|crispy }}
+                    </fieldset>
+                </div>
+                <div class="modal-footer d-flex">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removePostitModal"><i class="bi bi-trash-fill flex-grow-0"></i></button>
+                    <button type="button" class="btn btn-outline-secondary flex-grow-1" data-bs-dismiss="modal">Back</button>
+                    <button type="submit" class="btn btn-success flex-grow-1">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

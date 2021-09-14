@@ -10,7 +10,7 @@ from .models import Item, Kitchen, Membership, StoredItem, User, MembershipStatu
 from django.forms.models import model_to_dict
 
 # Create your views here.
-from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm
+from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm, NewPostItForm
 from .forms import NewKitchenForm, NewKitchenItemForm, UserRegisterForm, InviteExistingUsers
 
 def _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP):
@@ -156,6 +156,7 @@ def kitchen(request, id):
         'remove_item_form': RemoveStoredItemForm(item_set=stored_items),
         'update_item_form': UpdateStoredItemForm(),
         'postit': postit,
+        'new_postit_form': NewPostItForm(),
         'invite_users_form': invite_users_form,
         'invite_users_form_open': invite_users_form_open
     })
@@ -299,7 +300,7 @@ def invite_users(request, id):
 def join_kitchen(request, id):
     k = _getKitchen(request, id, status=MembershipStatus.PENDING_INVITATION)
     if not k:
-        messages.error("Kitchen not found")
+        messages.error(request, "Kitchen not found")
         return redirect('kitchens')
     
     m = request.user.membership_set.get(kitchen=k)
@@ -311,3 +312,61 @@ def join_kitchen(request, id):
     messages.error(request, "Generic error, cannot join kitchen")
     return redirect('kitchens')
 
+
+@login_required
+def create_postit(request, id):
+    k = _getKitchen(request, id)
+    if not k:
+        messages.error(request, "Invalid kitchen")
+        return redirect('kitchens')
+
+    if request.method == 'POST':
+        form = NewPostItForm(request.POST)
+        if form.is_valid():
+            i = form.save(commit=False)
+            i.author = request.user
+            i.kitchen = k
+            i.save()
+            messages.success(request, f'PostIt added successfully to {k}!')
+            return redirect('kitchen', id=id)
+
+
+@login_required
+def edit_postit(request, id, postit_id):
+    k = _getKitchen(request, id)
+    if not k:
+        messages.error(request, "Invalid kitchen")
+        return redirect('kitchens')
+    if request.method == 'POST':
+        instance = k.postit_set.get(id=postit_id)
+        form = NewPostItForm(request.POST or None, instance=instance)
+        print(form.data)
+        if form.is_valid():
+            editable_instance = form.save(commit=False)
+            editable_instance.last_edited_by = request.user
+            editable_instance.save()
+            messages.success(request, "Item updated successfully!")
+            return redirect('kitchen', id=id)
+        else:
+            print(form.errors)
+            messages.error(request, "Error, please check console :(")
+            return redirect('kitchen', id=id)
+
+
+@login_required
+def delete_postit(request, id, postit_id):
+    k = _getKitchen(request, id)
+    if not k:
+        return redirect('kitchens')
+
+    try:
+        postit = k.postit_set.get(id=postit_id)
+        if postit:
+            print(postit)
+            postit.delete()
+            messages.success(request, "Item deleted successfully!")
+        else:
+            messages.error(request, "Invalid PostIt :/")
+    except Exception:
+        messages.error(request, "Invalid PostIt :/")
+    return redirect('kitchen', id=id)

@@ -1,6 +1,6 @@
 from crispy_forms.layout import Field
 
-from .models import Item, Kitchen, User, StoredItem
+from .models import Item, Kitchen, User, StoredItem, PostIt
 from django.forms import ModelForm
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -152,3 +152,9 @@ class UpdateStoredItemForm(ModelForm):
 
 class InviteExistingUsers(forms.Form):
     invite_other_users = MultiUserField(widget=forms.Textarea, required=False)
+
+
+class NewPostItForm(ModelForm):
+    class Meta:
+        model = PostIt
+        fields = ['text']

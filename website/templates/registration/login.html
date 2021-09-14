@@ -27,7 +27,7 @@
                         <label for="{{ form.username.name }}" class="form-label">Username</label>
 
                         <div class="input-group has-validation">
-                            <span class="input-group-text" id="inputGroupPrepend">@</span>
+                            <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-at"></i></span>
                             <input class="form-control" name="{{ form.username.name }}" id="{{ form.username.name }}" aria-describedby="usernameHelp" required>
                             <div class="invalid-feedback">
                                 Missing username
@@ -36,9 +36,12 @@
                     </div>
                     <div class="mb-3">
                         <label for="{{ form.password.name }}" class="form-label">Password</label>
-                        <input type="password" class="form-control" name="{{ form.password.name }}" id="{{ form.password.name }}" required>
-                        <div class="invalid-feedback">
-                            Missing password
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-asterisk"></i></span>
+                            <input type="password" class="form-control" name="{{ form.password.name }}" id="{{ form.password.name }}" required>
+                            <div class="invalid-feedback">
+                                Missing password
+                            </div>
                         </div>
                     </div>
                     {% if form.errors %}
