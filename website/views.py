@@ -14,7 +14,8 @@ from django.forms.models import model_to_dict
 from django.views.decorators.http import require_POST
 
 # Create your views here.
-from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm, NewPostItForm
+from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm, NewPostItForm, \
+    AddShoppingCartItemForm
 from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UserRegisterForm, InviteExistingUsers
 
 def _getKitchen(request, id, status=None):
@@ -169,6 +170,7 @@ def kitchen(request, id):
     memberships = k.membership_set.filter(status=MembershipStatus.ACTIVE_MEMBERSHIP)
     pending_memberships = k.membership_set.filter(status__in=[MembershipStatus.PENDING_INVITATION, MembershipStatus.PENDING_JOIN_REQUEST])
     stored_items = k.storeditem_set.all()
+    shopping_cart = k.shoppingcartitem_set.all()
     postit = k.postit_set.all()
 
     invite_users_post, invite_users_form_open = _load_post_data_from_session(
@@ -190,6 +192,7 @@ def kitchen(request, id):
         'memberships': memberships,
         'pending_memberships': pending_memberships,
         'stored_items': stored_items,
+        'shopping_cart': shopping_cart,
         'remove_item_form': RemoveStoredItemForm(item_set=stored_items),
         'update_item_form': UpdateStoredItemForm(),
         'postit': postit,
@@ -209,8 +212,7 @@ def kitchens(request):
     return render(request, "pages/kitchens.html", {'kitchens': kitchens, 'invitations': invitations})
 
 
-@login_required
-def add_item_kitchen(request, id):
+def add_item_kitchen(request, id, is_shopping_cart_item=False):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
     except Kitchen.DoesNotExist:
@@ -218,13 +220,13 @@ def add_item_kitchen(request, id):
      
     custom_items = k.item_set.all()  # foreign key Item.custom_item_kitchen
     if request.method == 'POST':
-        form = AddStoredItemForm(request.POST)
+        form = AddStoredItemForm(request.POST) if not is_shopping_cart_item else AddShoppingCartItemForm(request.POST)
         if form.is_valid():
-            si = form.save(commit=False)
-            si.added_by = request.user
-            si.kitchen = k
-            si.save()
-            messages.success(request, f'Item "{si}" added successfully!')
+            item = form.save(commit=False)
+            item.added_by = request.user
+            item.kitchen = k
+            item.save()
+            messages.success(request, f'Item "{item}" added successfully!')
             return redirect('kitchen', id=id)
         else:
             messages.error(request, 'Error, check console.')
@@ -234,7 +236,8 @@ def add_item_kitchen(request, id):
                 'custom_items': custom_items,
                 'add_item_form': form,
                 'new_custom_item_form': NewKitchenItemForm(),
-                'back': reverse('kitchen', args=[id])
+                'back': reverse('kitchen', args=[id]),
+                'is_shopping_cart_item': is_shopping_cart_item
             })
     elif request.method == 'PUT':
         pass
@@ -243,10 +246,21 @@ def add_item_kitchen(request, id):
             'form': None,
             'kitchen': k,
             'custom_items': custom_items,
-            'add_item_form': AddStoredItemForm(),
+            'add_item_form': AddShoppingCartItemForm() if is_shopping_cart_item else AddStoredItemForm(),
             'new_custom_item_form': NewKitchenItemForm(),
-            'back': reverse('kitchen', args=[id])
+            'back': reverse('kitchen', args=[id]),
+            'is_shopping_cart_item': is_shopping_cart_item
         })
+
+
+@login_required
+def add_storeditem_kitchen(request, id):
+    return add_item_kitchen(request, id, is_shopping_cart_item=False)
+
+
+@login_required
+def add_cartitem_kitchen(request, id):
+    return add_item_kitchen(request, id, is_shopping_cart_item=True)
 
 
 @login_required
@@ -291,30 +305,27 @@ def update_item_kitchen(request, id, item_id):
             return redirect('kitchen', id=id)
 
 
+@require_POST
 @login_required
 def new_kitchen_item(request, id):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
     except Kitchen.DoesNotExist:
         return redirect('kitchens')
-     
 
-    if request.method == 'POST':
-        form = NewKitchenItemForm(request.POST, files=request.FILES)
-        if form.is_valid():
-            i = form.save(commit=False)  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
-            i.added_by = request.user
-            print(form.cleaned_data)
-            upc_data = form.data["upc"]
-            print(upc_data)
-            if upc_data is None or upc_data == "undefined":
-                i.custom_item_kitchen = k
-            i.save()
-            messages.success(request, f'Item {i} added successfully to {k}!')
-            return redirect('add_item_kitchen', id=id)
-    # else:
-    #     form = NewKitchenItemForm()
-    # return render(request, 'pages/new-kitchen-item.html', {'form': form})
+    form = NewKitchenItemForm(request.POST, files=request.FILES)
+    if form.is_valid():
+        i = form.save(commit=False)  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
+        i.added_by = request.user
+        print(form.cleaned_data)
+        upc_data = form.data["upc"]
+        print(upc_data)
+        if upc_data is None or upc_data == "undefined":
+            i.custom_item_kitchen = k
+        i.save()
+        messages.success(request, f'Item {i} added successfully to {k}!')
+        next_url = request.GET.get("next", reverse("add_storeditem_kitchen", args={id}))
+        return redirect(next_url)
 
 
 @login_required
@@ -417,6 +428,7 @@ def shared_kitchen(request, share_uuid):
     else:
         return render(request, "pages/join-shared-kitchen.html", {"kitchen": k})
 
+
 @require_POST
 def delete_membership(request, id):
     try:
@@ -434,7 +446,8 @@ def delete_membership(request, id):
     m.delete()
 
     return redirect('kitchen', id=k.id)
-    
+
+
 @login_required
 def create_postit(request, id):
     k = _getKitchen(request, id)

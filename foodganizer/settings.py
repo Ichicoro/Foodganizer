@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
+# Fix JS modules in Windows (?)
 import mimetypes
 mimetypes.add_type("application/javascript", ".js", True)
 

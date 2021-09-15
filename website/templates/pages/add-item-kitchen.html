@@ -209,7 +209,7 @@
         <div class="row justify-content-center">
             <div class="col-md-8 col-sm-12">
                 <div class="content-section">
-                    <h2>Add item to "{{ kitchen.name }}"</h2>
+                    <h2>Add {% if is_shopping_cart_item %}shopping cart {% endif %}item to "{{ kitchen.name }}"</h2>
                     <div class="my-3 mb-4">
                         <label for="item-add_search-bar" class="form-label">Search any item by name</label>
                         <div class="position-relative" id="item-add_search-bar-wrap">
@@ -313,7 +313,7 @@
     <div class="modal fade" id="newItemModal" tabindex="-1" aria-labelledby="newItemModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <form method="POST" action="{% url 'new_kitchen_item' id=kitchen.id %}" novalidate class="needs-validation">
+                <form method="POST" action="{% url 'new_kitchen_item' id=kitchen.id %}?next={{ request.path }}" novalidate class="needs-validation">
                     <div class="modal-header">
                         <h5 class="modal-title">New<span class="customItemSpan">&nbsp;custom</span> item</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -337,7 +337,7 @@
     <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <form method="POST" action="{% url 'add_item_kitchen' id=kitchen.id %}" class="needs-validation">
+                <form method="POST" action="{{ request.path }}" class="needs-validation">
                     <div class="modal-header">
                         <h5 class="modal-title">Add custom item "eccecc"</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

@@ -1,7 +1,7 @@
 from django.forms.fields import BooleanField
 from crispy_forms.layout import Field
 
-from .models import Item, Kitchen, User, StoredItem, PostIt
+from .models import Item, Kitchen, User, StoredItem, PostIt, ShoppingCartItem
 from django.forms import ModelForm
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -125,6 +125,15 @@ class AddStoredItemForm(ModelForm):
             'item': forms.HiddenInput()
         }
         fields = ['item', 'quantity', 'expiry_date', 'note']
+
+
+class AddShoppingCartItemForm(ModelForm):
+    class Meta:
+        model = ShoppingCartItem
+        exclude = ['added_by', 'kitchen']
+        widgets = {
+            'item': forms.HiddenInput()
+        }
 
 
 class RemoveStoredItemForm(forms.Form):
