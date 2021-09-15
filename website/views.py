@@ -206,10 +206,10 @@ def kitchen(request, id):
 
 @login_required
 def kitchens(request):
-    kitchens = _getUserKitchens(request, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+    active_memberships = request.user.membership_set.filter(status=MembershipStatus.ACTIVE_MEMBERSHIP)
     u:User = request.user
     invitations = u.membership_set.filter(status=MembershipStatus.PENDING_INVITATION)
-    return render(request, "pages/kitchens.html", {'kitchens': kitchens, 'invitations': invitations})
+    return render(request, "pages/kitchens.html", {'active_memberships': active_memberships, 'invitations': invitations})
 
 
 def add_item_kitchen(request, id, is_shopping_cart_item=False):
@@ -352,6 +352,7 @@ def invite_users(request, id):
 
 
 @login_required
+@require_POST
 def join_kitchen(request, id):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.PENDING_INVITATION)
@@ -433,19 +434,48 @@ def shared_kitchen(request, share_uuid):
 def delete_membership(request, id):
     try:
         m:Membership = Membership.objects.get(id=id)
-        k:Kitchen = _getKitchen(request, m.kitchen.id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        k:Kitchen = m.kitchen if request.user == m.user else _getKitchen(request, m.kitchen.id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
     except (Kitchen.DoesNotExist, Membership.DoesNotExist):
         return redirect('kitchens')
 
-    if m.status == MembershipStatus.ACTIVE_MEMBERSHIP:
-        messages.success(request, f"User @{m.user} has been kicked")
-    elif m.status == MembershipStatus.PENDING_INVITATION:
-        messages.success(request, f"Invitation for @{m.user} withdrawn")
-    elif m.status == MembershipStatus.PENDING_JOIN_REQUEST:
-        messages.success(request, f"@{m.user}'s join request has been rejected")
-    m.delete()
-
-    return redirect('kitchen', id=k.id)
+    
+    if request.user == m.user:
+        if m.status == MembershipStatus.ACTIVE_MEMBERSHIP:
+            _users = k.users.all()
+            _other_users = _users.exclude(id=request.user.id)
+            _admins = k.users.filter(membership__is_admin=True)
+            # if you are last user
+            if len(_other_users) == 0: 
+                m.delete()
+                k.delete()
+            # if you are last admin
+            elif len(_admins) == 1 and _admins.first().id == request.user.id:
+                _new_admin = _other_users.first().membership_set.get(kitchen=k)
+                _new_admin.is_admin = True
+                _new_admin.save()
+                m.delete()
+            else:
+                m.delete()
+            messages.success(request, f"You left {k}")
+        elif m.status == MembershipStatus.PENDING_INVITATION:
+            m.delete()
+            messages.success(request, f"You declined @{m.invited_by}'s invitation to join {k}")
+        elif m.status == MembershipStatus.PENDING_JOIN_REQUEST:
+            m.delete()
+            messages.success(request, f"You have withdrawn your request to join {k}")
+        return redirect('kitchens')
+    else:
+        if m.status == MembershipStatus.ACTIVE_MEMBERSHIP:
+            m.delete()
+            messages.success(request, f"User @{m.user} has been kicked")
+        elif m.status == MembershipStatus.PENDING_INVITATION:
+            m.delete()
+            messages.success(request, f"Invitation for @{m.user} withdrawn")
+        elif m.status == MembershipStatus.PENDING_JOIN_REQUEST:
+            m.delete()
+            messages.success(request, f"@{m.user}'s join request has been rejected")
+        return redirect('kitchen', id=k.id)
+    
 
 
 @login_required

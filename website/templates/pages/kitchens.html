@@ -8,41 +8,65 @@
 
 {% block body %}
     <div class="container-fluid mw-sm">
-        {% if kitchens %}
-            <h1 class="mb-3">Your kitchens</h1>
-            <div class="list-group">
-                {% for k in kitchens %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'kitchen' id=k.id %}">
-                        {# TODO: link to kitchen page #}
-                        {{ k.name }}
-                    </a>
-                {% endfor %}
-                <a class="list-group-item list-group-item-success" href="{% url 'new_kitchen' %}">
-                    <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add new kitchen
-                </a>
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-sm-12 mb-4 ">
+                <h1 class="mb-3">Your kitchens</h1>
+                {% if active_memberships %}
+                    <div class="list-group mb-4">
+                        {% for m in active_memberships %}
+                            <div class="d-flex flex-direction-column">
+                                <a class="list-group-item list-group-item-action border-bottom-0 border-end-0" href="{% url 'kitchen' id=m.kitchen.id %}">
+                                    {{ m.kitchen.name }} 
+                                </a>
+                                <form class="flex-grow-1" action="{% url 'delete_membership' id=m.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="list-group-item list-group-item-action w-100 h-100 py-1 border-bottom-0">
+                                        <i class="bi bi-box-arrow-right text-danger"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                        <a class="list-group-item list-group-item-success" href="{% url 'new_kitchen' %}">
+                            <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add new kitchen
+                        </a>
+                    </div>
+                {% else %}
+                    <ul class="list-group mb-4">
+                        <li class="list-group-item py-3">
+                           </i>&nbsp;&nbsp;No kitchens yet... create one!
+                        </li>
+                        <a class="list-group-item list-group-item-success" href="{% url 'new_kitchen' %}">
+                            <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add new kitchen
+                        </a>
+                    </ul>
+                {% endif %}
+                
+                {% if invitations %}
+                    <h2 class="mt-5 mb-3">You have been invited...</h1>
+                    <ul class="list-group mb-4">
+                        {% for i in invitations %}
+                            <li class="list-group-item py-3">
+                                @{{ i.invited_by }} invited you to join "{{ i.kitchen.name }}"
+                            </li>
+                            <div class="d-flex flex-direction-column mb-3">
+                                <form class="flex-grow-1" action="{% url 'delete_membership' id=i.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="list-group-item w-100 py-1">
+                                        <i class="bi bi-x-lg"></i>&nbsp;&nbsp;Decline
+                                    </button>
+                                </form>
+                                <form class="flex-grow-1" action="{% url 'join_kitchen' id=i.kitchen.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="list-group-item list-group-item-success w-100 py-1">
+                                        <i class="bi bi-check-lg"></i>&nbsp;&nbsp;Accept
+                                    </button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                        
+                    </ul>
+                {% endif %}
             </div>
-        {% else %}
-            <div class="d-flex justify-content-center">
-                <div class="rounded border p-4 d-inline-block text-center" style="min-width: 500px;">
-                    <h2 class="d-inline-block mb-4">No kitchens yet...</h2><br />
-                    <a href="{% url 'new_kitchen' %}">
-                        <button class="btn btn-success w-100">Create one!</button>
-                    </a>
-                </div>
-            </div>
-        {% endif %}
-        
-        {% if invitations %}
-            <div class="d-flex justify-content-center mt-3">
-                <div class="rounded border p-4 d-inline-block text-center" style="min-width: 500px;">
-                    <h2 class="d-inline-block mb-4">You have been invited...</h2><br />
-                    {% for i in invitations %}
-                    <a class="list-group-item list-group-item-action" href="{% url 'join_kitchen' id=i.kitchen.id %}">
-                        @{{ i.invited_by }} wants you to join their kitchen "{{ i.kitchen.name }}"
-                    </a>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
+        </div>
     </div>
 {% endblock %}
