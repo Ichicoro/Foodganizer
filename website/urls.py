@@ -30,7 +30,8 @@ urlpatterns = [
     path('kitchens/<int:id>/stored/update/<int:item_id>', views.update_storeditem_kitchen, name='update_storeditem_kitchen'),
 
     path('kitchens/<int:id>/cart/add', views.add_cartitem_kitchen, name='add_cartitem_kitchen'),
-    path('kitchens/<int:id>/cart/delete', views.delete_storeditem_kitchen, name='delete_cartitem_kitchen'),
+    path('kitchens/<int:id>/cart/update/<int:item_id>', views.update_cartitem_kitchen, name='update_cartitem_kitchen'),
+    path('kitchens/<int:id>/cart/delete/<int:item_id>', views.delete_cartitem_kitchen, name='delete_cartitem_kitchen'),
 
     path('kitchens/<int:id>/new', views.new_kitchen_item, name='new_kitchen_item'),
     path('kitchens/<int:id>/custom/delete/<int:item_id>', views.delete_customitem_kitchen, name='delete_customitem_kitchen'),

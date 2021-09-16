@@ -1,0 +1,47 @@
+{% load crispy_forms_tags %}
+
+<div class="modal fade" id="cartItemEditModal" tabindex="-1" aria-labelledby="cartItemEditModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form novalidate method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Cart item "<b class="item-name"></b>"</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-muted mb-3">
+                        <p class="text-muted fst-italic mb-0" id="item-desc"></p>
+                        &ndash;&nbsp;<a class="fst-italic" id="item-added-by" href="/profile"></a>
+                    </div>
+                    {{ form|crispy }}
+                </div>
+                <div class="modal-footer d-flex">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removeCartItemModal"><i class="bi bi-trash-fill flex-grow-0"></i></button>
+                    <button type="submit" class="btn btn-success flex-grow-1">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="removeCartItemModal" tabindex="-1" aria-labelledby="removeCartItemModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form method="GET" action="" novalidate>
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete item?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body overflow-hidden">
+                    <div>Are you sure you want to delete <b class="item-name"></b>?</div>
+                </div>
+                <div class="modal-footer d-flex-grow-1-child">
+                    <button type="button" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#cartItemEditModal" class="btn btn-outline-secondary">Do not delete</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash-fill"></i>&nbsp;&nbsp;Remove</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

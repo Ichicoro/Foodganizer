@@ -10,13 +10,13 @@ from django.contrib import messages
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.db.models import ProtectedError, ObjectDoesNotExist
-from .models import Item, Kitchen, Membership, StoredItem, User, MembershipStatus
+from .models import Item, Kitchen, Membership, StoredItem, User, MembershipStatus, ShoppingCartItem
 from django.forms.models import model_to_dict
 from django.views.decorators.http import require_POST
 
 # Create your views here.
 from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm, NewPostItForm, \
-    AddShoppingCartItemForm
+    AddShoppingCartItemForm, UpdateShoppingCartItemForm
 from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UserRegisterForm, InviteExistingUsers
 
 def _getKitchen(request, id, status=None):
@@ -202,6 +202,7 @@ def kitchen(request, id):
         'invite_users_form_open': invite_users_form_open,
         'share_kitchen_form': ShareKitchenForm(share_kitchen_post),
         'share_kitchen_form_open': share_kitchen_form_open,
+        'edit_shopping_cart_item_form': UpdateShoppingCartItemForm()
     })
 
 
@@ -262,6 +263,40 @@ def add_storeditem_kitchen(request, id):
 @login_required
 def add_cartitem_kitchen(request, id):
     return add_item_kitchen(request, id, is_shopping_cart_item=True)
+
+@login_required
+def update_cartitem_kitchen(request, id, item_id):
+    try:
+        k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+    except ObjectDoesNotExist:
+        return redirect('kitchens')
+
+    if request.method == 'POST':
+        instance = k.shoppingcartitem_set.get(id=item_id)
+        form = UpdateShoppingCartItemForm(request.POST or None, instance=instance)
+        print(form.data)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Item updated successfully!")
+            return redirect('kitchen', id=id)
+        else:
+            print(form.errors)
+            messages.error(request, "Error, please check console :(")
+            return redirect('kitchen', id=id)
+
+@login_required
+def delete_cartitem_kitchen(request, id, item_id):
+    try:
+        k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+    except ObjectDoesNotExist:
+        return redirect('kitchens')
+
+    try:
+        item = ShoppingCartItem.objects.get(id=item_id)
+        item.delete()
+    except ObjectDoesNotExist:
+        messages.error(request, "Item does not exist")
+    return redirect("kitchen", id=id)
 
 
 @login_required

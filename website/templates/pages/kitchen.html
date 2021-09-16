@@ -76,7 +76,27 @@
             postitModalEl.querySelector("form").action = "{% url "create_postit" id=kitchen.id %}"
             new bootstrap.Modal(postitModalEl).show()
         })
-        {#$$all(".stored-item-btn")[0].click()#}
+
+        const cartItemModalEl = $$("#cartItemEditModal")
+        const removeCartItemModalEl = $$("#removeCartItemModal")
+        $$all(".cart-item-btn").forEach(item => {
+            item.addEventListener("click", evt => {
+                // const itemJsonData = JSON.parse(item.dataset.itemJson)
+                $$all("#cartItemEditModal .item-name, #removeCartItemModal .item-name").forEach(el =>
+                    el.textContent = item.dataset.itemName
+                )
+                cartItemModalEl.querySelector("#item-desc").textContent = item.dataset.itemDesc
+                cartItemModalEl.querySelector("#item-added-by").textContent = item.dataset.itemAddedBy
+                cartItemModalEl.querySelector("#item-added-by").href = `/profile/${item.dataset.itemAddedBy}`
+                cartItemModalEl.querySelector("#id_quantity").value = item.dataset.itemQuantity
+
+                cartItemModalEl.querySelector("form").action = "{% url "update_cartitem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+
+                removeCartItemModalEl.querySelector("form").action = "{% url "delete_cartitem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+
+                new bootstrap.Modal(cartItemModalEl).show()
+            })
+        })
     </script>
 {% endblock %}
 
@@ -231,10 +251,10 @@
                 <h3 class="mt-3">Shopping Cart</h3>
                 <div class="list-group list-group-item-action">
                     {% for item in shopping_cart %}
-                        <a class="list-group-item list-group-item-action cart-item-btn" data-item-id="{{ item.id }}" data-item-is-custom="true" data-item-json="{{ item.item|json }}" data-stored-item-json="{{ item|json }}" data-item-name="{{ item }}">
+                        <a class="list-group-item list-group-item-action cart-item-btn" data-item-id="{{ item.id }}" data-item-json="{{ item.item|json }}" data-cart-item-json="{{ item|json }}" data-item-name="{{ item.item.title }}" data-item-desc="{{ item.item.description }}" data-item-added-by="{{ item.added_by.username }}" data-item-quantity="{{ item.quantity }}">
                             <div class="d-flex my-1">
                                 <div class="card3d si-image me-3">
-                                    <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
+                                    <img src="/static/media/{% firstof item.item.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
                                 </div>
                                 <div class="me-auto">
                                     <div class="fw-bold mb-1">
@@ -270,4 +290,6 @@
     {% include "components/kitchen-forms/newedit-postit-modal.html" with new_postit_form=new_postit_form id=kitchen.id %}
 
     {% include "components/kitchen-forms/remove-postit-modal.html" with id=kitchen.id %}
+
+    {% include "components/kitchen-forms/edit-cartitem-modal.html" with form=edit_shopping_cart_item_form id=kitchen.id %}
 {% endblock %}

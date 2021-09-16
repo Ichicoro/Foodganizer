@@ -128,12 +128,20 @@ class AddStoredItemForm(ModelForm):
 
 
 class AddShoppingCartItemForm(ModelForm):
+    Field('item', type="hidden")
+
     class Meta:
         model = ShoppingCartItem
         exclude = ['added_by', 'kitchen']
         widgets = {
             'item': forms.HiddenInput()
         }
+
+
+class UpdateShoppingCartItemForm(ModelForm):
+    class Meta:
+        model = ShoppingCartItem
+        fields = ['quantity']
 
 
 class RemoveStoredItemForm(forms.Form):
