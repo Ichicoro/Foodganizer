@@ -41,7 +41,7 @@
             // $$("#itemInfoModal form").action = `/kitchens/{{ kitchen.id }}/update/${item.dataset.itemId}`
 
 
-            $$("#itemInfoModal form").action = "{% url "update_item_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+            $$("#itemInfoModal form").action = "{% url "update_storeditem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
 
             $$all("#itemInfoModal #item-name, #removeItemModal #item-name").forEach(_ => _.textContent = itemJsonData["title"])
             $$("#itemInfoModal #item-desc").textContent = itemJsonData["description"]
@@ -261,13 +261,13 @@
         </div>
     </div>
 
-    {% include "components/kitchen-forms/item-info-modal.html" with kitchen=kitchen update_item_form=update_item_form %}
+    {% include "components/kitchen-forms/item-info-modal.html" with id=kitchen.id update_item_form=update_item_form %}
 
-    {% include "components/kitchen-forms/remove-item-modal.html" with kitchen=kitchen remove_item_form=remove_item_form %}
+    {% include "components/kitchen-forms/remove-item-modal.html" with id=kitchen.id remove_item_form=remove_item_form %}
 
     {% include "components/kitchen-forms/invite-users-modal.html" with invite_users_form=invite_users_form kitchen=kitchen %}
 
-    {% include "components/kitchen-forms/newedit-postit-modal.html" with new_postit_form=new_postit_form kitchen=kitchen %}
+    {% include "components/kitchen-forms/newedit-postit-modal.html" with new_postit_form=new_postit_form id=kitchen.id %}
 
-    {% include "components/kitchen-forms/remove-postit-modal.html" with kitchen=kitchen %}
+    {% include "components/kitchen-forms/remove-postit-modal.html" with id=kitchen.id %}
 {% endblock %}

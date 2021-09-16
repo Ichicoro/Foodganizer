@@ -3,7 +3,7 @@
 <div class="modal fade" id="newPostitModal" tabindex="-1" aria-labelledby="newPostitModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form method="POST" action="{% url "create_postit" id=kitchen.id %}" novalidate class="needs-validation">
+            <form method="POST" action="{% url "create_postit" id=id %}" novalidate class="needs-validation">
                 <div class="modal-header">
                     <h5 class="modal-title">Create PostIt</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

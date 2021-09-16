@@ -3,7 +3,16 @@
 <div class="modal fade" id="removeItemModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form method="POST" action="{% url "delete_item_kitchen" id=kitchen.id %}" novalidate>
+            <form
+                method="{% if remove_item_form %}POST{% else %}GET{% endif %}"
+                action="{% if remove_item_form %}
+                    {% url "delete_storeditem_kitchen" id=id %}
+                {% endif %}"
+                novalidate
+            >
+                {% if not remove_item_form %}
+                    <input type="hidden" name="next" value="{{ request.path }}" />
+                {% endif %}
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title" id="item-name">Delete item?</h5>
@@ -11,13 +20,9 @@
                 </div>
                 <div class="modal-body pb-0 overflow-hidden">
                     <div class="mb-2">Are you sure you want to delete <b id="item-name"></b>?</div>
-                    {% comment %}<div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="should-add-to-shoplist">
-                            <label class="form-check-label" for="should-add-to-shoplist">
-                                Add to shopping list
-                            </label>
-                        </div>{% endcomment %}
-                    {{ remove_item_form|crispy }}
+                    {% if remove_item_form %}
+                        {{ remove_item_form|crispy }}
+                    {% endif %}
                 </div>
                 <div class="modal-footer d-flex-grow-1-child">
                     <button type="button" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#itemInfoModal" class="btn btn-outline-secondary">Do not delete</button>

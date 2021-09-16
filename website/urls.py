@@ -26,12 +26,15 @@ urlpatterns = [
     path('kitchens/<int:id>/join', views.join_kitchen, name='join_kitchen'),
 
     path('kitchens/<int:id>/stored/add', views.add_storeditem_kitchen, name='add_storeditem_kitchen'),
-    path('kitchens/<int:id>/cart/add', views.add_cartitem_kitchen, name='add_cartitem_kitchen'),
-    path('kitchens/<int:id>/stored/delete', views.delete_item_kitchen, name='delete_item_kitchen'),
-    path('kitchens/<int:id>/cart/delete', views.delete_item_kitchen, name='delete_item_kitchen'),
+    path('kitchens/<int:id>/stored/delete', views.delete_storeditem_kitchen, name='delete_storeditem_kitchen'),
+    path('kitchens/<int:id>/stored/update/<int:item_id>', views.update_storeditem_kitchen, name='update_storeditem_kitchen'),
 
-    path('kitchens/<int:id>/update/<int:item_id>', views.update_item_kitchen, name='update_item_kitchen'),
+    path('kitchens/<int:id>/cart/add', views.add_cartitem_kitchen, name='add_cartitem_kitchen'),
+    path('kitchens/<int:id>/cart/delete', views.delete_storeditem_kitchen, name='delete_cartitem_kitchen'),
+
     path('kitchens/<int:id>/new', views.new_kitchen_item, name='new_kitchen_item'),
+    path('kitchens/<int:id>/custom/delete/<int:item_id>', views.delete_customitem_kitchen, name='delete_customitem_kitchen'),
+
     path('kitchens/<int:id>/postit/new', views.create_postit, name='create_postit'),
     path('kitchens/<int:id>/postit/edit/<int:postit_id>', views.edit_postit, name='edit_postit'),
     path('kitchens/<int:id>/postit/delete/<int:postit_id>', views.delete_postit, name='delete_postit'),

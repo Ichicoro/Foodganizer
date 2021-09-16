@@ -153,6 +153,12 @@
                         ? "custom item" : "item"}
                     "${item.dataset.itemName
                 }"`
+                $$("#addItemModal #deleteItemBtn").style.display = item.dataset.itemIsCustom ? "block" : "none"
+                if (item.dataset.itemIsCustom) {
+                    console.log("changing form action")
+                    $$("#removeItemModal form").action = "{% url "delete_customitem_kitchen" id=kitchen.id item_id="00000000" %}?next={{ request.path }}".replace("00000000", item.dataset.itemId)
+                }
+
                 new bootstrap.Modal($$("#addItemModal")).show()
             }
         }
@@ -349,12 +355,15 @@
                             {{ add_item_form|crispy }}
                         </fieldset>
                     </div>
-                    <div class="modal-footer d-flex-grow-1-child">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
-                        <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Create</button>
+                    <div class="modal-footer d-flex">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removeItemModal" id="deleteItemBtn"><i class="bi bi-trash-fill flex-grow-0"></i></button>
+                        <button type="button" class="btn btn-outline-secondary flex-grow-1" data-bs-dismiss="modal">Back</button>
+                        <button type="submit" class="btn btn-success flex-grow-1" id="codeNotFoundModalSuccessButton">Create</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    {% include "components/kitchen-forms/remove-item-modal.html" with id=kitchen.id %}
 {% endblock %}

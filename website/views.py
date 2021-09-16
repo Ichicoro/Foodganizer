@@ -9,6 +9,7 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.urls import reverse
 from django.db.utils import IntegrityError
+from django.db.models import ProtectedError, ObjectDoesNotExist
 from .models import Item, Kitchen, Membership, StoredItem, User, MembershipStatus
 from django.forms.models import model_to_dict
 from django.views.decorators.http import require_POST
@@ -20,7 +21,7 @@ from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UserReg
 
 def _getKitchen(request, id, status=None):
     if request.user.is_anonymous:
-        raise Kitchen.DoesNotExist()
+        raise ObjectDoesNotExist()
     return _getUserKitchens(request, status).get(id=id)
 
 def _getUserKitchens(request, status=None):
@@ -162,8 +163,8 @@ def new_kitchen(request):
 @login_required
 def kitchen(request, id):
     try:
-        k:Kitchen = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except Kitchen.DoesNotExist:
+        k: Kitchen = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+    except ObjectDoesNotExist:
         return redirect('kitchens')
      
 
@@ -215,7 +216,7 @@ def kitchens(request):
 def add_item_kitchen(request, id, is_shopping_cart_item=False):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except Kitchen.DoesNotExist:
+    except ObjectDoesNotExist:
         return redirect('kitchens')
      
     custom_items = k.item_set.all()  # foreign key Item.custom_item_kitchen
@@ -264,10 +265,10 @@ def add_cartitem_kitchen(request, id):
 
 
 @login_required
-def delete_item_kitchen(request, id):
+def delete_storeditem_kitchen(request, id):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except Kitchen.DoesNotExist:
+    except ObjectDoesNotExist:
         return redirect('kitchens')
         
     if request.method == 'POST':
@@ -285,10 +286,10 @@ def delete_item_kitchen(request, id):
 
 
 @login_required
-def update_item_kitchen(request, id, item_id):
+def update_storeditem_kitchen(request, id, item_id):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except Kitchen.DoesNotExist:
+    except ObjectDoesNotExist:
         return redirect('kitchens')
      
     if request.method == 'POST':
@@ -310,7 +311,7 @@ def update_item_kitchen(request, id, item_id):
 def new_kitchen_item(request, id):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except Kitchen.DoesNotExist:
+    except ObjectDoesNotExist:
         return redirect('kitchens')
 
     form = NewKitchenItemForm(request.POST, files=request.FILES)
@@ -329,10 +330,28 @@ def new_kitchen_item(request, id):
 
 
 @login_required
+def delete_customitem_kitchen(request, id, item_id):
+    try:
+        k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+    except ObjectDoesNotExist:
+        return redirect('kitchens')
+
+    try:
+        item = Item.objects.get(id=item_id)
+        item.delete()
+    except ObjectDoesNotExist:
+        messages.error(request, "Item does not exist")
+    except ProtectedError:
+        messages.warning(request, "Item is in use. Please delete all stored items referencing this item before trying again")
+    next_url = request.GET.get("next", reverse("add_storeditem_kitchen", args={id}))
+    return redirect(next_url)
+
+
+@login_required
 def invite_users(request, id):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except Kitchen.DoesNotExist:
+    except ObjectDoesNotExist:
         return redirect('kitchens')
      
 
@@ -356,7 +375,7 @@ def invite_users(request, id):
 def join_kitchen(request, id):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.PENDING_INVITATION)
-    except Kitchen.DoesNotExist:
+    except ObjectDoesNotExist:
         messages.error(request, "Kitchen not found")
         return redirect('kitchens')
     
@@ -373,7 +392,7 @@ def join_kitchen(request, id):
 def set_kitchen_sharing(request, id):
     try:
         k:Kitchen = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except Kitchen.DoesNotExist:
+    except ObjectDoesNotExist:
         return redirect('kitchens')
     
     if request.method == 'POST':
@@ -402,7 +421,7 @@ def set_kitchen_sharing(request, id):
 def shared_kitchen(request, share_uuid):
     try:
         k:Kitchen = Kitchen.objects.get(public_access_uuid=share_uuid)
-    except Kitchen.DoesNotExist:
+    except ObjectDoesNotExist:
         messages.error(request, 'No kitchen found, the link might be out of date')
         return redirect('kitchens')
 
@@ -416,10 +435,10 @@ def shared_kitchen(request, share_uuid):
                 m.save()
                 messages.success(request, f"{m.invited_by} accepted you into {k}")
             elif m.status == MembershipStatus.PENDING_JOIN_REQUEST:
-                raise Membership.DoesNotExist() # pretend there isn't already a pending request
+                raise ObjectDoesNotExist() # pretend there isn't already a pending request
             else:
                 messages.error(request, "Something went wrong...")
-        except Membership.DoesNotExist:
+        except ObjectDoesNotExist:
             requested_status = (MembershipStatus.PENDING_JOIN_REQUEST if k.join_confirmation else MembershipStatus.ACTIVE_MEMBERSHIP)
             m = Membership(user=request.user, kitchen=k, status=requested_status)
             m.save()
@@ -435,7 +454,7 @@ def delete_membership(request, id):
     try:
         m:Membership = Membership.objects.get(id=id)
         k:Kitchen = m.kitchen if request.user == m.user else _getKitchen(request, m.kitchen.id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except (Kitchen.DoesNotExist, Membership.DoesNotExist):
+    except (ObjectDoesNotExist, ObjectDoesNotExist):
         return redirect('kitchens')
 
     
@@ -532,6 +551,6 @@ def delete_postit(request, id, postit_id):
             messages.success(request, "Item deleted successfully!")
         else:
             messages.error(request, "Invalid PostIt :/")
-    except Exception:
+    except ObjectDoesNotExist:
         messages.error(request, "Invalid PostIt :/")
     return redirect('kitchen', id=id)
