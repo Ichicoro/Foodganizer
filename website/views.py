@@ -108,9 +108,12 @@ def signup(request):
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
             return redirect('index')
+        else:
+            status = 400
     else:
         form = UserRegisterForm()
-    return render(request, 'registration/signup.html', {'form': form})
+        status = 200
+    return render(request, 'registration/signup.html', {'form': form}, status=status)
 
 
 def quaggatest(request):
