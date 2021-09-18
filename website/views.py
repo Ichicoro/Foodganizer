@@ -108,9 +108,12 @@ def signup(request):
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
             return redirect('index')
+        else:
+            status = 400
     else:
         form = UserRegisterForm()
-    return render(request, 'registration/signup.html', {'form': form})
+        status = 200
+    return render(request, 'registration/signup.html', {'form': form}, status=status)
 
 
 def quaggatest(request):
@@ -125,17 +128,23 @@ def profile(request):
             user_form.save()
     else:
         user_form = UpdateUserForm(instance=request.user)
-    print(f"{user_form.files=}")  # TODO: Remove me
-    print(f"{user_form.is_valid()=}")  # TODO: Remove me
+    
     return render(request, "pages/own_profile.html", {
         'user_form': user_form,
     })
 
 
 def view_profile(request, username):
+    http_status = 200
+    try:
+        u = User.objects.get(username=username)
+    except User.DoesNotExist:
+        http_status = 404
+        u = None
+    
     return render(request, "pages/view_profile.html", {
-        'user': User.objects.get(username=username)
-    })
+        'user': u
+    }, status=http_status)
 
 
 @login_required
@@ -155,9 +164,12 @@ def new_kitchen(request):
             for wm in warning_messages:
                 messages.warning(request, wm)
             return redirect('kitchens')
+        else:
+            status = 400
     else:
         form = NewKitchenForm()
-    return render(request, 'pages/new-kitchen.html', {'form': form})
+        status = 200
+    return render(request, 'pages/new-kitchen.html', {'form': form}, status=status)
 
 
 @login_required
