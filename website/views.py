@@ -468,7 +468,7 @@ def set_kitchen_sharing(request, id):
 def shared_kitchen(request, share_uuid):
     try:
         k:Kitchen = Kitchen.objects.get(public_access_uuid=share_uuid)
-    except ObjectDoesNotExist:
+    except Kitchen.DoesNotExist:
         messages.error(request, 'No kitchen found, the link might be out of date')
         return redirect('kitchens')
 
@@ -482,16 +482,26 @@ def shared_kitchen(request, share_uuid):
                 m.save()
                 messages.success(request, f"{m.invited_by} accepted you into {k}")
             elif m.status == MembershipStatus.PENDING_JOIN_REQUEST:
-                raise ObjectDoesNotExist() # pretend there isn't already a pending request
+                # pretend there isn't already a pending request
+                m.delete()
+                raise Membership.DoesNotExist()
             else:
                 messages.error(request, "Something went wrong...")
-        except ObjectDoesNotExist:
-            requested_status = (MembershipStatus.PENDING_JOIN_REQUEST if k.join_confirmation else MembershipStatus.ACTIVE_MEMBERSHIP)
+        except Membership.DoesNotExist:
+            if k.join_confirmation:
+                requested_status = MembershipStatus.PENDING_JOIN_REQUEST  
+            else:
+                requested_status = MembershipStatus.ACTIVE_MEMBERSHIP
             m = Membership(user=request.user, kitchen=k, status=requested_status)
             m.save()
-            messages.success(request, f"Your request to join {k} has been sent to kitchen admins" if k.join_confirmation else f"You joined {k} from shared link")
-            
-        return (redirect("kitchen", id=k.id) if m.status == MembershipStatus.ACTIVE_MEMBERSHIP else redirect("kitchens"))
+            if k.join_confirmation:
+                messages.success(request, f"Your request to join {k} has been sent to kitchen admins")
+            else:
+                messages.success(request, f"You joined {k} from shared link")
+        if m.status == MembershipStatus.ACTIVE_MEMBERSHIP:
+            return redirect("kitchen", id=k.id) 
+        else:
+            return redirect("kitchens")
     else:
         return render(request, "pages/join-shared-kitchen.html", {"kitchen": k})
 

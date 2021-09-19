@@ -7,6 +7,9 @@ from django.urls import reverse, resolve
 
 
 class TestUrls(TestCase):
+    def setUp(self):
+        self.client.force_login(User.objects.create_user("test-user"))
+
     def test_index_is_resolved(self):
         url = reverse("index")
         self.assertEqual(resolve(url).func, index)
