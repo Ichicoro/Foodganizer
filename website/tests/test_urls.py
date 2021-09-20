@@ -6,6 +6,8 @@ from django.test.testcases import TestCase
 from django.urls import reverse, resolve
 
 
+## Here we make sure every url matches the correct view 
+
 class TestUrls(TestCase):
     def setUp(self):
         self.client.force_login(User.objects.create_user("test-user"))

@@ -1,3 +1,4 @@
+
 from django.forms.fields import BooleanField
 from crispy_forms.layout import Field
 
@@ -44,6 +45,8 @@ class MultiUserField(forms.Field):
         return data
 
     def validate(self, value):
+        if isinstance(value, list) and len(value) == 0:
+            return # an empty array is ok
         super().validate(value)
         incorrect_emails = []
         incorrect_usernames = []
@@ -64,19 +67,6 @@ class MultiUserField(forms.Field):
 
         if error_messages:
             raise ValidationError("\n".join(error_messages))
-
-
-
-            # if (len(incorrect_emails) == 1):  
-            #     raise ValidationError(f"{incorrect_emails[0]} is not a valid email address")
-            # else:  
-            #     incorrect_emails = ", ".join(incorrect_emails)
-            #     raise ValidationError(f"{incorrect_emails} are not valid email addresses")
-
-
-
-
-
 
 
 ## FORMS ##

@@ -11,7 +11,8 @@ from website.models import Kitchen, Membership, MembershipStatus, User
 from django.test import SimpleTestCase, client
 from django.urls import reverse, resolve
 
-
+## Here we check that the views work as 
+## intended in (kind of) every possible scenario
 
 class TestViews(TestCase):
     def setUp(self):
