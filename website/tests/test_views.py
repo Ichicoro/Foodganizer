@@ -2,7 +2,7 @@ import uuid
 
 from django.contrib import auth
 from django.contrib.auth.models import AnonymousUser, UserManager
-from website.views import kitchen, shared_kitchen
+from website.views import invite_users, kitchen, shared_kitchen
 
 from django.db.models.fields import EmailField
 from django.test.testcases import TestCase
@@ -318,12 +318,47 @@ class TestViews(TestCase):
         self.assertEqual(res.status_code, 200)
         self._assertMembership(self.user_2, self.k_no_confirm.name, MembershipStatus.ACTIVE_MEMBERSHIP)
   
+    def test_kitchen_get_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP, is_admin=True)
+        self.client.force_login(self.user_1)
+        url = reverse("kitchen", args=[self.k_1.id])
+        res = self.client.get(url)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+
+    def test_kitchen_get_no_membership(self):
+        self.client.force_login(self.user_1)
+        url = reverse("kitchen", args=[self.k_1.id])
+        res = self.client.get(url, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchens.html")
+        self.assertEqual(res.status_code, 200)
+
+    def test_kitchen_invite_users_post_ok(self): 
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP, is_admin=True)
+        self.client.force_login(self.user_1)
+        url = reverse("kitchen_invite_users", args=[self.k_1.id])
+        res = self.client.post(url, {
+            "invite_other_users": self.user_2.username
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self._assertMembership(self.user_2, self.k_1.name, MembershipStatus.PENDING_INVITATION)
+        
+    def test_kitchen_invite_users_post_invalid_user(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP, is_admin=True)
+        self.client.force_login(self.user_1)
+        url = reverse("kitchen_invite_users", args=[self.k_1.id])
+        invite_other_users = f"{self.user_2.username}, user_wrong_username"
+        res = self.client.post(url, {
+            "invite_other_users": invite_other_users
+        })
+        self.assertEqual(res.status_code, 302)
+        data = self.client.session.get("invite_existing_users_form__invite_other_users")
+        self.assertIsNotNone(data)
+        self.assertEqual(data, invite_other_users)
+        
 
     ## TODO: view tests for this urls
-
-    # def test_kitchen_is_resolved(self):
-    #     url = reverse("kitchen", args=[123])
-    #     self.assertEqual(resolve(url).func, kitchen)
     
     # def test_kitchen_invite_users_is_resolved(self):
     #     url = reverse("kitchen_invite_users", args=[123])

@@ -395,10 +395,11 @@ def delete_customitem_kitchen(request, id, item_id):
 
 
 @login_required
+@require_POST
 def invite_users(request, id):
     try:
         k = _getKitchen(request, id, status=MembershipStatus.ACTIVE_MEMBERSHIP)
-    except ObjectDoesNotExist:
+    except Kitchen.DoesNotExist:
         return redirect('kitchens')
      
 
