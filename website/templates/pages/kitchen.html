@@ -118,7 +118,7 @@
                                     <span>Email: <span class="monospaced">{{ m.user.email }}</span></span>
                                 {% endif %}
                             </div>
-                            {% if m.is_admin %}
+                            {% if m.status == 'ADMIN' %}
                                 <span class="badge rounded-pill bg-danger">Admin</span>
                             {% endif %}
                         </a>
@@ -144,7 +144,7 @@
                                 {% if pm.user.email %}
                                     <span>Email: <span class="monospaced">{{ pm.user.email }}</span></span><br />
                                 {% endif %}
-                                {% if pm.status == 'PI'  %}
+                                {% if pm.status == 'PENDING_INVITATION'  %}
                                     <div class="d-flex align-items-center mt-2">
                                         <span>Pending invitation: </span>
                                         <form action="{% url 'delete_membership' id=pm.id %}" method="POST">
@@ -155,7 +155,7 @@
                                         </form>
                                     </div>
                                 {% endif %}
-                                {% if pm.status == 'PJR'  %}
+                                {% if pm.status == 'PENDING_JOIN_REQUEST'  %}
                                     <div class="d-flex align-items-center mt-2">
                                         <span>Pending approval: </span>
                                         <form action="{% url 'kitchen_invite_users' id=kitchen.id %}" method="POST">

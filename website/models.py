@@ -85,18 +85,17 @@ class Kitchen(models.Model):
         return self.name
 
 class MembershipStatus(models.TextChoices):
-    PENDING_JOIN_REQUEST = 'PJR'
-    PENDING_INVITATION = 'PI'
-    ACTIVE_MEMBERSHIP = 'AM'
+    PENDING_JOIN_REQUEST = 'PENDING_JOIN_REQUEST'
+    PENDING_INVITATION = 'PENDING_INVITATION'
+    ACTIVE_MEMBERSHIP = 'ACTIVE_MEMBERSHIP'
+    ADMIN = "ADMIN"
 
 class Membership(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     kitchen = _getKitchenForeignKey()
-    is_admin = models.BooleanField(default=False)
     status = models.CharField(
-        max_length=3,
-        choices=MembershipStatus.choices,
-        default=MembershipStatus.ACTIVE_MEMBERSHIP,
+        max_length=30,
+        choices=MembershipStatus.choices
     )
     invited_by = models.ForeignKey(User, on_delete=models.SET_NULL, default=None, null=True, related_name="invites_set")
 
@@ -107,11 +106,11 @@ class Membership(models.Model):
             message = f"@{self.user} requested to join {self.kitchen}" 
         elif self.status == MembershipStatus.ACTIVE_MEMBERSHIP:
             message = f"@{self.user} member of {self.kitchen}" 
+        elif self.status == MembershipStatus.ADMIN:
+            message = f"@{self.user} admin of {self.kitchen}" 
         else:
             message = f"@{self.user} > {self.status} > {self.kitchen}" 
-        
-        if self.is_admin:
-            message += f" (admin)" 
+
         return message
 
     class Meta:

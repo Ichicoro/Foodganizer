@@ -224,7 +224,7 @@ class TestViews(TestCase):
         self.assertEqual(res.status_code, 302)
         self._assertKitchen(k_name)
         self.assertEqual(k_count + 1, Kitchen.objects.count())
-        self._assertMembership(u1, k_name, MembershipStatus.ACTIVE_MEMBERSHIP)
+        self._assertMembership(u1, k_name, MembershipStatus.ADMIN)
         self._assertMembership(u2, k_name, MembershipStatus.PENDING_INVITATION)
     
     def test_new_kitchen_post_invalid_body(self):
@@ -319,7 +319,7 @@ class TestViews(TestCase):
         self._assertMembership(self.user_2, self.k_no_confirm.name, MembershipStatus.ACTIVE_MEMBERSHIP)
   
     def test_kitchen_get_ok(self):
-        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP, is_admin=True)
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ADMIN)
         self.client.force_login(self.user_1)
         url = reverse("kitchen", args=[self.k_1.id])
         res = self.client.get(url)
@@ -334,7 +334,7 @@ class TestViews(TestCase):
         self.assertEqual(res.status_code, 200)
 
     def test_kitchen_invite_users_post_ok(self): 
-        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP, is_admin=True)
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ADMIN)
         self.client.force_login(self.user_1)
         url = reverse("kitchen_invite_users", args=[self.k_1.id])
         res = self.client.post(url, {
@@ -345,7 +345,7 @@ class TestViews(TestCase):
         self._assertMembership(self.user_2, self.k_1.name, MembershipStatus.PENDING_INVITATION)
         
     def test_kitchen_invite_users_post_invalid_user(self):
-        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP, is_admin=True)
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ADMIN)
         self.client.force_login(self.user_1)
         url = reverse("kitchen_invite_users", args=[self.k_1.id])
         invite_other_users = f"{self.user_2.username}, user_wrong_username"
