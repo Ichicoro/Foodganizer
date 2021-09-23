@@ -10,6 +10,7 @@ django-libsass = "*"
 django-crispy-forms = "*"
 crispy-bootstrap5 = "*"
 pillow = "*"
+coverage = "*"
 
 [dev-packages]
 
