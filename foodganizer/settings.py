@@ -33,7 +33,8 @@ ALLOWED_HOSTS = [
     'solfubook-pro.local',
     'apollo11.local',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    "*"
 ]
 
 

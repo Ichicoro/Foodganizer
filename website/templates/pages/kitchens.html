@@ -3,7 +3,11 @@
 {% block title %} Foodganizer {% endblock %}
 
 {% block head%}
-
+    <script type="module">
+        $$all(".leave-kitchen-button").forEach(entry => {
+            addConfirmationModal(entry)
+        })
+    </script>
 {% endblock %}
 
 {% block body %}
@@ -14,16 +18,19 @@
                 {% if active_memberships %}
                     <div class="list-group mb-4">
                         {% for m in active_memberships %}
-                            <div class="d-flex flex-direction-column">
-                                <a class="list-group-item list-group-item-action border-bottom-0 border-end-0" href="{% url 'kitchen' id=m.kitchen.id %}">
+                            <div class="d-flex align-items-stretch border-top border-start border-end">
+                                <a class="list-group-item list-group-item-action border-0" href="{% url 'kitchen' id=m.kitchen.id %}">
                                     {{ m.kitchen.name }} 
                                 </a>
-                                <form class="flex-grow-1" action="{% url 'delete_membership' id=m.id %}" method="POST">
-                                    {% csrf_token %}
-                                    <button type="submit" class="list-group-item list-group-item-action w-100 h-100 py-1 border-bottom-0">
-                                        <i class="bi bi-box-arrow-right text-danger"></i>
-                                    </button>
-                                </form>
+                                <button class="list-group-item list-group-item-action border-0 border-start w-25 leave-kitchen-button  text-center"
+                                        data-action="{% url 'delete_membership' id=m.id %}"
+                                        data-modal-title="Leave kitchen {{m.kitchen.name}}"
+                                        data-modal-body="Are you sure you want to leave kitchen {{m.kitchen.name}}?"
+                                        data-modal-confirm-cta="Leave kitchen"
+                                        data-modal-confirm-classes="btn-danger"
+                                        >
+                                    <i class="bi bi-box-arrow-right text-danger" ></i>
+                                </button>
                             </div>
                         {% endfor %}
                         <a class="list-group-item list-group-item-success" href="{% url 'new_kitchen' %}">
@@ -69,4 +76,6 @@
             </div>
         </div>
     </div>
+
+    {% include "components/kitchen-forms/confirmationModal.html" %}
 {% endblock %}
