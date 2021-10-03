@@ -1,0 +1,39 @@
+{% load crispy_forms_tags %}
+
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form novalidate>
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body overflow-hidden pb-2">
+                </div>
+                <div class="modal-footer row d-flex justify-content-center">
+                    <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary col-5 cancel-button">Cancel</button>
+                    <button type="submit" class="btn col-5 confirm-button"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const confirmationModal = $$("#confirmationModal")
+    const baseConfirmButtonClasses = confirmationModal.querySelector(".confirm-button").className
+
+    function addConfirmationModal(entry) {
+        entry.addEventListener("click", _ => {
+            confirmationModal.querySelector(".modal-title").textContent = entry.dataset.modalTitle
+            confirmationModal.querySelector(".modal-body").textContent = entry.dataset.modalBody
+            confirmationModal.querySelector(".confirm-button").className = baseConfirmButtonClasses
+            confirmationModal.querySelector(".confirm-button").classList.add(...(entry.dataset.modalConfirmClasses.split(" ")))
+            confirmationModal.querySelector(".confirm-button").textContent = entry.dataset.modalConfirmCta
+            confirmationModal.querySelector("form").action = entry.dataset.action 
+            confirmationModal.querySelector("form").method = "POST"
+            new bootstrap.Modal(confirmationModal).show()
+        })
+    } 
+</script>

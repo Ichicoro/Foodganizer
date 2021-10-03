@@ -1,4 +1,5 @@
 import json
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -32,6 +33,12 @@ class User(AbstractUser):
     bio = models.TextField(max_length=1000, blank=True)
     profile_pic = models.ImageField(upload_to='profile_images', blank=True)
 
+    def is_member_of(self, k):
+        try:
+            m = self.membership_set.get(kitchen=k)
+            return m in [MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN]
+        except ObjectDoesNotExist:
+            return False
 
 class Item(models.Model):
     upc = models.CharField(max_length=12, blank=True) 
