@@ -3,9 +3,24 @@
 {% block title %} Foodganizer {% endblock %}
 
 {% block head%}
-
+    <script type="module" src="/static/js/fridge.js"></script>
 {% endblock %}
 
 {% block body %}
-    <h1 style="margin-left: 15px">hello</h1>
+    <div class="container-fluid mw-md">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-sm-12">
+                <div class="content-section">
+                    <h1 class="foodganizer-title text-center">Foodganizer</h1>
+
+                    <div class="foodganizer-desc mt-3 mb-3 fst-italic fs-5">
+                        Mi chiamo Blu Borghi (128807) e con Marte Montipo' (192497) volevo portare un progetto ideato da noi per l'esame di tecnologie web.<br />
+                        La proposta è una webapp incentrata sulla gestione della dispensa, delle liste della spesa e delle ricette, tutto in ottica di condivisione con altri utenti.
+                    </div>
+
+                    <div id="fridge"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
