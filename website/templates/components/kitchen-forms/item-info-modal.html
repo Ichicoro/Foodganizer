@@ -19,11 +19,11 @@
 
                         <label for="id_note" class="form-label mt-3">Note</label>
                         <textarea type="text" class="form-control fst-italic" id="id_note"></textarea>{% endcomment %}
-
                     {{ update_item_form|crispy }}
                 </div>
                 <div class="modal-footer d-flex">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removeItemModal"><i class="bi bi-trash-fill flex-grow-0"></i>{% comment %}&nbsp;&nbsp;Remove{% endcomment %}</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removeItemModal"><i class="bi bi-trash-fill flex-grow-0"></i></button>
+                    <button type="button" class="btn btn-warning flex-grow-0 moveToButton"><i class="bi bi-cart-plus-fill flex-grow-0"></i>&nbsp;Move to cart</button>
                     <button type="submit" class="btn btn-success flex-grow-1">Update</button>
                 </div>
             </form>

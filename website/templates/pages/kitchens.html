@@ -16,16 +16,13 @@
             <div class="col-md-6 col-sm-12 mb-4 ">
                 <h1 class="mb-3">Your kitchens</h1>
                 {% if active_memberships %}
-                    <div class="list-group mb-4">
+                    <div class="list-group mb-4 border-1">
                         {% for m in active_memberships %}
-                            <div class="list-group-item d-flex align-items-stretch border-0 border-top border-start border-end p-0"
-                                style="border-color: rgba(250,250,250,.125) !important"
-                            >
-                                <a class="list-group-item list-group-item-action border-0" href="{% url 'kitchen' id=m.kitchen.id %}">
-                                    {{ m.kitchen.name }} 
+                            <div class="list-group-item p-0 d-flex align-items-stretch">
+                                <a style="border-top-right-radius: 0; {% if forloop.first %}border-top-left-radius: .175rem;{% endif %}" class="list-group-item list-group-item-action border-0" href="{% url 'kitchen' id=m.kitchen.id %}">
+                                    {{ m.kitchen.name }}
                                 </a>
-                                <button class="list-group-item list-group-item-action border-0 border-start w-25 leave-kitchen-button  text-center"
-                                        style="border-color: rgba(250,250,250,.125) !important"
+                                <button style="width: 64px; {% if forloop.first %}border-top-right-radius: .2rem;{% endif %}" class="list-group-item list-group-item-action border-0 border-start leave-kitchen-button text-center"
                                         data-action="{% url 'delete_membership' id=m.id %}"
                                         data-modal-title="Leave kitchen {{m.kitchen.name}}"
                                         data-modal-body="Are you sure you want to leave kitchen {{m.kitchen.name}}?"
@@ -73,7 +70,7 @@
                                 </form>
                             </div>
                         </ul>
-                    {% endfor %} 
+                    {% endfor %}
                 {% endif %}
 
                 {% if requests %}
