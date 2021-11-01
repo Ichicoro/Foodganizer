@@ -18,7 +18,7 @@
                 {% if active_memberships %}
                     <div class="list-group mb-4">
                         {% for m in active_memberships %}
-                            <div class="d-flex align-items-stretch border-top border-start border-end">
+                            <div class="list-group-item d-flex align-items-stretch border-start border-end p-0">
                                 <a class="list-group-item list-group-item-action border-0" href="{% url 'kitchen' id=m.kitchen.id %}">
                                     {{ m.kitchen.name }} 
                                 </a>
@@ -33,7 +33,7 @@
                                 </button>
                             </div>
                         {% endfor %}
-                        <a class="list-group-item list-group-item-success" href="{% url 'new_kitchen' %}">
+                        <a class="list-group-item list-group-item-success list-group-item-action" href="{% url 'new_kitchen' %}">
                             <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add new kitchen
                         </a>
                     </div>
@@ -42,36 +42,54 @@
                         <li class="list-group-item py-3">
                            </i>&nbsp;&nbsp;No kitchens yet... create one!
                         </li>
-                        <a class="list-group-item list-group-item-success" href="{% url 'new_kitchen' %}">
+                        <a class="list-group-item list-group-item-success list-group-item-action" href="{% url 'new_kitchen' %}">
                             <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add new kitchen
                         </a>
                     </ul>
                 {% endif %}
                 
                 {% if invitations %}
-                    <h2 class="mt-5 mb-3">You have been invited...</h1>
-                    <ul class="list-group mb-4">
-                        {% for i in invitations %}
+                    <h2 class="mt-5 mb-3">You have been invited:</h2>
+                    {% for i in invitations %}
+                        <ul class="list-group mb-1">
                             <li class="list-group-item py-3">
                                 @{{ i.invited_by }} invited you to join "{{ i.kitchen.name }}"
                             </li>
-                            <div class="d-flex flex-direction-column mb-3">
+                            <div class="d-flex flex-direction-column mb-3 border-bottom rounded-bottom">
                                 <form class="flex-grow-1" action="{% url 'delete_membership' id=i.id %}" method="POST">
                                     {% csrf_token %}
-                                    <button type="submit" class="list-group-item w-100 py-1">
+                                    <button type="submit" class="list-group-item list-group-item-action text-center w-100 py-1 border-bottom-0">
                                         <i class="bi bi-x-lg"></i>&nbsp;&nbsp;Decline
                                     </button>
                                 </form>
                                 <form class="flex-grow-1" action="{% url 'join_kitchen' id=i.kitchen.id %}" method="POST">
                                     {% csrf_token %}
-                                    <button type="submit" class="list-group-item list-group-item-success w-100 py-1">
+                                    <button type="submit" class="list-group-item list-group-item-success list-group-item-action text-center w-100 py-1 border-bottom-0">
                                         <i class="bi bi-check-lg"></i>&nbsp;&nbsp;Accept
                                     </button>
                                 </form>
                             </div>
+                        </ul>
+                    {% endfor %} 
+                {% endif %}
+
+                {% if requests %}
+                    <h2 class="mt-5 mb-3">Waiting for admins' approval:</h2>
+                        {% for r in requests %}
+                            <ul class="list-group mb-1">
+                                <li class="list-group-item py-3">
+                                    You requested to join "{{ r.kitchen.name }}"
+                                </li>
+                                <div class="d-flex flex-direction-column mb-3">
+                                    <form class="flex-grow-1" action="{% url 'delete_membership' id=r.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button type="submit" class="list-group-item list-group-item-action w-100 py-1 border-top-0 rounded-bottom">
+                                            <i class="bi bi-x-lg"></i>&nbsp;&nbsp;Retract request
+                                        </button>
+                                    </form>
+                                </div>
+                            </ul>
                         {% endfor %}
-                        
-                    </ul>
                 {% endif %}
             </div>
         </div>

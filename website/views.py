@@ -222,7 +222,8 @@ def kitchens(request):
     active_memberships = request.user.membership_set.filter(status__in=[MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN])
     u:User = request.user
     invitations = u.membership_set.filter(status=MembershipStatus.PENDING_INVITATION)
-    return render(request, "pages/kitchens.html", {'active_memberships': active_memberships, 'invitations': invitations})
+    requests = u.membership_set.filter(status=MembershipStatus.PENDING_JOIN_REQUEST)
+    return render(request, "pages/kitchens.html", {'active_memberships': active_memberships, 'invitations': invitations, 'requests': requests})
 
 
 def add_item_kitchen(request, id, is_shopping_cart_item=False):
