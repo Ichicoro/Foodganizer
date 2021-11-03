@@ -41,7 +41,8 @@
             // $$("#itemInfoModal form").action = `/kitchens/{{ kitchen.id }}/update/${item.dataset.itemId}`
 
 
-            $$("#itemInfoModal form").action = "{% url "update_storeditem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+            const form = $$("#itemInfoModal form")
+            form.action = "{% url "update_storeditem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
 
             $$all("#itemInfoModal #item-name, #removeItemModal #item-name").forEach(_ => _.textContent = itemJsonData["title"])
             $$("#itemInfoModal #item-desc").textContent = itemJsonData["description"]
@@ -52,6 +53,16 @@
             $$("#itemInfoModal #id_expiry_date").value = instanceJsonData["expiry_date"]
             $$("#removeItemModal #id_item").value = parseInt(item.dataset.itemId)
 
+            $$("#itemInfoModal .moveToButton").onclick = () => {
+                form.action = "{% url "move_storeditem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+                form.submit()
+            }
+
+            $$("#itemInfoModal .btn-success").onclick = () => {
+                form.action = "{% url "update_storeditem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+                form.submit()
+            }
+
             new bootstrap.Modal($$("#itemInfoModal")).show()
         }))
 
@@ -61,8 +72,10 @@
         $$all(".postit-listing-btn").forEach(entry => {
             entry.addEventListener("click", _ => {
                 postitModalEl.querySelector(".modal-title").textContent = "Edit PostIt"
-                postitModalEl.querySelector("#id_text").textContent = entry.dataset.postitText
+                postitModalEl.querySelector("#id_text").value = entry.dataset.postitText
                 postitModalEl.querySelector("form").action = "{% url "edit_postit" id=kitchen.id postit_id="00000000" %}".replace("00000000", entry.dataset.postitId)
+                postitModalEl.querySelector(".btn-danger").style.display = ""
+                postitModalEl.querySelector(".btn-success").innerHTML = "&nbsp;&nbsp;&nbsp;Edit&nbsp;&nbsp;&nbsp;"
 
                 removePostitModalEl.querySelector("form").action = "{% url "delete_postit" id=kitchen.id postit_id="00000000" %}".replace("00000000", entry.dataset.postitId)
 
@@ -72,8 +85,11 @@
 
         $$("#create-new-postit-btn").addEventListener("click", () => {
             postitModalEl.querySelector(".modal-title").textContent = "Create PostIt"
-            postitModalEl.querySelector("#id_text").textContent = ""
+            postitModalEl.querySelector("#id_text").value = ""
+            console.log(postitModalEl.querySelector("#id_text"))
             postitModalEl.querySelector("form").action = "{% url "create_postit" id=kitchen.id %}"
+            postitModalEl.querySelector(".btn-danger").style.display = "none"
+            postitModalEl.querySelector(".btn-success").textContent = "Create"
             new bootstrap.Modal(postitModalEl).show()
         })
 
@@ -89,8 +105,16 @@
                 cartItemModalEl.querySelector("#item-added-by").textContent = item.dataset.itemAddedBy
                 cartItemModalEl.querySelector("#item-added-by").href = `/profile/${item.dataset.itemAddedBy}`
                 cartItemModalEl.querySelector("#id_quantity").value = item.dataset.itemQuantity
+                const form = cartItemModalEl.querySelector("form")
+                cartItemModalEl.querySelector(".moveToButton").onclick = () => {
+                    form.action = "{% url "move_cartitem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+                    form.submit()
+                }
 
-                cartItemModalEl.querySelector("form").action = "{% url "update_cartitem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+                cartItemModalEl.querySelector(".btn-success").onclick = () => {
+                    form.action = "{% url "update_cartitem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
+                    form.submit()
+                }
 
                 removeCartItemModalEl.querySelector("form").action = "{% url "delete_cartitem_kitchen" id=kitchen.id item_id="00000000" %}".replace("00000000", item.dataset.itemId)
 
@@ -184,7 +208,7 @@
                 </div>
                 {% endif %}
                 <div class="mt-3">
-                    <h3>PostIt</h3>
+                    <h3>Post-It</h3>
                     <div class="list-group">
                         {% for p in postit %}
                             <span class="list-group-item list-group-item-action postit-listing-btn" data-postit-id="{{ p.id }}" data-postit-text="{{ p.text }}">
@@ -202,7 +226,7 @@
                             </span>
                         {% empty %}
                             <li class="list-group-item text-center text-muted">
-                                <i>No PostIt</i>
+                                <i>No Post-It</i>
                             </li>
                         {% endfor %}
                         <a class="list-group-item list-group-item-action list-group-item-success text-center" id="create-new-postit-btn">

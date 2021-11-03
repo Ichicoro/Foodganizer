@@ -28,10 +28,12 @@ urlpatterns = [
     path('kitchens/<int:id>/stored/add', views.add_storeditem_kitchen, name='add_storeditem_kitchen'),
     path('kitchens/<int:id>/stored/delete', views.delete_storeditem_kitchen, name='delete_storeditem_kitchen'),
     path('kitchens/<int:id>/stored/update/<int:item_id>', views.update_storeditem_kitchen, name='update_storeditem_kitchen'),
+    path('kitchens/<int:id>/stored/move/<int:item_id>', views.move_storeditem_kitchen, name='move_storeditem_kitchen'),
 
     path('kitchens/<int:id>/cart/add', views.add_cartitem_kitchen, name='add_cartitem_kitchen'),
     path('kitchens/<int:id>/cart/update/<int:item_id>', views.update_cartitem_kitchen, name='update_cartitem_kitchen'),
     path('kitchens/<int:id>/cart/delete/<int:item_id>', views.delete_cartitem_kitchen, name='delete_cartitem_kitchen'),
+    path('kitchens/<int:id>/cart/move/<int:item_id>', views.move_cartitem_kitchen, name='move_cartitem_kitchen'),
 
     path('kitchens/<int:id>/new', views.new_kitchen_item, name='new_kitchen_item'),
     path('kitchens/<int:id>/custom/delete/<int:item_id>', views.delete_customitem_kitchen, name='delete_customitem_kitchen'),
@@ -42,6 +44,7 @@ urlpatterns = [
 
     path('api/products/search', api_endpoints.search_products, name='search_products_api'),
     path('api/product/search', api_endpoints.get_product_by_code, name='check_product_exists_api')
+
     # # ex: /polls/5/
     # path('<int:question_id>/', views., name='detail'),
     # # ex: /polls/5/results/

@@ -1,5 +1,7 @@
+from datetime import datetime
 import json
 import uuid
+from typing import List
 
 from urllib.parse import urlencode
 from django import forms
@@ -20,19 +22,21 @@ from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemFor
 from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UserRegisterForm, InviteExistingUsers
 
 
-def _get_kitchen(request, id, status__in:list[MembershipStatus]=None):
+def _get_kitchen(request, id, status__in: List[MembershipStatus] = None):
     if request.user.is_anonymous:
         raise Kitchen.DoesNotExist()
-    
+
     kitchens = request.user.kitchen_set.all()
     if status__in:
         filtered_kitchens = kitchens.filter(membership__status__in=status__in)
     else:
-        filtered_kitchens = kitchens.filter(membership__status__in=[MembershipStatus.ADMIN, MembershipStatus.ACTIVE_MEMBERSHIP])
+        filtered_kitchens = kitchens.filter(
+            membership__status__in=[MembershipStatus.ADMIN, MembershipStatus.ACTIVE_MEMBERSHIP])
 
     return filtered_kitchens.get(id=id)
 
-def _inviteUsersToKitchen(request, k: Kitchen, users: list[User]):
+
+def _inviteUsersToKitchen(request, k: Kitchen, users: List[User]):
     warning_messages = []
     success_messages = []
 
@@ -58,11 +62,12 @@ def _inviteUsersToKitchen(request, k: Kitchen, users: list[User]):
                     m.invited_by = request.user
                     m.save()
                     joined_users.append(u)
-    
+
     if len(already_members) == 1:
         warning_messages.append(f"@{already_members[0]} is already a member of {k.name}")
     elif len(already_members) > 1:
-        warning_messages.append(", ".join([f"@{user.username}" for user in already_members]) + f" are already members of {k.name}")
+        warning_messages.append(
+            ", ".join([f"@{user.username}" for user in already_members]) + f" are already members of {k.name}")
 
     if len(invited_users) == 1:
         success_messages.append(f"@{invited_users[0]} has been invited")
@@ -73,12 +78,13 @@ def _inviteUsersToKitchen(request, k: Kitchen, users: list[User]):
         success_messages.append(f"@{joined_users[0]} joined now")
     elif len(joined_users) > 1:
         success_messages.append(", ".join([f"@{user.username}" for user in joined_users]) + f" joined now")
-  
+
     return success_messages, warning_messages
-    
+
+
 def _load_post_data_from_session(request, prefix, keys):
     found_all = True
-    new_post = { **request.POST }
+    new_post = {**request.POST}
     for k in keys:
         session_key = f"{prefix}__{k}"
         if session_key in request.session:
@@ -88,11 +94,11 @@ def _load_post_data_from_session(request, prefix, keys):
             found_all = False
     return new_post, found_all
 
+
 def _save_post_data_to_session(request, prefix, keys):
     for k in keys:
         session_key = f"{prefix}__{k}"
         request.session[session_key] = request.POST[k]
-            
 
 
 def index(request):
@@ -127,7 +133,7 @@ def profile(request):
             user_form.save()
     else:
         user_form = UpdateUserForm(instance=request.user)
-    
+
     return render(request, "pages/own_profile.html", {
         'user_form': user_form,
     })
@@ -140,7 +146,7 @@ def view_profile(request, username):
     except User.DoesNotExist:
         http_status = 404
         u = None
-    
+
     return render(request, "pages/view_profile.html", {
         'user': u
     }, status=http_status)
@@ -151,14 +157,14 @@ def new_kitchen(request):
     if request.method == 'POST':
         form = NewKitchenForm(request.POST)
         if form.is_valid():
-            k = form.save() # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
-            
+            k = form.save()  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
+
             m = Membership(user=request.user, kitchen=k, status=MembershipStatus.ADMIN)
             m.save()
-            
+
             users = [data['User'] for data in form.cleaned_data.get('invite_other_users')]
             success_messages, warning_messages = _inviteUsersToKitchen(request, k, users)
-            for sm in success_messages: 
+            for sm in success_messages:
                 messages.success(request, sm)
             for wm in warning_messages:
                 messages.warning(request, wm)
@@ -177,25 +183,25 @@ def kitchen(request, id):
         k: Kitchen = _get_kitchen(request, id)
     except Kitchen.DoesNotExist:
         return redirect('kitchens')
-     
 
     memberships = k.membership_set.filter(status__in=[MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN])
-    pending_memberships = k.membership_set.filter(status__in=[MembershipStatus.PENDING_INVITATION, MembershipStatus.PENDING_JOIN_REQUEST])
+    pending_memberships = k.membership_set.filter(
+        status__in=[MembershipStatus.PENDING_INVITATION, MembershipStatus.PENDING_JOIN_REQUEST])
     stored_items = k.storeditem_set.all()
     shopping_cart = k.shoppingcartitem_set.all()
     postit = k.postit_set.all()
 
     invite_users_post, invite_users_form_open = _load_post_data_from_session(
-        request=request, 
-        prefix="invite_existing_users_form", 
+        request=request,
+        prefix="invite_existing_users_form",
         keys=InviteExistingUsers.declared_fields.keys()
     )
-    
+
     share_kitchen_post, share_kitchen_form_open = _load_post_data_from_session(
-        request=request, 
-        prefix="share_kitchen_form", 
+        request=request,
+        prefix="share_kitchen_form",
         keys=ShareKitchenForm.declared_fields.keys()
-    ) 
+    )
     share_kitchen_post["enable_kitchen_sharing_link"] = k.public_access_uuid != None
     share_kitchen_post["join_confirmation_needed"] = k.join_confirmation
 
@@ -219,11 +225,13 @@ def kitchen(request, id):
 
 @login_required
 def kitchens(request):
-    active_memberships = request.user.membership_set.filter(status__in=[MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN])
-    u:User = request.user
+    active_memberships = request.user.membership_set.filter(
+        status__in=[MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN])
+    u: User = request.user
     invitations = u.membership_set.filter(status=MembershipStatus.PENDING_INVITATION)
     requests = u.membership_set.filter(status=MembershipStatus.PENDING_JOIN_REQUEST)
-    return render(request, "pages/kitchens.html", {'active_memberships': active_memberships, 'invitations': invitations, 'requests': requests})
+    return render(request, "pages/kitchens.html",
+                  {'active_memberships': active_memberships, 'invitations': invitations, 'requests': requests})
 
 
 def add_item_kitchen(request, id, is_shopping_cart_item=False):
@@ -231,7 +239,7 @@ def add_item_kitchen(request, id, is_shopping_cart_item=False):
         k = _get_kitchen(request, id)
     except ObjectDoesNotExist:
         return redirect('kitchens')
-     
+
     custom_items = k.item_set.all()  # foreign key Item.custom_item_kitchen
     if request.method == 'POST':
         form = AddStoredItemForm(request.POST) if not is_shopping_cart_item else AddShoppingCartItemForm(request.POST)
@@ -276,6 +284,7 @@ def add_storeditem_kitchen(request, id):
 def add_cartitem_kitchen(request, id):
     return add_item_kitchen(request, id, is_shopping_cart_item=True)
 
+
 @login_required
 def update_cartitem_kitchen(request, id, item_id):
     try:
@@ -296,6 +305,7 @@ def update_cartitem_kitchen(request, id, item_id):
             messages.error(request, "Error, please check console :(")
             return redirect('kitchen', id=id)
 
+
 @login_required
 def delete_cartitem_kitchen(request, id, item_id):
     try:
@@ -312,12 +322,37 @@ def delete_cartitem_kitchen(request, id, item_id):
 
 
 @login_required
+def move_cartitem_kitchen(request, id, item_id):
+    try:
+        k = _get_kitchen(request, id)
+    except ObjectDoesNotExist:
+        return redirect('kitchens')
+
+    try:
+        cart_item = ShoppingCartItem.objects.get(id=item_id)
+        curr_time = datetime.now()
+        item = StoredItem.objects.create(
+            item=cart_item.item,
+            kitchen=k,
+            added_by=request.user,
+            last_update=curr_time,
+            created_at=curr_time,
+            quantity=cart_item.quantity
+        )
+        item.save()
+        cart_item.delete()
+    except ObjectDoesNotExist:
+        messages.error(request, "Item does not exist")
+    return redirect("kitchen", id=id)
+
+
+@login_required
 def delete_storeditem_kitchen(request, id):
     try:
         k = _get_kitchen(request, id)
     except ObjectDoesNotExist:
         return redirect('kitchens')
-        
+
     if request.method == 'POST':
         print(k.storeditem_set.all())
         form = RemoveStoredItemForm(request.POST, item_set=k.storeditem_set.all())
@@ -333,12 +368,37 @@ def delete_storeditem_kitchen(request, id):
 
 
 @login_required
+def move_storeditem_kitchen(request, id, item_id):
+    try:
+        k = _get_kitchen(request, id)
+    except ObjectDoesNotExist:
+        return redirect('kitchens')
+
+    try:
+        stored_item = StoredItem.objects.get(id=item_id)
+        curr_time = datetime.now()
+        item = ShoppingCartItem.objects.create(
+            item=stored_item.item,
+            kitchen=k,
+            added_by=request.user,
+            last_update=curr_time,
+            created_at=curr_time,
+            quantity=stored_item.quantity
+        )
+        item.save()
+        stored_item.delete()
+    except ObjectDoesNotExist:
+        messages.error(request, "Item does not exist")
+    return redirect("kitchen", id=id)
+
+
+@login_required
 def update_storeditem_kitchen(request, id, item_id):
     try:
         k = _get_kitchen(request, id)
     except ObjectDoesNotExist:
         return redirect('kitchens')
-     
+
     if request.method == 'POST':
         instance = k.storeditem_set.get(id=item_id)
         form = UpdateStoredItemForm(request.POST or None, instance=instance)
@@ -389,7 +449,8 @@ def delete_customitem_kitchen(request, id, item_id):
     except ObjectDoesNotExist:
         messages.error(request, "Item does not exist")
     except ProtectedError:
-        messages.warning(request, "Item is in use. Please delete all stored items referencing this item before trying again")
+        messages.warning(request,
+                         "Item is in use. Please delete all stored items referencing this item before trying again")
     next_url = request.GET.get("next", reverse("add_storeditem_kitchen", args={id}))
     return redirect(next_url)
 
@@ -401,19 +462,19 @@ def invite_users(request, id):
         k = _get_kitchen(request, id)
     except Kitchen.DoesNotExist:
         return redirect('kitchens')
-     
 
     if request.method == 'POST':
         form = InviteExistingUsers(request.POST)
         if form.is_valid():
             users = [data['User'] for data in form.cleaned_data.get('invite_other_users')]
             success_messages, warning_messages = _inviteUsersToKitchen(request, k, users)
-            for sm in success_messages: 
+            for sm in success_messages:
                 messages.success(request, sm)
             for wm in warning_messages:
-                messages.warning(request, wm) 
+                messages.warning(request, wm)
         else:
-            _save_post_data_to_session(request, "invite_existing_users_form", InviteExistingUsers.declared_fields.keys())
+            _save_post_data_to_session(request, "invite_existing_users_form",
+                                       InviteExistingUsers.declared_fields.keys())
 
     return redirect('kitchen', id=id)
 
@@ -426,7 +487,7 @@ def join_kitchen(request, id):
     except ObjectDoesNotExist:
         messages.error(request, "Kitchen not found")
         return redirect('kitchens')
-    
+
     m = request.user.membership_set.get(kitchen=k)
     if m.status == MembershipStatus.PENDING_INVITATION:
         m.status = MembershipStatus.ACTIVE_MEMBERSHIP
@@ -436,19 +497,20 @@ def join_kitchen(request, id):
     messages.error(request, "Generic error, cannot join kitchen")
     return redirect('kitchens')
 
+
 @login_required
 def set_kitchen_sharing(request, id):
     try:
-        k:Kitchen = _get_kitchen(request, id)
+        k: Kitchen = _get_kitchen(request, id)
     except ObjectDoesNotExist:
         return redirect('kitchens')
-    
+
     if request.method == 'POST':
         form = ShareKitchenForm(request.POST)
         if form.is_valid():
             enabled = form.cleaned_data.get('enable_kitchen_sharing_link')
             join_confirmation = form.cleaned_data.get('join_confirmation_needed')
-            
+
             edit = False
             if enabled != bool(k.public_access_uuid):
                 k.public_access_uuid = (uuid.uuid4() if enabled else None)
@@ -463,19 +525,19 @@ def set_kitchen_sharing(request, id):
             _save_post_data_to_session(request, "share_kitchen_form", ShareKitchenForm.declared_fields.keys())
 
     return redirect('kitchen', id=id)
-    
+
 
 @login_required
 def shared_kitchen(request, share_uuid):
     try:
-        k:Kitchen = Kitchen.objects.get(public_access_uuid=share_uuid)
+        k: Kitchen = Kitchen.objects.get(public_access_uuid=share_uuid)
     except Kitchen.DoesNotExist:
         messages.error(request, 'No kitchen found, the link might be out of date')
         return redirect('kitchens')
 
     if request.method == "POST":
         try:
-            m:Membership = Membership.objects.get(kitchen=k, user=request.user)
+            m: Membership = Membership.objects.get(kitchen=k, user=request.user)
             if m.status in [MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN]:
                 messages.warning(request, f"You are already a member of {k}")
             elif m.status == MembershipStatus.PENDING_INVITATION:
@@ -490,7 +552,7 @@ def shared_kitchen(request, share_uuid):
                 messages.error(request, "Something went wrong...")
         except Membership.DoesNotExist:
             if k.join_confirmation:
-                requested_status = MembershipStatus.PENDING_JOIN_REQUEST  
+                requested_status = MembershipStatus.PENDING_JOIN_REQUEST
             else:
                 requested_status = MembershipStatus.ACTIVE_MEMBERSHIP
             m = Membership(user=request.user, kitchen=k, status=requested_status)
@@ -500,7 +562,7 @@ def shared_kitchen(request, share_uuid):
             else:
                 messages.success(request, f"You joined {k} from shared link")
         if m.status in [MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN]:
-            return redirect("kitchen", id=k.id) 
+            return redirect("kitchen", id=k.id)
         else:
             return redirect("kitchens")
     else:
@@ -510,27 +572,26 @@ def shared_kitchen(request, share_uuid):
 @require_POST
 def delete_membership(request, id):
     try:
-        m:Membership = Membership.objects.get(id=id)
+        m: Membership = Membership.objects.get(id=id)
         if request.user == m.user:
-            k:Kitchen = m.kitchen  
+            k: Kitchen = m.kitchen
         else:
-            k:Kitchen = _get_kitchen(request, id, status__in=[MembershipStatus.ADMIN])
+            k: Kitchen = _get_kitchen(request, id, status__in=[MembershipStatus.ADMIN])
     except (Kitchen.DoesNotExist, Membership.DoesNotExist):
         return redirect('kitchens')
 
-    
     if request.user == m.user:
         if m.status in [MembershipStatus.ADMIN, MembershipStatus.ACTIVE_MEMBERSHIP]:
             _users = k.users.filter(membership__status__in=[MembershipStatus.ADMIN, MembershipStatus.ACTIVE_MEMBERSHIP])
             _other_users = _users.exclude(id=request.user.id)
             _admins = k.users.filter(membership__status=MembershipStatus.ADMIN)
             # if you are last user
-            if len(_other_users) == 0: 
+            if len(_other_users) == 0:
                 m.delete()
                 k.delete()
             # if you are last admin
             elif len(_admins) == 1 and _admins.first().id == request.user.id:
-                _new_admin:Membership = _other_users.first().membership_set.get(kitchen=k)
+                _new_admin: Membership = _other_users.first().membership_set.get(kitchen=k)
                 _new_admin.status = MembershipStatus.ADMIN
                 _new_admin.save()
                 m.delete()
@@ -555,7 +616,6 @@ def delete_membership(request, id):
             m.delete()
             messages.success(request, f"@{m.user}'s join request has been rejected")
         return redirect('kitchen', id=k.id)
-    
 
 
 @login_required

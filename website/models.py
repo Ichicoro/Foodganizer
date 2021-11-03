@@ -40,6 +40,7 @@ class User(AbstractUser):
         except ObjectDoesNotExist:
             return False
 
+
 class Item(models.Model):
     upc = models.CharField(max_length=12, blank=True) 
     # TODO: create form validation for integer only https://stackoverflow.com/questions/60966095/django-charfield-accepting-only-numbers
@@ -53,10 +54,11 @@ class Item(models.Model):
     custom_item_kitchen = models.ForeignKey('Kitchen', on_delete=models.CASCADE, null=True, default=None) 
 
     def __str__(self):
-        str = self.title
-        if self.upc:
-           str = f"{str} - {self.upc}" 
-        return str
+        name = self.title
+        print(self.upc)
+        if self.upc != "undefined":
+            name = f"{name} (UPC: {self.upc})"
+        return name
 
     # def toJSON(self):
     #     return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
@@ -91,11 +93,13 @@ class Kitchen(models.Model):
     def __str__(self):
         return self.name
 
+
 class MembershipStatus(models.TextChoices):
     PENDING_JOIN_REQUEST = 'PENDING_JOIN_REQUEST'
     PENDING_INVITATION = 'PENDING_INVITATION'
     ACTIVE_MEMBERSHIP = 'ACTIVE_MEMBERSHIP'
     ADMIN = "ADMIN"
+
 
 class Membership(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
