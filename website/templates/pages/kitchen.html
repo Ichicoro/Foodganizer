@@ -25,9 +25,37 @@
             margin-bottom: 0 !important;
         }
     </style>
+    <script src="/static/js/mousetrap.min.js"></script>
     <script type="module">
         import { setup } from "/static/js/Card3D.js"
+        const Mousetrap = window.Mousetrap
+
+        console.log(Mousetrap)
+
+        const onNewPostItClick = () => {
+            postitModalEl.querySelector(".modal-title").textContent = "Create PostIt"
+            postitModalEl.querySelector("#id_text").value = ""
+            console.log(postitModalEl.querySelector("#id_text"))
+            postitModalEl.querySelector("form").action = "{% url "create_postit" id=kitchen.id %}"
+            postitModalEl.querySelector(".btn-danger").style.display = "none"
+            postitModalEl.querySelector(".btn-success").textContent = "Create"
+            new bootstrap.Modal(postitModalEl).show()
+            setTimeout(() => postitModalEl.querySelector("#id_text").focus(), 0)
+        }
+
         setup()
+
+        Mousetrap.bind("n p", onNewPostItClick)
+        Mousetrap.bind("n i", () => { window.location = "{% url 'add_storeditem_kitchen' id=kitchen.id %}" })
+        Mousetrap.bind("n c", () => { window.location = "{% url 'add_cartitem_kitchen' id=kitchen.id %}" })
+
+        const itemInfoModal = $$("#itemInfoModal")
+        itemInfoModal.addEventListener("show.bs.modal", evt => {
+            Mousetrap.bind("c", () => { $$("#itemInfoModal .moveToButton").click() })
+        })
+        itemInfoModal.addEventListener("hide.bs.modal", evt => {
+            Mousetrap.unbind("c")
+        })
 
         {% if invite_users_form_open %}
             const inviteUsersModal = $$("#inviteUsersModal")
@@ -85,15 +113,7 @@
             })
         })
 
-        $$("#create-new-postit-btn").addEventListener("click", () => {
-            postitModalEl.querySelector(".modal-title").textContent = "Create PostIt"
-            postitModalEl.querySelector("#id_text").value = ""
-            console.log(postitModalEl.querySelector("#id_text"))
-            postitModalEl.querySelector("form").action = "{% url "create_postit" id=kitchen.id %}"
-            postitModalEl.querySelector(".btn-danger").style.display = "none"
-            postitModalEl.querySelector(".btn-success").textContent = "Create"
-            new bootstrap.Modal(postitModalEl).show()
-        })
+        $$("#create-new-postit-btn").addEventListener("click", onNewPostItClick)
 
         const cartItemModalEl = $$("#cartItemEditModal")
         const removeCartItemModalEl = $$("#removeCartItemModal")
@@ -218,7 +238,7 @@
                                 <i>No Post-It</i>
                             </li>
                         {% endfor %}
-                        <a class="list-group-item list-group-item-action list-group-item-success text-center" id="create-new-postit-btn">
+                        <a class="list-group-item list-group-item-action list-group-item-success text-center" id="create-new-postit-btn"  data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="You can also access this with <code>n</code> then <code>p</code>">
                             <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Create new
                         </a>
                     </div>
@@ -239,9 +259,15 @@
                                         {{ si.item.title }}
                                     </div>
                                     <div class="text-muted fst-italic mb-1">{% firstof si.note si.item.description "No description..." %}</div>
-                                    <div class="text-muted small{% if si.expiry_date|utc < now|utc %} text-danger{% endif %}">
-                                        Expires on {{ si.expiry_date|date:"d-m-yy" }}
-                                    </div>
+                                    {% if si.expiry_date %}
+                                        <div class="text-muted small{% if si.expiry_date|utc < now|utc %} text-danger{% endif %}">
+                                            Expires on {{ si.expiry_date|date:"d-m-yy" }}
+                                        </div>
+                                    {% else %}
+                                        <div class="text-success small">
+                                            No expiry date
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 <div style="margin-top: -2.5px; width: 48px; height: 48px" class="text-center font-iosevka">
                                     <p class="small text-muted mb-0">AMOUNT</p>
@@ -254,7 +280,7 @@
                             <i class="text-muted"><i class="bi bi-"></i>No items</i>
                         </a>
                     {% endfor %}
-                    <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_storeditem_kitchen' id=kitchen.id %}">
+                    <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_storeditem_kitchen' id=kitchen.id %}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="You can also access this with <code>n</code> then <code>i</code>">
                         <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add item
                     </a>
                 </div>
@@ -286,7 +312,7 @@
                             <i class="text-muted"><i class="bi bi-"></i>No items</i>
                         </a>
                     {% endfor %}
-                    <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_cartitem_kitchen' id=kitchen.id %}">
+                    <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_cartitem_kitchen' id=kitchen.id %}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="You can also access this with <code>n</code> then <code>c</code>">
                         <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add item
                     </a>
                 </div>

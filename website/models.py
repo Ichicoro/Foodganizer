@@ -71,7 +71,7 @@ class StoredItem(models.Model):
     last_update = _getLastUpdate()
     created_at = _getCreatedAt()
     quantity = _getProductQuantity()
-    expiry_date = models.DateField(null=True, default=None)
+    expiry_date = models.DateField(null=True, default=None, blank=True)
     note = models.TextField(max_length=500, blank=True)
 
     def __str__(self):

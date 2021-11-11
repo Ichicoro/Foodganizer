@@ -151,7 +151,7 @@ class UpdateStoredItemForm(ModelForm):
         model = StoredItem
         widgets = {
             'expiry_date': forms.DateInput(attrs={'type': 'date'}),
-            'quantity': forms.NumberInput(attrs={'min': 1})
+            'quantity': forms.TextInput(attrs={'min': 1, 'type': 'number'})    # forms.NumberInput(attrs={'min': 1})
         }
         fields = ['quantity', 'note', 'expiry_date']
 

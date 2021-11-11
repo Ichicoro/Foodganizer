@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+# This is for the messages' styling fix
+from django.contrib.messages import constants as message_constants
+
 from pathlib import Path
 
 # Fix JS modules in Windows (?)
@@ -160,6 +163,8 @@ AUTH_USER_MODEL = 'website.User'
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+MESSAGE_TAGS = {message_constants.ERROR: 'danger'}
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"

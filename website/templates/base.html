@@ -15,7 +15,15 @@
             doc = document
             window.$$ = document.querySelector.bind(document)
             window.$$all = document.querySelectorAll.bind(document)
-            window.$$onReady = (func) => doc.addEventListener("DOMContentLoaded", func)
+            window.$$onReady = func => doc.addEventListener("DOMContentLoaded", func)
+
+            $$onReady(() => {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                console.log("tooltipTriggerList", tooltipTriggerList)
+                const tooltipList = tooltipTriggerList.map(tooltipTriggerEl => {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
+                })
+            })
         </script>
         {% block head %}{% endblock %}
     </head>
