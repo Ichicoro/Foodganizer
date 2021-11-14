@@ -156,6 +156,7 @@ def view_profile(request, username):
 def new_kitchen(request):
     if request.method == 'POST':
         form = NewKitchenForm(request.POST)
+        print(form)
         if form.is_valid():
             k = form.save()  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
 

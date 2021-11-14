@@ -14,8 +14,6 @@ from django.core.exceptions import ValidationError
 
 class MultiUserField(forms.Field):
     def to_python(self, value):
-        """Normalize data to a list of strings."""
-        # Return an empty list if no input was given.
         if not value:
             return []
         
@@ -29,7 +27,7 @@ class MultiUserField(forms.Field):
                     u = User.objects.get(email=c)
                 except User.DoesNotExist:
                     u = None
-                if u not in users:
+                if u not in users or u is None:
                     users.append(u)
                     data.append({"value": c, "is_email": True, "User": u})
             except ValidationError:
@@ -39,7 +37,7 @@ class MultiUserField(forms.Field):
                     u = None                                
                 if c.startswith('@'):
                     c = c[1:]
-                if u not in users:
+                if u not in users or u is None:
                     users.append(u)    
                     data.append({"value": c, "is_email": False, "User": u})
         return data
