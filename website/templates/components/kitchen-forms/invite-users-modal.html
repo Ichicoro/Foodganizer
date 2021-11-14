@@ -3,15 +3,17 @@
 <div class="modal fade" id="inviteUsersModal" tabindex="-1" aria-labelledby="inviteUsersModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form method="POST" action="{% url 'kitchen_invite_users' id=kitchen.id %}" novalidate class="needs-validation">
+            <form autocomplete="off" method="POST" action="{% url 'kitchen_invite_users' id=kitchen.id %}" novalidate>
+                <input autocomplete="false" name="hidden" type="text" class="invisible">
                 <div class="modal-header">
                     <h5 class="modal-title">Invite users</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     {% csrf_token %}
-                    <fieldset class="form-group">
-                        {{ invite_users_form|crispy }}
+                    <fieldset class="form-group">  
+                        <label for="{{ invite_users_form.invite_other_users.name }}" class="form-label  mt-4 mb-2">Invite friends</label>                                              
+                        {% include "components/invite-friends-to-kitchen.html" with invite_othe_users_form=invite_users_form %}
                     </fieldset>
                 </div>
                 <div class="modal-footer d-flex-grow-1-child border-0 border-bottom">
