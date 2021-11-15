@@ -577,7 +577,7 @@ def delete_membership(request, id):
         if request.user == m.user:
             k: Kitchen = m.kitchen
         else:
-            k: Kitchen = _get_kitchen(request, id, status__in=[MembershipStatus.ADMIN])
+            k: Kitchen = _get_kitchen(request, m.kitchen.id, status__in=[MembershipStatus.ADMIN])
     except (Kitchen.DoesNotExist, Membership.DoesNotExist):
         return redirect('kitchens')
 
