@@ -1,43 +1,52 @@
 {% load crispy_forms_tags %}
 
 <div class="modal fade" id="inviteUsersModal" tabindex="-1" aria-labelledby="inviteUsersModal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <form autocomplete="off" method="POST" action="{% url 'kitchen_invite_users' id=kitchen.id %}" novalidate>
-                <input autocomplete="false" name="hidden" type="text" class="invisible">
-                <div class="modal-header">
-                    <h5 class="modal-title">Invite users</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    {% csrf_token %}
-                    <fieldset class="form-group">  
-                        <label for="{{ invite_users_form.invite_other_users.name }}" class="form-label  mt-4 mb-2">Invite friends</label>                                              
-                        {% include "components/invite-friends-to-kitchen.html" with invite_othe_users_form=invite_users_form %}
-                    </fieldset>
-                </div>
-                <div class="modal-footer d-flex-grow-1-child border-0 border-bottom">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
-                    <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Invite</button>
-                </div>
-            </form>
-            <form id="set_kitchen_sharing_form" method="POST" action="{% url 'set_kitchen_sharing' id=kitchen.id %}" novalidate class="needs-validation">
-                <div class="modal-body  mt-5 py-0">
-                    {% csrf_token %}
-                    <fieldset class="form-group">
-                        {{ share_kitchen_form|crispy }}
-                    </fieldset>
-                    {% if kitchen.public_access_uuid %}
-                        <fieldset class="form-group">
-                            <a href="{% url 'share_kitchen_link' share_uuid=kitchen.public_access_uuid %}">{% url 'share_kitchen_link' share_uuid=kitchen.public_access_uuid %}</a>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-content">
+                <form autocomplete="off" method="POST" action="{% url 'kitchen_invite_users' id=kitchen.id %}" novalidate>
+                    <input autocomplete="false" name="hidden" type="text" class="invisible" style="position: absolute;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Invite friends</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <fieldset class="form-group">  
+                            {% comment %} <label for="{{ invite_users_form.invite_other_users.name }}" class="form-label  mt-4 mb-2"></label> {% endcomment %}
+                            <div class="form-text mt-0 mb-2">Add friends by their username or e-mail address (they must already be registered on this platform)</div>   
+                            {% include "components/invite-friends-to-kitchen.html" with invite_othe_users_form=invite_users_form %}
                         </fieldset>
-                    {% endif %}
-                </div>
-                <div class="modal-footer d-flex-grow-1-child border-0 border-bottom">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
-                    <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Save</button>
-                </div>
-            </form>
+                    </div>
+                    <div class="modal-footer d-flex-grow-1-child border-0 border-bottom">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
+                        <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Invite</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-header bg-transparent border-0"></div>
+            <div class="modal-content">
+                <form id="set_kitchen_sharing_form" method="POST" action="{% url 'set_kitchen_sharing' id=kitchen.id %}" novalidate class="needs-validation mt-20">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Share link</h5>
+                    </div>
+                    <div class="modal-body  mt-5 py-0">
+                        {% csrf_token %}
+                        <fieldset class="form-group">
+                            {{ share_kitchen_form|crispy }}
+                        </fieldset>
+                        {% if kitchen.public_access_uuid %}
+                            <fieldset class="form-group">
+                                <a href="{% url 'share_kitchen_link' share_uuid=kitchen.public_access_uuid %}">{% url 'share_kitchen_link' share_uuid=kitchen.public_access_uuid %}</a>
+                            </fieldset>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer d-flex-grow-1-child border-0 border-bottom">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
+                        <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Save</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

@@ -30,7 +30,9 @@
         setup()
 
         {% if invite_users_form_open %}
-            new bootstrap.Modal($$("#inviteUsersModal")).show()
+            const inviteUsersModal = $$("#inviteUsersModal")
+            inviteUsersModal.classList.remove("fade")
+            new bootstrap.Modal(inviteUsersModal).show()
         {% endif %}
         
         $$all(".stored-item-btn").forEach(item => item.addEventListener("click", _ => {
