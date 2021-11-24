@@ -3,7 +3,7 @@
 <div class="modal fade" id="itemInfoModal" tabindex="-1" aria-labelledby="itemInfoModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form novalidate method="POST">
+            <form novalidate method="POST" class="needs-validation">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title" id="item-name">Item info</h5>
@@ -14,19 +14,22 @@
                         <p class="text-muted fst-italic mb-0" id="item-desc"></p>
                         &ndash;&nbsp;<a class="fst-italic" id="item-added-by" href="/profile"></a>
                     </div>
-                    {% comment %}<label for="id_quantity" class="form-label mt-3">Quantity</label>
-                        <input required type="number" class="form-control" id="id_quantity" min="0" oninput="validity.valid||(value='');" />
-
-                        <label for="id_note" class="form-label mt-3">Note</label>
-                        <textarea type="text" class="form-control fst-italic" id="id_note"></textarea>{% endcomment %}
                     {{ update_item_form|crispy }}
                 </div>
                 <div class="modal-footer d-flex">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removeItemModal"><i class="bi bi-trash-fill flex-grow-0"></i></button>
-                    <button type="button" class="btn btn-warning flex-grow-0 moveToButton"><i class="bi bi-cart-plus-fill flex-grow-0"></i>&nbsp;Move to cart</button>
+                    <button type="button" class="btn btn-warning flex-grow-0 moveToButton" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="You can also press <code>c</code>"><i class="bi bi-cart-plus-fill flex-grow-0"></i>&nbsp;Move to cart</button>
                     <button type="submit" class="btn btn-success flex-grow-1">Update</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+{% comment %}
+    <label for="id_quantity" class="form-label mt-3">Quantity</label>
+    <input required type="number" class="form-control" id="id_quantity" min="0" oninput="validity.valid||(value='');" />
+
+    <label for="id_note" class="form-label mt-3">Note</label>
+    <textarea type="text" class="form-control fst-italic" id="id_note"></textarea>
+{% endcomment %}

@@ -25,12 +25,42 @@
             margin-bottom: 0 !important;
         }
     </style>
+    <script src="/static/js/mousetrap.min.js"></script>
     <script type="module">
         import { setup } from "/static/js/Card3D.js"
+        const Mousetrap = window.Mousetrap
+
+        console.log(Mousetrap)
+
+        const onNewPostItClick = () => {
+            postitModalEl.querySelector(".modal-title").textContent = "Create PostIt"
+            postitModalEl.querySelector("#id_text").value = ""
+            console.log(postitModalEl.querySelector("#id_text"))
+            postitModalEl.querySelector("form").action = "{% url "create_postit" id=kitchen.id %}"
+            postitModalEl.querySelector(".btn-danger").style.display = "none"
+            postitModalEl.querySelector(".btn-success").textContent = "Create"
+            new bootstrap.Modal(postitModalEl).show()
+            setTimeout(() => postitModalEl.querySelector("#id_text").focus(), 0)
+        }
+
         setup()
 
+        Mousetrap.bind("n p", onNewPostItClick)
+        Mousetrap.bind("n i", () => { window.location = "{% url 'add_storeditem_kitchen' id=kitchen.id %}" })
+        Mousetrap.bind("n c", () => { window.location = "{% url 'add_cartitem_kitchen' id=kitchen.id %}" })
+
+        const itemInfoModal = $$("#itemInfoModal")
+        itemInfoModal.addEventListener("show.bs.modal", evt => {
+            Mousetrap.bind("c", () => { $$("#itemInfoModal .moveToButton").click() })
+        })
+        itemInfoModal.addEventListener("hide.bs.modal", evt => {
+            Mousetrap.unbind("c")
+        })
+
         {% if invite_users_form_open %}
-            new bootstrap.Modal($$("#inviteUsersModal")).show()
+            const inviteUsersModal = $$("#inviteUsersModal")
+            inviteUsersModal.classList.remove("fade")
+            new bootstrap.Modal(inviteUsersModal).show()
         {% endif %}
         
         $$all(".stored-item-btn").forEach(item => item.addEventListener("click", _ => {
@@ -83,15 +113,7 @@
             })
         })
 
-        $$("#create-new-postit-btn").addEventListener("click", () => {
-            postitModalEl.querySelector(".modal-title").textContent = "Create PostIt"
-            postitModalEl.querySelector("#id_text").value = ""
-            console.log(postitModalEl.querySelector("#id_text"))
-            postitModalEl.querySelector("form").action = "{% url "create_postit" id=kitchen.id %}"
-            postitModalEl.querySelector(".btn-danger").style.display = "none"
-            postitModalEl.querySelector(".btn-success").textContent = "Create"
-            new bootstrap.Modal(postitModalEl).show()
-        })
+        $$("#create-new-postit-btn").addEventListener("click", onNewPostItClick)
 
         const cartItemModalEl = $$("#cartItemEditModal")
         const removeCartItemModalEl = $$("#removeCartItemModal")
@@ -159,51 +181,38 @@
                 <h3>Pending members</h3>
                 <div class="list-group mb-4">
                     {% for pm in pending_memberships %}
-                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start pending-membership">
-                            <div class="me-auto">
-                                <div class="fw-bold mb-0">@{{ pm.user.username }}</div>
-                                {% if pm.user.first_name or pm.user.last_name %}
-                                    <span>Full name: <b>{{ pm.user.first_name }} {{pm.user.last_name}}</b></span><br />
-                                {% endif %}
-                                {% if pm.user.email %}
-                                    <span>Email: <span class="monospaced">{{ pm.user.email }}</span></span><br />
-                                {% endif %}
-                                {% if pm.status == 'PENDING_INVITATION'  %}
-                                    <div class="d-flex align-items-center mt-2">
-                                        <span>Pending invitation: </span>
-                                        <form action="{% url 'delete_membership' id=pm.id %}" method="POST">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn bg-danger py-0 px-1 ms-2">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                {% endif %}
-                                {% if pm.status == 'PENDING_JOIN_REQUEST'  %}
-                                    <div class="d-flex align-items-center mt-2">
-                                        <span>Pending approval: </span>
-                                        <form action="{% url 'kitchen_invite_users' id=kitchen.id %}" method="POST">
-                                            {% csrf_token %}
-                                            <input name="invite_other_users" type="hidden" value="{{pm.user.username}}"></input>
-                                            <button type="submit" class="btn bg-success py-0 px-1 ms-2">
-                                                <i class="bi bi-check"></i>
-                                            </button>
-                                        </form>
-                                        <form action="{% url 'delete_membership' id=pm.id %}" method="POST">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn bg-danger py-0 px-1 ms-2">
-                                                <i class="bi bi-x"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                {% endif %}
+                        {% if pm.status == 'PENDING_JOIN_REQUEST'  %}
+                            <div class="list-group-item border-bottom-0 rounded-top">
+                                @{{ pm.user.username }} wants to join your kitchen
                             </div>
-                                
-                            {% if pm.is_admin %}
-                                <span class="badge rounded-pill bg-danger">Admin</span>
-                            {% endif %}
-                            
-                        </a>
+                            <div class="d-flex flex-direction-column mb-3">
+                                <form class="flex-grow-1" action="{% url 'delete_membership' id=pm.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="list-group-item list-group-item-action text-center w-100 py-1 rounded-bottom-start">
+                                        <i class="bi bi-x-lg"></i>&nbsp;&nbsp;Decline
+                                    </button>
+                                </form>
+                                <form class="flex-grow-1" action="{% url 'kitchen_invite_users' id=kitchen.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <input name="invite_other_users" type="hidden" value="{{pm.user.username}}"></input>
+                                    <button type="submit" class="list-group-item list-group-item-success list-group-item-action text-center w-100 py-1 rounded-bottom-end">
+                                        <i class="bi bi-check-lg"></i>&nbsp;&nbsp;Accept
+                                    </button>
+                                </form>
+                            </div>
+                        {% elif pm.status == 'PENDING_INVITATION'  %}
+                            <div class="list-group-item border-bottom-0 rounded-top">
+                                @{{ pm.user.username }} has been invited, waiting for their response
+                            </div>
+                            <div class="d-flex flex-direction-column mb-3">
+                                <form class="flex-grow-1" action="{% url 'delete_membership' id=pm.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="list-group-item list-group-item-action text-center w-100 py-1 rounded-bottom">
+                                        <i class="bi bi-arrow-counterclockwise"></i>&nbsp;&nbsp;Retract invitation
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -229,7 +238,7 @@
                                 <i>No Post-It</i>
                             </li>
                         {% endfor %}
-                        <a class="list-group-item list-group-item-action list-group-item-success text-center" id="create-new-postit-btn">
+                        <a class="list-group-item list-group-item-action list-group-item-success text-center" id="create-new-postit-btn"  data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="You can also access this with <code>n</code> then <code>p</code>">
                             <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Create new
                         </a>
                     </div>
@@ -250,9 +259,15 @@
                                         {{ si.item.title }}
                                     </div>
                                     <div class="text-muted fst-italic mb-1">{% firstof si.note si.item.description "No description..." %}</div>
-                                    <div class="text-muted small{% if si.expiry_date|utc < now|utc %} text-danger{% endif %}">
-                                        Expires on {{ si.expiry_date|date:"d-m-yy" }}
-                                    </div>
+                                    {% if si.expiry_date %}
+                                        <div class="text-muted small{% if si.expiry_date|utc < now|utc %} text-danger{% endif %}">
+                                            Expires on {{ si.expiry_date|date:"d-m-yy" }}
+                                        </div>
+                                    {% else %}
+                                        <div class="text-success small">
+                                            No expiry date
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 <div style="margin-top: -2.5px; width: 48px; height: 48px" class="text-center font-iosevka">
                                     <p class="small text-muted mb-0">AMOUNT</p>
@@ -265,7 +280,7 @@
                             <i class="text-muted"><i class="bi bi-"></i>No items</i>
                         </a>
                     {% endfor %}
-                    <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_storeditem_kitchen' id=kitchen.id %}">
+                    <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_storeditem_kitchen' id=kitchen.id %}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="You can also access this with <code>n</code> then <code>i</code>">
                         <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add item
                     </a>
                 </div>
@@ -297,7 +312,7 @@
                             <i class="text-muted"><i class="bi bi-"></i>No items</i>
                         </a>
                     {% endfor %}
-                    <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_cartitem_kitchen' id=kitchen.id %}">
+                    <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_cartitem_kitchen' id=kitchen.id %}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="You can also access this with <code>n</code> then <code>c</code>">
                         <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add item
                     </a>
                 </div>

@@ -11,10 +11,11 @@
             .forEach(function (form) {
                 console.log(form)
                 form.addEventListener('submit', function (event) {
-                    console.log('help' + form.checkValidity())
+                    console.log(`valid? -> ${form.checkValidity()}`)
                     if (!form.checkValidity()) {
                         event.preventDefault()
                         event.stopPropagation()
+                        return false
                     }
 
                     form.classList.add('was-validated')

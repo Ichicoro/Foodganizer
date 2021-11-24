@@ -1,6 +1,6 @@
 <div class="mb-2">
     <input type="hidden" class="form-control {% if invite_othe_users_form.errors.invite_other_users %}is-invalid{% endif %}" name="{{ invite_othe_users_form.invite_other_users.name }}" id="id_invite_other_users" {% if invite_othe_users_form.invite_other_users.value %}value="{{ invite_othe_users_form.invite_other_users.value }}"{% endif %}>
-    <div class="invalid-feedback">{{ invite_othe_users_form.errors.invite_other_users }}</div>
+    <div class="invalid-feedback no-bullets break-spaces">{{ invite_othe_users_form.errors.invite_other_users }}</div>
     <div class="mt-0 mb-2">
         <ul class="list-group list-group-horizontal w-100">
             <input type="text" class="form-control rounded-0 rounded-start" name="add-friend-input" id="add-friend-input" placeholder="username or email">
@@ -30,7 +30,7 @@
         li.classList.add("list-group","list-group-horizontal","w-100","mt-1")
         li.innerHTML = `
             <div class="list-group-item w-100">${name}</div>
-            <div onClick="removeFriendFromList(${friendsList.length})" class="list-group-item list-group-item-action list-group-item-danger w-auto d-flex align-items-center"><i class="bi bi-trash-fill"></i></div>
+            <div onClick="removeFriendFromList(${friendsList.length})" class="list-group-item list-group-item-action w-auto d-flex align-items-center"><i class="bi bi-x-lg"></i></div>
         `                      
         friendsList.push(name)
         updateHiddenFormFriendList(friendsList)
