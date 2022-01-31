@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 import uuid
-from typing import List
+from typing import List, Optional
 
 from urllib.parse import urlencode
 from django import forms
@@ -127,6 +127,7 @@ def quaggatest(request):
 
 @login_required
 def profile(request):
+    user_form: Optional[UpdateUserForm] = None
     if request.method == 'POST':
         user_form = UpdateUserForm(data=request.POST, instance=request.user, files=request.FILES)
         if user_form.is_valid():

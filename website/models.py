@@ -40,6 +40,13 @@ class User(AbstractUser):
         except ObjectDoesNotExist:
             return False
 
+    def is_admin_of(self, k):
+        try:
+            m = self.membership_set.get(kitchen=k)
+            return m == MembershipStatus.ADMIN
+        except ObjectDoesNotExist:
+            return False
+
 
 class Item(models.Model):
     upc = models.CharField(max_length=12, blank=True) 
@@ -144,3 +151,6 @@ class ShoppingCartItem(models.Model):
     quantity = _getProductQuantity()
     last_update = _getLastUpdate()
     created_at = _getCreatedAt()
+
+    def __str__(self):
+        return f"{self.quantity}x {self.item}"

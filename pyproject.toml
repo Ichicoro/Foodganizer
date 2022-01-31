@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "foodganizer"
+version = "0.1.0"
+description = ""
+authors = ["Ichicoro_Blublublu"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+django = "*"
+django-compressor = "*"
+django-libsass = "*"
+django-crispy-forms = "*"
+crispy-bootstrap5 = "*"
+pillow = "*"
+coverage = "*"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
