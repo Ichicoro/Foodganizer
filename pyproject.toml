@@ -13,6 +13,7 @@ django-crispy-forms = "*"
 crispy-bootstrap5 = "*"
 pillow = "*"
 coverage = "*"
+django-mathfilters = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 
