@@ -156,19 +156,26 @@
                 <h3>Members</h3>
                 <div class="list-group mb-4">
                     {% for m in memberships %}
-                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
-                            <div class="me-auto">
-                                <div class="fw-bold mb-0">@{{ m.user.username }} {% if m.user == user %}(You){% endif %}</div>
-                                {% if m.user.first_name or m.user.last_name %}
-                                    <span>Full name: <b>{{ m.user.first_name }} {{m.user.last_name}}</b></span><br />
-                                {% endif %}
-                                {% if m.user.email %}
-                                    <span>Email: <span class="monospaced">{{ m.user.email }}</span></span>
+                        <a class="list-group-item list-group-item-action" href="{% url 'otherprofile' username=m.user.username %}">
+                            <div class="d-flex my-1">
+                                <div class="rounded-user-pic-container card3d me-3">
+                                    <img class="rounded ratio-1x1 image-48" src="/static/media/{% firstof m.user.profile_pic "question_mark.png" %}" />
+                                </div>
+                                <div class="me-auto">
+                                    <div class="fw-bold mb-0">@{{ m.user.username }} {% if m.user == user %}(You){% endif %}</div>
+                                    {% if m.user.first_name or m.user.last_name %}
+                                        <span>Full name: <b>{{ m.user.first_name }} {{m.user.last_name}}</b></span><br />
+                                    {% endif %}
+                                    {% if m.user.email %}
+                                        <span>Email: <span class="monospaced">{{ m.user.email }}</span></span>
+                                    {% endif %}
+                                </div>
+                                {% if m.status == 'ADMIN' %}
+                                    <div>
+                                        <span class="badge rounded-pill bg-danger">Admin</span>
+                                    </div>
                                 {% endif %}
                             </div>
-                            {% if m.status == 'ADMIN' %}
-                                <span class="badge rounded-pill bg-danger">Admin</span>
-                            {% endif %}
                         </a>
                     {% empty %}
                         <li class="list-group-item">

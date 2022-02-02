@@ -127,7 +127,6 @@ def quaggatest(request):
 
 @login_required
 def profile(request):
-    user_form: Optional[UpdateUserForm] = None
     if request.method == 'POST':
         user_form = UpdateUserForm(data=request.POST, instance=request.user, files=request.FILES)
         if user_form.is_valid():

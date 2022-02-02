@@ -8,7 +8,7 @@
         <div class="row {% comment %}me-lg-4 {% endcomment %}">
             <div class="col-md-3 col-sm-12 d-flex justify-content-center">
                 <div class="rounded-pic-container">
-                    <img src="/static/media/{{ user.profile_pic }}" />
+                    <img src="/static/media/{% firstof user.profile_pic "question_mark.png" %}" />
                 </div>
             </div>
             <div class="col-md-9 col-sm-12 mb-5">

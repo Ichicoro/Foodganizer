@@ -96,7 +96,7 @@ class NewKitchenItemForm(ModelForm):
         super(NewKitchenItemForm, self).__init__(*args, **kwargs)
         self.fields['upc'].label = "EAN-13 / UPC"
 
-    upc = forms.CharField(max_length=12, required=False)
+    upc = forms.CharField(max_length=13, required=False)
 
     class Meta:
         model = Item
