@@ -145,6 +145,13 @@
                 new bootstrap.Modal(cartItemModalEl).show()
             })
         })
+
+
+
+         {# Members user card modals #}
+         $$all(".members-list .member-entry").forEach(entry => {
+            addUserCardModal(entry)
+         })
     </script>
 {% endblock %}
 
@@ -154,9 +161,18 @@
         <div class="row">
             <div class="col-md-6 col-sm-12 mb-4">
                 <h3>Members</h3>
-                <div class="list-group mb-4">
+                <div class="list-group mb-4 members-list">
                     {% for m in memberships %}
-                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+                        <a class="member-entry list-group-item list-group-item-action d-flex justify-content-between align-items-start"
+                            data-user-card-username="@{{ m.user.username }}"
+                            data-membership-status="{{ m.status }}"
+                            {% if m.user.email %}
+                               data-user-card-email="{{ m.user.email }}"
+                            {% endif %}
+                            {% if m.user.first_name or m.user.last_name %}
+                               data-user-card-name="{{ m.user.first_name }} {{m.user.last_name}}"
+                            {% endif %}
+                        >
                             <div class="me-auto">
                                 <div class="fw-bold mb-0">@{{ m.user.username }} {% if m.user == user %}(You){% endif %}</div>
                                 {% if m.user.first_name or m.user.last_name %}
@@ -345,4 +361,6 @@
     {% include "components/kitchen-forms/remove-postit-modal.html" with id=kitchen.id %}
 
     {% include "components/kitchen-forms/edit-cartitem-modal.html" with form=edit_shopping_cart_item_form id=kitchen.id %}
+
+    {% include "components/kitchen-forms/user-card-modal.html" %}
 {% endblock %}

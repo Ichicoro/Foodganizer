@@ -1,0 +1,61 @@
+{% load crispy_forms_tags %}
+
+<div class="modal fade" id="userCardModal" tabindex="-1" aria-labelledby="userCardModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <a class="userProfileAnchor" style="color: #FFFFFF"><h5 class="modal-title userCardUsername"></h5></a>
+                    <span class="userAdminBadge  ms-3 badge rounded-pill bg-danger">Admin</span>
+                    <span class="userMemberBadge ms-3 badge rounded-pill bg-success">Member</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body border-bottom">
+                    <div class="me-auto">
+                        <div class="userCardName"></div>
+                        <div class="userCardEmail"></div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex border-top-0">
+                    <button type="button" class="btn btn-outline-secondary flex-grow-1" data-bs-dismiss="modal">Back</button>
+                    <button type="button" class="promoteButton btn btn-success flex-grow-1" data-bs-dismiss="modal">Promote to admin <i class="bi bi-star-fill"></i></button>
+                    <button type="button" class="btn btn-danger flex-grow-1" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removePostitModal">Remove from kitchen <i class="bi bi-dash-circle"></i></button>
+                </div>
+        </div>
+    </div>
+</div>
+
+{% include "components/kitchen-forms/confirmationModal.html" %}
+
+<script>
+    const userCardModal = $$("#userCardModal")
+    {#const baseConfirmButtonClasses = confirmationModal.querySelector(".confirm-button").className#}
+
+    function addUserCardModal(entry) {
+        console.log("add user card modal")
+        console.log(entry.dataset)
+        const username = entry.dataset.userCardUsername.replace("@","")
+        entry.addEventListener("click", _ => {
+            userCardModal.querySelector(".userCardUsername").textContent = entry.dataset.userCardUsername
+            userCardModal.querySelector(".userCardEmail").textContent = entry.dataset.userCardEmail? `Email: ${entry.dataset.userCardEmail}` : ""
+            userCardModal.querySelector(".userCardName").textContent = entry.dataset.userCardName ? `Name: ${entry.dataset.userCardName}` : ""
+            const isBodyEmpty = !entry.dataset.userCardName && !entry.dataset.userCardEmail
+            userCardModal.querySelector(".modal-body").style.display = isBodyEmpty ? "none" : "block"
+            
+            userCardModal.querySelector(".userAdminBadge").style.display = entry.dataset.membershipStatus == "ADMIN" ? "inline-block" : "none"
+            userCardModal.querySelector(".userMemberBadge").style.display = entry.dataset.membershipStatus == "ACTIVE_MEMBERSHIP" ? "inline-block" : "none"
+            userCardModal.querySelector(".userProfileAnchor").href = `/profile/${username}`
+
+            let promoteButton = userCardModal.querySelector(".promoteButton")
+            promoteButton.dataset.backBsTarget = "#userCardModal"
+            promoteButton.dataset.modalTitle = `Promote ${entry.dataset.userCardUsername} to admin?`
+            promoteButton.dataset.modalBody = `Are you sure you want to promote ${entry.dataset.userCardUsername}?`
+            promoteButton.dataset.modalConfirmCta = "Promote to admin"
+            promoteButton.dataset.modalConfirmCtaIconClass = "bi bi-star-fill"
+            promoteButton.dataset.action = "promote/"+username
+            promoteButton.dataset.modalConfirmClasses = "btn-success"
+            addConfirmationModal(promoteButton)
+
+            bootstrap.Modal.getOrCreateInstance(userCardModal).show()
+        })
+    }
+</script>
