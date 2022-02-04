@@ -19,6 +19,7 @@
                     <button type="button" class="btn btn-outline-secondary flex-grow-1" data-bs-dismiss="modal">Back</button>
                     <button type="button" class="promoteButton btn btn-success flex-grow-1" data-bs-dismiss="modal">Promote to admin <i class="bi bi-star-fill"></i></button>
                     <button type="button" class="kickButton btn btn-danger flex-grow-1" data-bs-dismiss="modal">Remove from kitchen <i class="bi bi-dash-circle"></i></button>
+                    <button type="button" class="leaveButton btn btn-danger flex-grow-1" data-bs-dismiss="modal">Leave kitchen <i class="bi bi-box-arrow-right"></i></button>
                 </div>
         </div>
     </div>
@@ -31,8 +32,6 @@
     {#const baseConfirmButtonClasses = confirmationModal.querySelector(".confirm-button").className#}
 
     function addUserCardModal(entry) {
-        console.log("add user card modal")
-        console.log(entry.dataset)
         const username = entry.dataset.userCardUsername.replace("@","")
         entry.addEventListener("click", _ => {
             userCardModal.querySelector(".userCardUsername").textContent = entry.dataset.userCardUsername
@@ -45,25 +44,63 @@
             userCardModal.querySelector(".userMemberBadge").style.display = entry.dataset.membershipStatus == "ACTIVE_MEMBERSHIP" ? "inline-block" : "none"
             userCardModal.querySelector(".userProfileAnchor").href = `/profile/${username}`
 
-            let promoteButton = userCardModal.querySelector(".promoteButton")
-            promoteButton.dataset.backBsTarget = "#userCardModal"
-            promoteButton.dataset.modalTitle = `Promote ${entry.dataset.userCardUsername} to admin?`
-            promoteButton.dataset.modalBody = `Are you sure you want to promote ${entry.dataset.userCardUsername}?`
-            promoteButton.dataset.modalConfirmCta = "Promote to admin"
-            promoteButton.dataset.modalConfirmCtaIconClass = "bi bi-star-fill"
-            promoteButton.dataset.action = `{{k_id}}/promote/${username}`
-            promoteButton.dataset.modalConfirmClasses = "btn-success"
-            addConfirmationModal(promoteButton)
+            const promoteButton = userCardModal.querySelector(".promoteButton")
+            console.log("entry.dataset.isYou", entry.dataset.isYou)
+            console.log("entry.dataset.membershipStatus", entry.dataset.membershipStatus)
+            console.log("entry.dataset.showAdminPanel", entry.dataset.showAdminPanel)
+            if (!entry.dataset.isYou && entry.dataset.membershipStatus == "ACTIVE_MEMBERSHIP" && entry.dataset.showAdminPanel) {
+                // the user in the card isn't you, they're not an admin, you're an admin
+                promoteButton.style.display = "inline-block"
 
-            let kickButton = userCardModal.querySelector(".kickButton")
-            kickButton.dataset.backBsTarget = "#userCardModal"
-            kickButton.dataset.modalTitle = `Remove ${entry.dataset.userCardUsername}?`
-            kickButton.dataset.modalBody = `Are you sure you want to remove ${entry.dataset.userCardUsername} from this kitchen?`
-            kickButton.dataset.modalConfirmCta = "Remove from kitchen"
-            kickButton.dataset.modalConfirmCtaIconClass = "bi bi-dash-circle"
-            kickButton.dataset.action = `/memberships/${entry.dataset.membershipId}/delete`
-            kickButton.dataset.modalConfirmClasses = "btn-danger"
-            addConfirmationModal(kickButton)
+                // data for confirmation modal
+                promoteButton.dataset.backBsTarget = "#userCardModal"
+                promoteButton.dataset.modalTitle = `Promote ${entry.dataset.userCardUsername} to admin?`
+                promoteButton.dataset.modalBody = `Are you sure you want to promote ${entry.dataset.userCardUsername}?`
+                promoteButton.dataset.modalConfirmCta = "Promote to admin"
+                promoteButton.dataset.modalConfirmCtaIconClass = "bi bi-star-fill"
+                promoteButton.dataset.action = `{{k.id}}/promote/${username}`
+                promoteButton.dataset.modalConfirmClasses = "btn-success"
+                addConfirmationModal(promoteButton)
+            } else {
+                promoteButton.style.display = "none"
+            }
+
+
+            const kickButton = userCardModal.querySelector(".kickButton")
+            if (!entry.dataset.isYou && entry.dataset.showAdminPanel) {
+                kickButton.style.display = "inline-block"
+
+                // data for confirmation modal
+                kickButton.dataset.backBsTarget = "#userCardModal"
+                kickButton.dataset.modalTitle = `Remove ${entry.dataset.userCardUsername}?`
+                kickButton.dataset.modalBody = `Are you sure you want to remove ${entry.dataset.userCardUsername} from this kitchen?`
+                kickButton.dataset.modalConfirmCta = "Remove from kitchen"
+                kickButton.dataset.modalConfirmCtaIconClass = "bi bi-dash-circle"
+                kickButton.dataset.action = `/memberships/${entry.dataset.membershipId}/delete`
+                kickButton.dataset.modalConfirmClasses = "btn-danger"
+                addConfirmationModal(kickButton)
+            } else {
+                kickButton.style.display = "none"
+            }
+
+            const leaveButton = userCardModal.querySelector(".leaveButton")
+            if (entry.dataset.isYou) {
+                leaveButton.style.display = "inline-block"
+
+                // data for confirmation modal
+                leaveButton.dataset.backBsTarget = "#userCardModal"
+                leaveButton.dataset.modalTitle = `Leave {{k.name}}?`
+                leaveButton.dataset.modalBody = `Are you sure you want to leave this kitchen?`
+                leaveButton.dataset.modalConfirmCta = "Leave"
+                leaveButton.dataset.modalConfirmCtaIconClass = "bi bi-box-arrow-right"
+                leaveButton.dataset.action = `/memberships/${entry.dataset.membershipId}/delete`
+                leaveButton.dataset.modalConfirmClasses = "btn-danger"
+                addConfirmationModal(leaveButton)
+            } else {
+                leaveButton.style.display = "none"
+            }
+            
+
 
             bootstrap.Modal.getOrCreateInstance(userCardModal).show()
         })

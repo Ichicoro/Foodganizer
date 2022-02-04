@@ -167,6 +167,9 @@
                             data-user-card-username="@{{ m.user.username }}"
                             data-membership-status="{{ m.status }}"
                             data-membership-id="{{m.id}}"
+                            {% if m.user == user %}data-is-you="true"{% endif %}
+                            {% if user_membership.status == "ADMIN" %}data-show-admin-panel="true"{% endif %}
+                            
                             {% if m.user.email %}
                                data-user-card-email="{{ m.user.email }}"
                             {% endif %}
@@ -363,5 +366,5 @@
 
     {% include "components/kitchen-forms/edit-cartitem-modal.html" with form=edit_shopping_cart_item_form id=kitchen.id %}
 
-    {% include "components/kitchen-forms/user-card-modal.html" with k_id=kitchen.id %}
+    {% include "components/kitchen-forms/user-card-modal.html" with k=kitchen %}
 {% endblock %}

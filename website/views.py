@@ -183,7 +183,8 @@ def new_kitchen(request):
 def kitchen(request, id):
     try:
         k: Kitchen = _get_kitchen(request, id)
-    except Kitchen.DoesNotExist:
+        user_membership = request.user.membership_set.get(kitchen=k)
+    except (Kitchen.DoesNotExist, Membership.DoesNotExist):
         return redirect('kitchens')
 
     memberships = k.membership_set.filter(status__in=[MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN])
@@ -209,6 +210,7 @@ def kitchen(request, id):
 
     return render(request, 'pages/kitchen.html', {
         'kitchen': k,
+        'user_membership': user_membership,
         'memberships': memberships,
         'pending_memberships': pending_memberships,
         'stored_items': stored_items,
