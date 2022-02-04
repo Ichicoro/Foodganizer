@@ -18,7 +18,7 @@
                 <div class="modal-footer d-flex border-top-0">
                     <button type="button" class="btn btn-outline-secondary flex-grow-1" data-bs-dismiss="modal">Back</button>
                     <button type="button" class="promoteButton btn btn-success flex-grow-1" data-bs-dismiss="modal">Promote to admin <i class="bi bi-star-fill"></i></button>
-                    <button type="button" class="btn btn-danger flex-grow-1" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#removePostitModal">Remove from kitchen <i class="bi bi-dash-circle"></i></button>
+                    <button type="button" class="kickButton btn btn-danger flex-grow-1" data-bs-dismiss="modal">Remove from kitchen <i class="bi bi-dash-circle"></i></button>
                 </div>
         </div>
     </div>
@@ -51,9 +51,19 @@
             promoteButton.dataset.modalBody = `Are you sure you want to promote ${entry.dataset.userCardUsername}?`
             promoteButton.dataset.modalConfirmCta = "Promote to admin"
             promoteButton.dataset.modalConfirmCtaIconClass = "bi bi-star-fill"
-            promoteButton.dataset.action = "promote/"+username
+            promoteButton.dataset.action = `{{k_id}}/promote/${username}`
             promoteButton.dataset.modalConfirmClasses = "btn-success"
             addConfirmationModal(promoteButton)
+
+            let kickButton = userCardModal.querySelector(".kickButton")
+            kickButton.dataset.backBsTarget = "#userCardModal"
+            kickButton.dataset.modalTitle = `Remove ${entry.dataset.userCardUsername}?`
+            kickButton.dataset.modalBody = `Are you sure you want to remove ${entry.dataset.userCardUsername} from this kitchen?`
+            kickButton.dataset.modalConfirmCta = "Remove from kitchen"
+            kickButton.dataset.modalConfirmCtaIconClass = "bi bi-dash-circle"
+            kickButton.dataset.action = `/memberships/${entry.dataset.membershipId}/delete`
+            kickButton.dataset.modalConfirmClasses = "btn-danger"
+            addConfirmationModal(kickButton)
 
             bootstrap.Modal.getOrCreateInstance(userCardModal).show()
         })
