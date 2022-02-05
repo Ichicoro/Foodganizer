@@ -58,7 +58,7 @@
                 promoteButton.dataset.modalBody = `Are you sure you want to promote ${entry.dataset.userCardUsername}?`
                 promoteButton.dataset.modalConfirmCta = "Promote to admin"
                 promoteButton.dataset.modalConfirmCtaIconClass = "bi bi-star-fill"
-                promoteButton.dataset.action = `{{k.id}}/promote/${username}`
+                promoteButton.dataset.action = `/memberships/${entry.dataset.membershipId}/promote`
                 promoteButton.dataset.modalConfirmClasses = "btn-success"
                 addConfirmationModal(promoteButton)
             } else {
@@ -91,7 +91,7 @@
                 leaveButton.dataset.backBsTarget = "#userCardModal"
                 leaveButton.dataset.modalTitle = `Leave {{k.name}}?`
                 leaveButton.dataset.modalBody = `Are you sure you want to leave this kitchen?`
-                leaveButton.dataset.modalConfirmCta = "Leave"
+                leaveButton.dataset.modalConfirmCta = `/memberships/${entry.dataset.membershipId}/delete`//"Leave"
                 leaveButton.dataset.modalConfirmCtaIconClass = "bi bi-box-arrow-right"
                 leaveButton.dataset.action = `/memberships/${entry.dataset.membershipId}/delete`
                 leaveButton.dataset.modalConfirmClasses = "btn-danger"

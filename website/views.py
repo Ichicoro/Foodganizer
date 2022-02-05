@@ -622,6 +622,34 @@ def delete_membership(request, id):
         return redirect('kitchen', id=k.id)
 
 
+@require_POST
+def promote_membership(request, id):
+    try:
+        m: Membership = Membership.objects.get(id=id)
+        if request.user == m.user:
+            messages.error(request, "You can't promote yourself")
+            return redirect('kitchen', id=m.kitchen.id)
+        else:
+            k: Kitchen = _get_kitchen(request, m.kitchen.id, status__in=[MembershipStatus.ADMIN])
+    except Membership.DoesNotExist:
+        return redirect('kitchens')
+    except Kitchen.DoesNotExist:
+        messages.error(request, "You don't have the required permissions")
+        return redirect('kitchen', id=m.kitchen.id)
+    
+    if m.status == MembershipStatus.ADMIN:
+        messages.error(request, f"@{m.user.username} is already an admin of {m.kitchen.name}")
+        return redirect('kitchen', id=m.kitchen.id)
+    elif m.status == MembershipStatus.ACTIVE_MEMBERSHIP:
+        m.status = MembershipStatus.ADMIN
+        m.save()
+        messages.success(request, f"@{m.user.username} promoted to admin")
+        return redirect('kitchen', id=m.kitchen.id)
+    else:
+        messages.error(request, f"@{m.user.username} is not a member of {m.kitchen.name}")
+        return redirect('kitchen', id=m.kitchen.id)
+
+
 @login_required
 def create_postit(request, id):
     k = _get_kitchen(request, id)

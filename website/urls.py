@@ -22,6 +22,7 @@ urlpatterns = [
     path('kitchens/<int:id>', views.kitchen, name='kitchen'),
     path('kitchens/<int:id>/invite', views.invite_users, name='kitchen_invite_users'),
     path('memberships/<int:id>/delete', views.delete_membership, name='delete_membership'),
+    path('memberships/<int:id>/promote', views.promote_membership, name='promote_membership'),
     path('kitchens/<int:id>/share', views.set_kitchen_sharing, name='set_kitchen_sharing'),
     path('kitchens/<int:id>/join', views.join_kitchen, name='join_kitchen'),
 
