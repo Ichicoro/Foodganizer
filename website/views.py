@@ -463,7 +463,7 @@ def delete_customitem_kitchen(request, id, item_id):
 @require_POST
 def invite_users(request, id):
     try:
-        k = _get_kitchen(request, id)
+        k = _get_kitchen(request, id, status__in=[MembershipStatus.ADMIN])
     except Kitchen.DoesNotExist:
         return redirect('kitchens')
 
@@ -505,7 +505,7 @@ def join_kitchen(request, id):
 @login_required
 def set_kitchen_sharing(request, id):
     try:
-        k: Kitchen = _get_kitchen(request, id)
+        k: Kitchen = _get_kitchen(request, id, status__in=[MembershipStatus.ADMIN])
     except ObjectDoesNotExist:
         return redirect('kitchens')
 
