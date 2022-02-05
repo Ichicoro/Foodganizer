@@ -9,7 +9,7 @@ urlpatterns = [
     path('signup', views.signup, name='signup'),
     path('login', auth_views.LoginView.as_view(), name='login'),
     path('profile', views.profile, name='profile'),
-    path('profile/<slug:username>', views.view_profile, name='otherprofile'),  # TODO: create separate view, this is currently useless
+    path('profile/<slug:username>', views.view_profile, name='otherprofile'),
     path('quaggatest', views.quaggatest, name='quaggatest'),
     path('logout', auth_views.LogoutView.as_view(
         extra_context={
