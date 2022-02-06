@@ -19,7 +19,7 @@ from django.views.decorators.http import require_POST
 # Create your views here.
 from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm, NewPostItForm, \
     AddShoppingCartItemForm, UpdateShoppingCartItemForm
-from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UserRegisterForm, InviteExistingUsers
+from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UpdateKitchenForm, UserRegisterForm, InviteExistingUsers
 
 
 def _get_kitchen(request, id, status__in: List[MembershipStatus] = None):
@@ -208,6 +208,23 @@ def kitchen(request, id):
     share_kitchen_post["enable_kitchen_sharing_link"] = k.public_access_uuid != None
     share_kitchen_post["join_confirmation_needed"] = k.join_confirmation
 
+    
+    open_edit_kitchen_name = False
+    if user_membership.status == MembershipStatus.ADMIN:
+        if request.method == 'POST':
+            update_kitchen_form = UpdateKitchenForm(request.POST)
+            print(request.POST)
+            if update_kitchen_form.is_valid():
+                form_kitchen: Kitchen = update_kitchen_form.save()
+                k.name = form_kitchen.name
+                k.save()
+            else:
+                open_edit_kitchen_name = True
+        else:
+            update_kitchen_form = UpdateKitchenForm()
+    else:
+        update_kitchen_form = None
+
     return render(request, 'pages/kitchen.html', {
         'kitchen': k,
         'user_membership': user_membership,
@@ -219,6 +236,8 @@ def kitchen(request, id):
         'update_item_form': UpdateStoredItemForm(),
         'postit': postit,
         'new_postit_form': NewPostItForm(),
+        'open_edit_kitchen_name': open_edit_kitchen_name,
+        'update_kitchen_form': update_kitchen_form if (update_kitchen_form) else None,
         'invite_users_form': InviteExistingUsers(invite_users_post),
         'invite_users_form_open': invite_users_form_open,
         'share_kitchen_form': ShareKitchenForm(share_kitchen_post),

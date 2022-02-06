@@ -153,11 +153,59 @@
             addUserCardModal(entry)
          })
     </script>
+    <script>
+        // Edit kitchen name buttons
+        function editKitchenName() {
+            $$(".editName").classList.replace("d-inline-block", "d-none")
+            $$("#kitchenName").classList.replace("d-inline-block", "d-none")
+            $$("#editKitchenNameForm").classList.replace("d-none", "d-inline-block")
+            const element = $$("#id_name")
+            element.focus()
+            setCursorToEnd(element)
+        } 
+        function discardKitchenName() {
+            $$(".editName").classList.replace("d-none", "d-inline-block")
+            $$("#kitchenName").classList.replace("d-none", "d-inline-block")
+            $$("#editKitchenNameForm").classList.replace("d-inline-block", "d-none")
+        } 
+
+        {% if open_edit_kitchen_name %}
+            $$onReady(() => editKitchenName())
+        {% endif %}
+
+        function setCursorToEnd(element) {
+            const value = element.value
+            element.value = null
+            element.value = value
+        }
+    </script>
 {% endblock %}
 
 {% block body %}
     <div class="container-fluid mw-md mb-5">
-        <h1 class="mb-3">{{ kitchen.name }}</h1>
+        <div>
+            <h1 id="kitchenName" style="padding-bottom: 6px" class="mb-3 d-inline-block">{{ kitchen.name }}</h1>
+            {% if user_membership.status == "ADMIN" %}
+                <form novalidate method="POST" id="editKitchenNameForm" class="d-none">
+                    {% csrf_token %}
+                    <div class="d-inline-block">
+                        <input class="h1 mb-3" value="{{kitchen.name}}" type="text" name="name" maxlength="255" required="" id="id_name">
+                    </div>
+                    <div class="d-inline-block">
+                        <button type="button" onClick="discardKitchenName()" class="btn mb-3"><i class="h3 text-danger bi bi-x-lg"></i></button>
+                        <button type="submit" class="btn confirm-button mb-3"><i class="h3 text-success bi bi-check-lg"></i></button>
+                    </div>
+                    {% if  update_kitchen_form.name.errors %}
+                        <ul class="errorlist text-danger d-block">
+                            {% for error in update_kitchen_form.name.errors %}
+                                {{ error|escape }}
+                                {% endfor %}
+                        </ul>
+                    {% endif %}
+                </form>
+                <button type="button" onClick="editKitchenName()" class="btn editName d-inline-block mb-3"><i class="h3 text-muted bi bi-pencil"></i></button>
+            {% endif %}
+        </div> 
         <div class="row">
             <div class="col-md-6 col-sm-12 mb-4">
                 <h3>Members</h3>
