@@ -133,6 +133,9 @@ def profile(request):
         user_form = UpdateUserForm(data=request.POST, instance=request.user, files=request.FILES)
         if user_form.is_valid():
             user_form.save()
+            return redirect("profile")
+        else:
+            messages.error(request, user_form.errors)
     else:
         user_form = UpdateUserForm(instance=request.user)
 
