@@ -259,7 +259,7 @@
                                 <i class="bi bi-upc-scan"></i>
                             </button>
                             <input class="form-control d-none" type="file" accept="image/*" capture="camera" id="scan-file-input" />
-                            <input type="number" min="0" id="item-add_barcode-input" oninput="validity.valid||(value='');" class="form-control monospaced" />
+                            <input type="number" maxlength="13" size="13" min="0" id="item-add_barcode-input" oninput="validity.valid||(value='');" class="form-control monospaced" />
                             <button class="btn btn-primary" id="item-add_barcode-search">
                                 <i class="bi bi-search"></i>
                             </button>
@@ -332,7 +332,7 @@
                     </div>
                     <div class="modal-footer d-flex-grow-1-child">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
-                        <button type="submit" class="btn btn-success" id="codeNotFoundModalSuccessButton">Create</button>
+                        <button type="submit" class="btn btn-success">Create</button>
                     </div>
                 </form>
             </div>

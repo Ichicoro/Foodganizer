@@ -49,7 +49,7 @@ class User(AbstractUser):
 
 
 class Item(models.Model):
-    upc = models.CharField(max_length=12, blank=True) 
+    upc = models.CharField(max_length=13, blank=True)
     # TODO: create form validation for integer only https://stackoverflow.com/questions/60966095/django-charfield-accepting-only-numbers
     # TODO: accept only upc_a or upc_e https://en.wikipedia.org/wiki/Universal_Product_Code
     title = models.CharField(max_length=255)

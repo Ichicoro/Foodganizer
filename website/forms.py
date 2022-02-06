@@ -95,11 +95,19 @@ class NewKitchenItemForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(NewKitchenItemForm, self).__init__(*args, **kwargs)
         self.fields['upc'].label = "EAN-13 / UPC"
+        self.fields['upc'].max_length = 13
 
     upc = forms.CharField(max_length=13, required=False)
+    image = forms.ImageField(required=False)
 
     class Meta:
         model = Item
+        widgets = {
+            'upc': forms.TextInput(attrs={
+                'size': 13,
+                'maxlength': 13
+            })
+        }
         fields = ['upc', 'title', 'description', 'image']
 
 

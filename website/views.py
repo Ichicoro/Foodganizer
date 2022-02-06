@@ -12,6 +12,8 @@ from django.contrib import messages
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.db.models import ProtectedError, ObjectDoesNotExist
+from requests import Response
+
 from .models import Item, Kitchen, Membership, StoredItem, User, MembershipStatus, ShoppingCartItem
 from django.forms.models import model_to_dict
 from django.views.decorators.http import require_POST
@@ -435,6 +437,10 @@ def new_kitchen_item(request, id):
         messages.success(request, f'Item {i} added successfully to {k}!')
         next_url = request.GET.get("next", reverse("add_storeditem_kitchen", args={id}))
         return redirect(next_url)
+    else:
+        print(form.errors)
+        messages.error(request, f"{form.errors}")
+        return redirect('kitchen', id=id)
 
 
 @login_required
