@@ -91,6 +91,12 @@ class NewKitchenForm(ModelForm):
         fields = ['name', 'invite_other_users']
 
 
+class UpdateKitchenForm(ModelForm):
+    class Meta:
+        model = Kitchen
+        fields = ['name']
+
+
 class NewKitchenItemForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(NewKitchenItemForm, self).__init__(*args, **kwargs)

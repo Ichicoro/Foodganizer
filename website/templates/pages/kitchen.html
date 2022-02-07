@@ -145,82 +145,206 @@
                 new bootstrap.Modal(cartItemModalEl).show()
             })
         })
+
+
+
+         {# Members user card modals #}
+         $$all(".members-list .member-entry").forEach(entry => {
+            addUserCardModal(entry)
+         })
+    </script>
+    <script>
+        // Edit kitchen name buttons
+        function editKitchenName() {
+            $$(".editName").classList.replace("d-inline-block", "d-none")
+            $$("#kitchenName").classList.replace("d-inline-block", "d-none")
+            $$("#editKitchenNameForm").classList.replace("d-none", "d-inline-block")
+            const element = $$("#id_name")
+            element.focus()
+            setCursorToEnd(element)
+        } 
+        function discardKitchenName() {
+            $$(".editName").classList.replace("d-none", "d-inline-block")
+            $$("#kitchenName").classList.replace("d-none", "d-inline-block")
+            $$("#editKitchenNameForm").classList.replace("d-inline-block", "d-none")
+        } 
+
+        {% if open_edit_kitchen_name %}
+            $$onReady(() => editKitchenName())
+        {% endif %}
+
+        function setCursorToEnd(element) {
+            const value = element.value
+            element.value = null
+            element.value = value
+        }
+    </script>
+    <script>
+        function copyToClipboard(element) {
+            const link = element.dataset.link
+            if (link) {
+                navigator.clipboard.writeText(link)
+                element.innerHTML = '<i class="bi bi-clipboard-check"></i>&nbsp;&nbsp;Copied!'
+                element.blur()
+            }
+        }
     </script>
 {% endblock %}
 
 {% block body %}
     <div class="container-fluid mw-md mb-5">
-        <h1 class="mb-3">{{ kitchen.name }}</h1>
+        <div>
+            <h1 id="kitchenName" style="padding-bottom: 6px" class="mb-3 d-inline-block">{{ kitchen.name }}</h1>
+            {% if user_membership.status == "ADMIN" %}
+                <form novalidate method="POST" id="editKitchenNameForm" class="d-none">
+                    {% csrf_token %}
+                    <div class="d-inline-block">
+                        <input class="h1 mb-3" value="{{kitchen.name}}" type="text" name="name" maxlength="255" required="" id="id_name">
+                    </div>
+                    <div class="d-inline-block">
+                        <button type="button" onClick="discardKitchenName()" class="btn mb-3"><i class="h3 text-danger bi bi-x-lg"></i></button>
+                        <button type="submit" class="btn confirm-button mb-3"><i class="h3 text-success bi bi-check-lg"></i></button>
+                    </div>
+                    {% if  update_kitchen_form.name.errors %}
+                        <ul class="errorlist text-danger d-block">
+                            {% for error in update_kitchen_form.name.errors %}
+                                {{ error|escape }}
+                                {% endfor %}
+                        </ul>
+                    {% endif %}
+                </form>
+                <button type="button" onClick="editKitchenName()" class="btn editName d-inline-block mb-3"><i class="h3 text-muted bi bi-pencil"></i></button>
+            {% endif %}
+        </div> 
         <div class="row">
             <div class="col-md-6 col-sm-12 mb-4">
                 <h3>Members</h3>
-                <div class="list-group mb-4">
+                <div class="list-group mb-4 members-list">
                     {% for m in memberships %}
-                        <a class="list-group-item list-group-item-action" href="{% url 'otherprofile' username=m.user.username %}">
+                        <div class="list-group-item">
                             <div class="d-flex my-1">
-                                <div class="rounded-user-pic-container card3d me-3">
-                                    <img class="rounded ratio-1x1 image-48" src="/static/media/{% firstof m.user.profile_pic "question_mark.png" %}" />
-                                </div>
-                                <div class="me-auto">
-                                    <div class="fw-bold mb-0">@{{ m.user.username }} {% if m.user == user %}(You){% endif %}</div>
-                                    {% if m.user.first_name or m.user.last_name %}
-                                        <span>Full name: <b>{{ m.user.first_name }} {{m.user.last_name}}</b></span><br />
-                                    {% endif %}
-                                    {% if m.user.email %}
-                                        <span>Email: <span class="monospaced">{{ m.user.email }}</span></span>
-                                    {% endif %}
-                                </div>
-                                {% if m.status == 'ADMIN' %}
-                                    <div>
-                                        <span class="badge rounded-pill bg-danger">Admin</span>
+                                {% comment %} <a href="{% url 'otherprofile' username=m.user.username %}"> {% endcomment %}
+                                    <div class="rounded-user-pic-container card3d me-3">
+                                        <a  href="{% url 'otherprofile' username=m.user.username %}">
+                                            <img class="rounded ratio-1x1 image-48" src="/static/media/{% firstof m.user.profile_pic "question_mark.png" %}" />
+                                        </a>
                                     </div>
-                                {% endif %}
+                                    <div class="me-auto">
+                                        <div class="fw-bold mb-0"><a class="text-reset"  href="{% url 'otherprofile' username=m.user.username %}">@{{ m.user.username }}</a> {% if m.user == user %}(You){% endif %}</div>
+                                        {% if m.user.first_name or m.user.last_name %}
+                                            <span>Full name: <b>{{ m.user.first_name }} {{m.user.last_name}}</b></span><br />
+                                        {% endif %}
+                                        {% if m.user.email %}
+                                            <span>Email: <span class="monospaced">{{ m.user.email }}</span></span>
+                                        {% endif %}
+                                    </div>
+                                {% comment %} </a> {% endcomment %}
+                                <div>
+                                    {% if m.status == 'ADMIN' %}
+                                        <span class="badge rounded-pill bg-danger">Admin</span>
+                                    {% endif %}
+                                    <button class="member-entry btn p-0"
+                                        data-user-card-username="@{{ m.user.username }}"
+                                        data-membership-status="{{ m.status }}"
+                                        data-membership-id="{{m.id}}"
+                                        {% if m.user == user %}data-is-you="true"{% endif %}
+                                        {% if user_membership.status == "ADMIN" %}data-show-admin-panel="true"{% endif %}
+                                        {% if m.user.email %}
+                                        data-user-card-email="{{ m.user.email }}"
+                                        {% endif %}
+                                        {% if m.user.first_name or m.user.last_name %}
+                                        data-user-card-name="{{ m.user.first_name }} {{m.user.last_name}}"
+                                        {% endif %}
+                                    >
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </a>
+                        </div>
                     {% empty %}
                         <li class="list-group-item">
                             No users
                         </li>
                     {% endfor %}
-                    <a onClick='new bootstrap.Modal($$("#inviteUsersModal")).show()' class="list-group-item list-group-item-action list-group-item-success text-center" id="invite-user-btn">
-                        <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Invite user
-                    </a>
+                    {% if user_membership.status == "ADMIN" %}
+                        <a onClick='new bootstrap.Modal($$("#inviteUsersModal")).show()' class="list-group-item list-group-item-action list-group-item-success text-center" id="invite-user-btn">
+                            <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Invite user
+                        </a>
+                    {% endif %}
                 </div>
+
+                {% if kitchen.public_access_uuid %}
+                <h3>Share kitchen <i class="bi bi-share-fill ms-1"></i></h3>
+                <h6>Invite other users to join this kitchen</h6>
+                <div class="p-3 mb-3 d-flex justify-content-between align-items-stretch">
+                    <button data-link="{{ share_kitchen_url }}" onclick="copyToClipboard(this)" class="me-5 flex-grow-1 btn btn-dark text-center">
+                        <i class="bi bi-clipboard"></i>&nbsp;&nbsp;Copy link
+                    </button>
+                    <h6 class="mb-0 me-5 align-self-center"> or </h6>
+                    <a class="me-4 btn btn-dark  text-center" target="_blank" href="https://api.whatsapp.com/send?{{ whatsapp_share_query_params }}" data-action="share/whatsapp/share">
+                        <i class="bi bi-whatsapp"></i>
+                    </a>
+                    <a class="me-4 btn btn-dark  text-center" target="_blank" href="https://t.me/share/url?{{ telegram_share_query_params }}">
+                        <i class="bi bi-telegram"></i>
+                    </a>
+                    <a href="mailto:?{{ email_share_query_params }}" class="btn btn-dark  text-center">
+                        <i class="bi bi-envelope"></i>
+                    </a>
+                    
+                </div>
+                {% endif %}
+
                 {% if pending_memberships %}
                 <h3>Pending members</h3>
                 <div class="list-group mb-4">
                     {% for pm in pending_memberships %}
                         {% if pm.status == 'PENDING_JOIN_REQUEST'  %}
-                            <div class="list-group-item border-bottom-0 rounded-top">
-                                @{{ pm.user.username }} wants to join your kitchen
-                            </div>
-                            <div class="d-flex flex-direction-column mb-3">
-                                <form class="flex-grow-1" action="{% url 'delete_membership' id=pm.id %}" method="POST">
-                                    {% csrf_token %}
-                                    <button type="submit" class="list-group-item list-group-item-action text-center w-100 py-1 rounded-bottom-start">
-                                        <i class="bi bi-x-lg"></i>&nbsp;&nbsp;Decline
-                                    </button>
-                                </form>
-                                <form class="flex-grow-1" action="{% url 'kitchen_invite_users' id=kitchen.id %}" method="POST">
-                                    {% csrf_token %}
-                                    <input name="invite_other_users" type="hidden" value="{{pm.user.username}}"></input>
-                                    <button type="submit" class="list-group-item list-group-item-success list-group-item-action text-center w-100 py-1 rounded-bottom-end">
-                                        <i class="bi bi-check-lg"></i>&nbsp;&nbsp;Accept
-                                    </button>
-                                </form>
-                            </div>
+                            {% if user_membership.status == "ADMIN" %}
+                                <div class="list-group-item border-bottom-0 rounded-top">
+                                    <a style="color: inherit" href="{% url 'otherprofile' username=pm.user.username %}">@{{ pm.user.username }}</a> wants to join your kitchen
+                                </div>
+                                <div class="d-flex flex-direction-column mb-3">
+                                    <form class="flex-grow-1" action="{% url 'delete_membership' id=pm.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button type="submit" class="list-group-item list-group-item-action text-center w-100 py-1 rounded-bottom-start">
+                                            <i class="bi bi-x-lg"></i>&nbsp;&nbsp;Decline
+                                        </button>
+                                    </form>
+                                    <form class="flex-grow-1" action="{% url 'kitchen_invite_users' id=kitchen.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <input name="invite_other_users" type="hidden" value="{{pm.user.username}}"></input>
+                                        <button type="submit" class="list-group-item list-group-item-success list-group-item-action text-center w-100 py-1 rounded-bottom-end">
+                                            <i class="bi bi-check-lg"></i>&nbsp;&nbsp;Accept
+                                        </button>
+                                    </form>
+                                </div>
+                                <br/>
+                            {% else %}
+                                <div class="list-group-item rounded mb-3">
+                                    <a style="color: inherit" href="{% url 'otherprofile' username=pm.user.username %}">@{{ pm.user.username }}</a> wants to join your kitchen, waiting for admin's approval
+                                </div>
+                                <br/>
+                            {% endif %}
                         {% elif pm.status == 'PENDING_INVITATION'  %}
-                            <div class="list-group-item border-bottom-0 rounded-top">
-                                @{{ pm.user.username }} has been invited, waiting for their response
-                            </div>
-                            <div class="d-flex flex-direction-column mb-3">
-                                <form class="flex-grow-1" action="{% url 'delete_membership' id=pm.id %}" method="POST">
-                                    {% csrf_token %}
-                                    <button type="submit" class="list-group-item list-group-item-action text-center w-100 py-1 rounded-bottom">
-                                        <i class="bi bi-arrow-counterclockwise"></i>&nbsp;&nbsp;Retract invitation
-                                    </button>
-                                </form>
-                            </div>
+                            {% if user_membership.status == "ADMIN" %}
+                                <div class="list-group-item border-bottom-0 rounded-top">
+                                    <a style="color: inherit" href="{% url 'otherprofile' username=pm.user.username %}">@{{ pm.user.username }}</a> has been invited, waiting for their response
+                                </div>
+                                <div class="d-flex flex-direction-column mb-3">
+                                    <form class="flex-grow-1" action="{% url 'delete_membership' id=pm.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button type="submit" class="list-group-item list-group-item-action text-center w-100 py-1 rounded-bottom">
+                                            <i class="bi bi-arrow-counterclockwise"></i>&nbsp;&nbsp;Retract invitation
+                                        </button>
+                                    </form>
+                                </div>
+                                <br/>
+                            {% else %}
+                                <div class="list-group-item rounded mb-3">
+                                    <a style="color: inherit" href="{% url 'otherprofile' username=pm.user.username %}">@{{ pm.user.username }}</a> has been invited, waiting for their response
+                                </div>
+                                <br/>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 </div>
@@ -345,11 +469,13 @@
 
     {% include "components/kitchen-forms/remove-item-modal.html" with id=kitchen.id remove_item_form=remove_item_form %}
 
-    {% include "components/kitchen-forms/invite-users-modal.html" with invite_users_form=invite_users_form kitchen=kitchen %}
+    {% include "components/kitchen-forms/invite-users-modal.html" with invite_users_form=invite_users_form kitchen=kitchen share_kitchen_url=share_kitchen_url%}
 
     {% include "components/kitchen-forms/newedit-postit-modal.html" with new_postit_form=new_postit_form id=kitchen.id %}
 
     {% include "components/kitchen-forms/remove-postit-modal.html" with id=kitchen.id %}
 
     {% include "components/kitchen-forms/edit-cartitem-modal.html" with form=edit_shopping_cart_item_form id=kitchen.id %}
+
+    {% include "components/kitchen-forms/user-card-modal.html" with k=kitchen %}
 {% endblock %}

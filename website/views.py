@@ -12,7 +12,6 @@ from django.contrib import messages
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.db.models import ProtectedError, ObjectDoesNotExist
-from requests import Response
 
 from .models import Item, Kitchen, Membership, StoredItem, User, MembershipStatus, ShoppingCartItem
 from django.forms.models import model_to_dict
@@ -21,7 +20,7 @@ from django.views.decorators.http import require_POST
 # Create your views here.
 from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm, NewPostItForm, \
     AddShoppingCartItemForm, UpdateShoppingCartItemForm
-from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UserRegisterForm, InviteExistingUsers
+from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UpdateKitchenForm, UserRegisterForm, InviteExistingUsers
 
 
 def _get_kitchen(request, id, status__in: List[MembershipStatus] = None):
@@ -161,7 +160,6 @@ def view_profile(request, username):
 def new_kitchen(request):
     if request.method == 'POST':
         form = NewKitchenForm(request.POST)
-        print(form)
         if form.is_valid():
             k = form.save()  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
 
@@ -187,7 +185,8 @@ def new_kitchen(request):
 def kitchen(request, id):
     try:
         k: Kitchen = _get_kitchen(request, id)
-    except Kitchen.DoesNotExist:
+        user_membership = request.user.membership_set.get(kitchen=k)
+    except (Kitchen.DoesNotExist, Membership.DoesNotExist):
         return redirect('kitchens')
 
     memberships = k.membership_set.filter(status__in=[MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN])
@@ -211,8 +210,36 @@ def kitchen(request, id):
     share_kitchen_post["enable_kitchen_sharing_link"] = k.public_access_uuid != None
     share_kitchen_post["join_confirmation_needed"] = k.join_confirmation
 
+    if k.public_access_uuid != None:
+        share_url = request.build_absolute_uri(reverse("share_kitchen_link", args=[k.public_access_uuid]))
+        whatsapp_share_query_params = urlencode({"text": f"Hey, join my kitchen on Foodganizer! { share_url }"})
+        telegram_share_query_params = urlencode({"url": share_url,"text": "Hey, join my kitchen on Foodganizer!"}) 
+        email_share_query_params = urlencode({"subject": "Join my kitchen on Foodganizer!","body": f"Hey, join my kitchen on Foodganizer at this link: {share_url}"}).replace("+","%20")
+    else:
+        share_url = None
+        whatsapp_share_query_params = None
+        telegram_share_query_params = None
+        email_share_query_params = None
+
+    open_edit_kitchen_name = False
+    if user_membership.status == MembershipStatus.ADMIN:
+        if request.method == 'POST':
+            update_kitchen_form = UpdateKitchenForm(request.POST)
+            print(request.POST)
+            if update_kitchen_form.is_valid():
+                form_kitchen: Kitchen = update_kitchen_form.save()
+                k.name = form_kitchen.name
+                k.save()
+            else:
+                open_edit_kitchen_name = True
+        else:
+            update_kitchen_form = UpdateKitchenForm()
+    else:
+        update_kitchen_form = None
+
     return render(request, 'pages/kitchen.html', {
         'kitchen': k,
+        'user_membership': user_membership,
         'memberships': memberships,
         'pending_memberships': pending_memberships,
         'stored_items': stored_items,
@@ -221,11 +248,17 @@ def kitchen(request, id):
         'update_item_form': UpdateStoredItemForm(),
         'postit': postit,
         'new_postit_form': NewPostItForm(),
+        'open_edit_kitchen_name': open_edit_kitchen_name,
+        'update_kitchen_form': update_kitchen_form if (update_kitchen_form) else None,
         'invite_users_form': InviteExistingUsers(invite_users_post),
         'invite_users_form_open': invite_users_form_open,
         'share_kitchen_form': ShareKitchenForm(share_kitchen_post),
         'share_kitchen_form_open': share_kitchen_form_open,
-        'edit_shopping_cart_item_form': UpdateShoppingCartItemForm()
+        'edit_shopping_cart_item_form': UpdateShoppingCartItemForm(),
+        'share_kitchen_url': share_url,
+        'whatsapp_share_query_params': whatsapp_share_query_params,
+        'telegram_share_query_params': telegram_share_query_params,
+        'email_share_query_params': email_share_query_params
     })
 
 
@@ -469,7 +502,7 @@ def delete_customitem_kitchen(request, id, item_id):
 @require_POST
 def invite_users(request, id):
     try:
-        k = _get_kitchen(request, id)
+        k = _get_kitchen(request, id, status__in=[MembershipStatus.ADMIN])
     except Kitchen.DoesNotExist:
         return redirect('kitchens')
 
@@ -511,7 +544,7 @@ def join_kitchen(request, id):
 @login_required
 def set_kitchen_sharing(request, id):
     try:
-        k: Kitchen = _get_kitchen(request, id)
+        k: Kitchen = _get_kitchen(request, id, status__in=[MembershipStatus.ADMIN])
     except ObjectDoesNotExist:
         return redirect('kitchens')
 
@@ -626,6 +659,34 @@ def delete_membership(request, id):
             m.delete()
             messages.success(request, f"@{m.user}'s join request has been rejected")
         return redirect('kitchen', id=k.id)
+
+
+@require_POST
+def promote_membership(request, id):
+    try:
+        m: Membership = Membership.objects.get(id=id)
+        if request.user == m.user:
+            messages.error(request, "You can't promote yourself")
+            return redirect('kitchen', id=m.kitchen.id)
+        else:
+            k: Kitchen = _get_kitchen(request, m.kitchen.id, status__in=[MembershipStatus.ADMIN])
+    except Membership.DoesNotExist:
+        return redirect('kitchens')
+    except Kitchen.DoesNotExist:
+        messages.error(request, "You don't have the required permissions")
+        return redirect('kitchen', id=m.kitchen.id)
+    
+    if m.status == MembershipStatus.ADMIN:
+        messages.error(request, f"@{m.user.username} is already an admin of {m.kitchen.name}")
+        return redirect('kitchen', id=m.kitchen.id)
+    elif m.status == MembershipStatus.ACTIVE_MEMBERSHIP:
+        m.status = MembershipStatus.ADMIN
+        m.save()
+        messages.success(request, f"@{m.user.username} promoted to admin")
+        return redirect('kitchen', id=m.kitchen.id)
+    else:
+        messages.error(request, f"@{m.user.username} is not a member of {m.kitchen.name}")
+        return redirect('kitchen', id=m.kitchen.id)
 
 
 @login_required

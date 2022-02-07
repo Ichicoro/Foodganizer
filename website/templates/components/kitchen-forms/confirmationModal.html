@@ -12,7 +12,7 @@
                 <div class="modal-body overflow-hidden pb-2">
                 </div>
                 <div class="modal-footer row d-flex justify-content-center">
-                    <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary col-5 cancel-button">Cancel</button>
+                    <button type="button" data-bs-dismiss="modal" data-bs-toggle="modal" class="modal-cancel-button btn btn-outline-secondary col-5 cancel-button">Cancel</button>
                     <button type="submit" class="btn col-5 confirm-button"></button>
                 </div>
             </form>
@@ -29,11 +29,23 @@
             confirmationModal.querySelector(".modal-title").textContent = entry.dataset.modalTitle
             confirmationModal.querySelector(".modal-body").textContent = entry.dataset.modalBody
             confirmationModal.querySelector(".confirm-button").className = baseConfirmButtonClasses
-            confirmationModal.querySelector(".confirm-button").classList.add(...(entry.dataset.modalConfirmClasses.split(" ")))
+            if (entry.dataset.modalConfirmClasses) {
+                confirmationModal.querySelector(".confirm-button").classList.add(...(entry.dataset.modalConfirmClasses.split(" ")))
+            }
             confirmationModal.querySelector(".confirm-button").textContent = entry.dataset.modalConfirmCta
             confirmationModal.querySelector("form").action = entry.dataset.action 
             confirmationModal.querySelector("form").method = "POST"
-            new bootstrap.Modal(confirmationModal).show()
+
+            confirmationModal.querySelector(".modal-cancel-button").dataset.bsTarget = entry.dataset.backBsTarget
+
+            if (entry.dataset.modalConfirmCtaIconClass) {
+                // if modalConfirmCtaIconClass = "bi bi-star-fill" append <i class="bi bi-star-fill"></i> tag in the confirm button
+                let icon = document.createElement("i")
+                icon.classList.add(...(entry.dataset.modalConfirmCtaIconClass.split(" ")), "ms-1")
+                confirmationModal.querySelector(".confirm-button").appendChild(icon)
+            }
+            
+            bootstrap.Modal.getOrCreateInstance(confirmationModal).show()
         })
     } 
 </script>
