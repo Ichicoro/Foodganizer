@@ -1,19 +1,10 @@
 .fg-header
   //background-color: rgba(0,0,0,0.1)
-  background-color: var(--bs-gray-dark) //rgba(59,59,59,0.5)
+  //background-color: var(--bs-gray-dark) //rgba(59,59,59,0.5)
+  background-color: #121212d8 !important
   backdrop-filter: blur(10px)
   --webkit-backdrop-filter: blur(10px)
-  //position: fixed
-  //top: 0
-  //left: 0
-  //right: 0
-  //height: 44px
-  //vertical-align: center
-  //padding: 0 5px
-  //display: flex
-  //justify-content: space-between
-  //align-items: center
-  //z-index: 99999
+
 .navbar-toggler
   border: 0
   margin-right: -5px !important
@@ -26,15 +17,6 @@
   --webkit-backdrop-filter: blur(10px)
   transition: .15s
 
-
-  //& a
-  //  text-decoration: none
-  //  color: var(--text-color-main)
-  //  transition: 0.3s
-  //  cursor: pointer
-  //
-  //  &:hover
-  //    color: var(--text-color-hover)
 
 .fg-header_container
   flex-grow: 1
@@ -113,11 +95,15 @@
   &:hover
     color: rgba(255,255,255,.75) !important
 
-@media (prefers-color-scheme: dark)
+@supports not (backdrop-filter: none)
   .fg-header
-    background-color: #303030
-  .fg-back-bar
-    background-color: #303030
+    background-color: #121212 !important
+
+//@media (prefers-color-scheme: dark)
+//  .fg-header
+//    background-color: #303030
+//  .fg-back-bar
+//    background-color: #303030
 
 @media (max-width: 480px)
   .fg-header_ham

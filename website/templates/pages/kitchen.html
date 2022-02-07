@@ -385,7 +385,7 @@
                         <a class="list-group-item list-group-item-action stored-item-btn" data-item-id="{{ si.id }}" data-item-is-custom="true" data-item-json="{{ si.item|json }}" data-stored-item-json="{{ si|json }}" data-item-name="{{ si }}">
                             <div class="d-flex my-1">
                                 <div class="card3d si-image me-3">
-                                    <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
+                                    <img src="/static/media/{% firstof si.item.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
                                 </div>
                                 <div class="me-auto">
                                     <div class="fw-bold mb-1">
