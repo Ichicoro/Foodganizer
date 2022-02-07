@@ -456,7 +456,7 @@
 
     {% include "components/kitchen-forms/remove-item-modal.html" with id=kitchen.id remove_item_form=remove_item_form %}
 
-    {% include "components/kitchen-forms/invite-users-modal.html" with invite_users_form=invite_users_form kitchen=kitchen %}
+    {% include "components/kitchen-forms/invite-users-modal.html" with invite_users_form=invite_users_form kitchen=kitchen share_kitchen_url=share_kitchen_url%}
 
     {% include "components/kitchen-forms/newedit-postit-modal.html" with new_postit_form=new_postit_form id=kitchen.id %}
 
