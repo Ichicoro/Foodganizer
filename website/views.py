@@ -208,7 +208,17 @@ def kitchen(request, id):
     share_kitchen_post["enable_kitchen_sharing_link"] = k.public_access_uuid != None
     share_kitchen_post["join_confirmation_needed"] = k.join_confirmation
 
-    
+    if k.public_access_uuid != None:
+        share_url = request.build_absolute_uri(reverse("share_kitchen_link", args=[k.public_access_uuid]))
+        whatsapp_share_query_params = urlencode({"text": f"Hey, join my kitchen on Foodganizer! { share_url }"})
+        telegram_share_query_params = urlencode({"url": share_url,"text": "Hey, join my kitchen on Foodganizer!"}) 
+        email_share_query_params = urlencode({"subject": "Join my kitchen on Foodganizer!","body": f"Hey, join my kitchen on Foodganizer at this link: {share_url}"}).replace("+","%20")
+    else:
+        share_url = None
+        whatsapp_share_query_params = None
+        telegram_share_query_params = None
+        email_share_query_params = None
+
     open_edit_kitchen_name = False
     if user_membership.status == MembershipStatus.ADMIN:
         if request.method == 'POST':
@@ -242,7 +252,11 @@ def kitchen(request, id):
         'invite_users_form_open': invite_users_form_open,
         'share_kitchen_form': ShareKitchenForm(share_kitchen_post),
         'share_kitchen_form_open': share_kitchen_form_open,
-        'edit_shopping_cart_item_form': UpdateShoppingCartItemForm()
+        'edit_shopping_cart_item_form': UpdateShoppingCartItemForm(),
+        'share_kitchen_url': share_url,
+        'whatsapp_share_query_params': whatsapp_share_query_params,
+        'telegram_share_query_params': telegram_share_query_params,
+        'email_share_query_params': email_share_query_params
     })
 
 

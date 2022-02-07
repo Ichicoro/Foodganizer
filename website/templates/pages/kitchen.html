@@ -179,6 +179,16 @@
             element.value = value
         }
     </script>
+    <script>
+        function copyToClipboard(element) {
+            const link = element.dataset.link
+            if (link) {
+                navigator.clipboard.writeText(link)
+                element.innerHTML = '<i class="bi bi-clipboard-check"></i>&nbsp;&nbsp;Copied!'
+                element.blur()
+            }
+        }
+    </script>
 {% endblock %}
 
 {% block body %}
@@ -249,6 +259,28 @@
                         </a>
                     {% endif %}
                 </div>
+
+                {% if kitchen.public_access_uuid %}
+                <h3>Share kitchen <i class="bi bi-share-fill ms-1"></i></h3>
+                <h6>Invite other users to join this kitchen</h6>
+                <div class="p-3 mb-3 d-flex justify-content-between align-items-stretch">
+                    <button data-link="{{ share_kitchen_url }}" onclick="copyToClipboard(this)" class="me-5 flex-grow-1 btn btn-dark text-center">
+                        <i class="bi bi-clipboard"></i>&nbsp;&nbsp;Copy link
+                    </button>
+                    <h6 class="mb-0 me-5 align-self-center"> or </h6>
+                    <a class="me-4 btn btn-dark  text-center" target="_blank" href="https://api.whatsapp.com/send?{{ whatsapp_share_query_params }}" data-action="share/whatsapp/share">
+                        <i class="bi bi-whatsapp"></i>
+                    </a>
+                    <a class="me-4 btn btn-dark  text-center" target="_blank" href="https://t.me/share/url?{{ telegram_share_query_params }}">
+                        <i class="bi bi-telegram"></i>
+                    </a>
+                    <a href="mailto:?{{ email_share_query_params }}" class="btn btn-dark  text-center">
+                        <i class="bi bi-envelope"></i>
+                    </a>
+                    
+                </div>
+                {% endif %}
+
                 {% if pending_memberships %}
                 <h3>Pending members</h3>
                 <div class="list-group mb-4">
