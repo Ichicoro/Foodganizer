@@ -16,3 +16,7 @@ def is_expired(date):
 @register.simple_tag(name='expires_today')
 def expires_today(date):
     return (date - datetime.date.today()).days == 0
+
+@register.simple_tag(name='expires_in_days')
+def expires_in_days(date, days):
+    return (date - datetime.date.today()).days <= days

@@ -394,14 +394,14 @@
                                     <div class="text-muted fst-italic mb-1">{% firstof si.note si.item.description "No description..." %}</div>
                                     {% if si.expiry_date %}
                                         {% is_expired si.expiry_date as has_expired %}
-                                        {% expires_today si.expiry_date as expires_today %}
+                                        {% expires_in_days si.expiry_date 7 as expires_in_a_week %}
                                         {% if has_expired %}
                                             <div class="small text-danger">
                                                 Expired on {{ si.expiry_date|date:"d-m-Y" }} ({{ si.expiry_date|days_until|abs }} days ago)
                                             </div>
-                                        {% elif expires_today %}
+                                        {% elif expires_in_a_week %}
                                             <div class="small text-warning">
-                                                Expires today
+                                                Expires in {{ si.expiry_date|days_until|abs }} days
                                             </div>
                                         {% else %}
                                             <div class="small text-muted">

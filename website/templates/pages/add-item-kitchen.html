@@ -107,7 +107,7 @@
                         return `<a class="list-group-item list-group-item-action add-item-btn" data-item-id="${item.pk}" data-item-name="${item.fields.title}" ${!item.fields.upc ? "data-item-is-custom=\"true\"" : ""}>
                             <div class="d-flex my-1">
                                 <div class="card3d si-image me-3">
-                                    <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
+                                    <img src="/static/media/${item?.fields?.image || "question_mark.png"}" alt="item image" class="rounded ratio-1x1 image-48">
                                 </div>
                                 <div>
                                     <div class="fw-bold mb-1">${item.fields.title}</div>
@@ -273,7 +273,7 @@
                                 <a class="list-group-item list-group-item-action add-item-btn" data-item-id="{{ ci.id }}" data-item-name="{{ ci }}" data-item-is-custom="true">
                                     <div class="d-flex my-1">
                                         <div class="card3d si-image me-3">
-                                            <img src="/static/media/{% firstof si.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
+                                            <img src="/static/media/{% firstof ci.image "question_mark.png" %}" alt="item image" class="rounded ratio-1x1 image-48">
                                         </div>
                                         <div>
                                             <div class="fw-bold mb-1">{{ ci.title }}</div>
@@ -319,7 +319,7 @@
     <div class="modal fade" id="newItemModal" tabindex="-1" aria-labelledby="newItemModal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <form method="POST" action="{% url 'new_kitchen_item' id=kitchen.id %}?next={{ request.path }}" novalidate class="needs-validation">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'new_kitchen_item' id=kitchen.id %}?next={{ request.path }}" novalidate class="needs-validation">
                     <div class="modal-header">
                         <h5 class="modal-title">New<span class="customItemSpan">&nbsp;custom</span> item</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

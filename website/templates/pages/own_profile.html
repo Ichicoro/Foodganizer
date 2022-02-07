@@ -13,7 +13,7 @@
                 </div>
             </div>
             <div class="col-md-9 col-sm-12 mb-5">
-                <h1>{{ user.username }}</h1>
+                <h1 class="monospaced">@{{ user.username }}</h1>
                 <form novalidate method="post" class="needs-validation" enctype="multipart/form-data" action="{% url 'profile' %}">
                     {% csrf_token %}
 
@@ -31,7 +31,7 @@
 
                     <div class="mb-2">
                         <label for="{{ user_form.email.name }}" class="form-label">Email</label>
-                        <input type="email" class="form-control" name="{{ user_form.email.name }}" id="{{ user_form.email.name }}" value="{{ user_form.email.initial }}" required>
+                        <input type="email" class="form-control monospaced" name="{{ user_form.email.name }}" id="{{ user_form.email.name }}" value="{{ user_form.email.initial }}" required>
                         <div class="invalid-feedback">
                             Missing or invalid email
                         </div>
@@ -49,7 +49,8 @@
 
                     <div class="mb-3">
                         <label for="{{ user_form.profile_pic.name }}" class="form-label">Profile pic</label>
-                        <input type="file" class="form-control" name="{{ user_form.profile_pic.name }}" id="{{ user_form.profile_pic.name }}">{% firstof user_form.profile_pic.initial "" %}</input>
+                        <input type="file" class="form-control" name="{{ user_form.profile_pic.name }}" id="{{ user_form.profile_pic.name }}">
+                        {% comment %}{% firstof user_form.profile_pic.initial "" %}{% endcomment %}
                         <div class="invalid-feedback">
                             Error.
                         </div>
@@ -57,8 +58,10 @@
 
                     <input type="hidden" name="next" value="{{ next }}" />
                     <div class="d-flex justify-content-between">
+                        <a href="{% url 'logout' %}">
+                            <button type="button" class="btn btn-danger">Log out</button>
+                        </a>
                         <button type="submit" class="btn btn-success mb-3">Update profile</button>
-                        <a href="{% url 'logout' %}"><button type="button" class="btn btn-danger">Log out</button></a>
                     </div>
 
                 </form>
