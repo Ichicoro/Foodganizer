@@ -63,7 +63,7 @@ class Item(models.Model):
     def __str__(self):
         name = self.title
         print(self.upc)
-        if self.upc != "undefined":
+        if self.upc and self.upc not in ["undefined", ""]:
             name = f"{name} (UPC: {self.upc})"
         return name
 

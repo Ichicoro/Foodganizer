@@ -481,8 +481,10 @@ def new_kitchen_item(request, id):
         print(upc_data)
         if upc_data is None or upc_data == "undefined":
             i.custom_item_kitchen = k
+            messages.success(request, f'Item {i} created successfully in {k}!')
+        else:
+            messages.success(request, f'Item {i} created successfully!')
         i.save()
-        messages.success(request, f'Item {i} added successfully to {k}!')
         next_url = request.GET.get("next", reverse("add_storeditem_kitchen", args={id}))
         return redirect(next_url)
     else:
