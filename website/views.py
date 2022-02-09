@@ -397,7 +397,19 @@ def delete_storeditem_kitchen(request, id):
         form = RemoveStoredItemForm(request.POST, item_set=k.storeditem_set.all())
         print(form.data)
         if form.is_valid():
-            custom_items = form.cleaned_data.get("item").delete()
+            item = form.cleaned_data.get("item")
+            if form.cleaned_data.get("add_to_shopping_list"):
+                curr_time = datetime.now()
+                cart_item = ShoppingCartItem.objects.create(
+                    item=item.item,
+                    kitchen=k,
+                    added_by=request.user,
+                    last_update=curr_time,
+                    created_at=curr_time,
+                    quantity=item.quantity
+                )
+                cart_item.save()
+            item.delete()
             messages.success(request, "Item deleted successfully!")
             return redirect('kitchen', id=id)
         else:
