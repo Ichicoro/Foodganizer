@@ -269,7 +269,7 @@
                     <div class="mb-3">
                         <p class="form-label">Choose from your own (kitchen-specific) items</p>
                         <div class="list-group">
-                            {% for ci in custom_items %}
+                            {% for ci in custom_items|dictsort:"title" %}
                                 <a class="list-group-item list-group-item-action add-item-btn" data-item-id="{{ ci.id }}" data-item-name="{{ ci }}" data-item-is-custom="true">
                                     <div class="d-flex my-1">
                                         <div class="card3d si-image me-3">

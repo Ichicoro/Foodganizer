@@ -381,7 +381,7 @@
             <div class="col-md-6 col-sm-12">
                 <h3>Items</h3>
                 <div class="list-group list-group-item-action">
-                    {% for si in stored_items %}
+                    {% for si in stored_items|dictsort:"item.title" %}
                         <a class="list-group-item list-group-item-action stored-item-btn" data-item-id="{{ si.id }}" data-item-is-custom="true" data-item-json="{{ si.item|json }}" data-stored-item-json="{{ si|json }}" data-item-name="{{ si }}">
                             <div class="d-flex my-1">
                                 <div class="card3d si-image me-3">
@@ -391,7 +391,7 @@
                                     <div class="fw-bold mb-1">
                                         {{ si.item.title }}
                                     </div>
-                                    <div class="text-muted fst-italic mb-1">{% firstof si.note si.item.description "No description..." %}</div>
+                                    <div class="text-muted fst-italic mb-1">{% firstof si.note si.item.description %}</div>
                                     {% if si.expiry_date %}
                                         {% is_expired si.expiry_date as has_expired %}
                                         {% expires_in_days si.expiry_date 7 as expires_in_a_week %}
@@ -434,7 +434,7 @@
             <div class="col-md-6 col-sm-12">
                 <h3 class="mt-3">Shopping Cart</h3>
                 <div class="list-group list-group-item-action">
-                    {% for item in shopping_cart %}
+                    {% for item in shopping_cart|dictsort:"item.title" %}
                         <a class="list-group-item list-group-item-action cart-item-btn" data-item-id="{{ item.id }}" data-item-json="{{ item.item|json }}" data-cart-item-json="{{ item|json }}" data-item-name="{{ item.item.title }}" data-item-desc="{{ item.item.description }}" data-item-added-by="{{ item.added_by.username }}" data-item-quantity="{{ item.quantity }}">
                             <div class="d-flex my-1">
                                 <div class="card3d si-image me-3">
@@ -444,7 +444,7 @@
                                     <div class="fw-bold mb-1">
                                         {{ item.item.title }}
                                     </div>
-                                    <div class="text-muted fst-italic mb-1">{% firstof item.note item.item.description "No description..." %}</div>
+                                    <div class="text-muted fst-italic mb-1">{{ item.item.description }}</div>
                                 </div>
                                 <div style="margin-top: -2.5px; width: 48px; height: 48px" class="text-center font-iosevka">
                                     <p class="small text-muted mb-0">AMOUNT</p>
