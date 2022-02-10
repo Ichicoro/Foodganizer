@@ -352,18 +352,21 @@
                 <div class="mt-3">
                     <h3>Post-It</h3>
                     <div class="list-group">
-                        {% for p in postit %}
+                        {% for p in postit|dictsortreversed:"last_update" %}
                             <span class="list-group-item list-group-item-action postit-listing-btn" data-postit-id="{{ p.id }}" data-postit-text="{{ p.text }}">
                                 <p class="fst-italic mb-2 postit-listing-text">{{ p.text|linebreaksbr }}</p>
                                 <span class="text-muted fst-italic text-decoration-none small">
-                                    &ndash;&nbsp;{{ p.author.username }}
+                                    &ndash;&nbsp;
                                     {% if p.last_edited_by %}
                                         {% if p.author.username == p.last_edited_by.username %}
-                                            (edited)
+                                            {{ p.author.username }} (edited
                                         {% else %}
-                                            (edited by {{ p.last_edited_by.username }})
+                                            {{ p.author.username }} (edited by {{ p.last_edited_by.username }}
                                         {% endif %}
+                                    {% else %}
+                                        {{ p.author.username }} (created
                                     {% endif %}
+                                    on {{ p.last_update|date:"b. d, Y \a\t H:m"|capfirst }})
                                 </span>
                             </span>
                         {% empty %}
