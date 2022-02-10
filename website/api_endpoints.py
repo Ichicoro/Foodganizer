@@ -2,6 +2,7 @@ import json
 
 from django.http import HttpResponse
 from django.core.serializers import serialize
+from django.db.models import Q
 
 from website.models import Item
 
@@ -11,7 +12,7 @@ def search_products(request):
     if not text:
         return None  # TODO: Fix
     # items = []
-    items = Item.objects.filter(title__icontains=text)[:3]
+    items = Item.objects.filter(Q(title__icontains=text) & (Q(custom_item_kitchen__isnull=True) | Q(custom_item_kitchen=8)))[:5]
     items_json = serialize("json", queryset=items) # sanitize_json_encoder_output() no more!
     print(items_json)
     return HttpResponse(items_json)
