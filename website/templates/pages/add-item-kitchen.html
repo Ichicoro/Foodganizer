@@ -140,7 +140,7 @@
 
         $$("#create-private-item-btn").addEventListener("click", _ => {
             $$(".customItemSpan").style.display = ""
-            $$("#id_upc").value = undefined
+            $$("#id_upc").value = ""
             $$("#div_id_upc").style.display = "none"
             new bootstrap.Modal($$("#newItemModal")).show()
         })

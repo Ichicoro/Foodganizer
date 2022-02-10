@@ -469,7 +469,7 @@ def update_storeditem_kitchen(request, id, item_id):
 def new_kitchen_item(request, id):
     try:
         k = _get_kitchen(request, id)
-    except ObjectDoesNotExist:
+    except Kitchen.DoesNotExist:
         return redirect('kitchens')
 
     form = NewKitchenItemForm(request.POST, files=request.FILES)
@@ -478,8 +478,7 @@ def new_kitchen_item(request, id):
         i.added_by = request.user
         print(form.cleaned_data)
         upc_data = form.data["upc"]
-        print(upc_data)
-        if upc_data is None or upc_data == "undefined":
+        if upc_data == "":
             i.custom_item_kitchen = k
             messages.success(request, f'Item {i} created successfully in {k}!')
         else:
@@ -490,7 +489,7 @@ def new_kitchen_item(request, id):
     else:
         print(form.errors)
         messages.error(request, f"{form.errors}")
-        return redirect('kitchen', id=id)
+        return redirect(reverse("add_storeditem_kitchen", args={id}))
 
 
 @login_required

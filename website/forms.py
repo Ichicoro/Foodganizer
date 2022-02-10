@@ -103,7 +103,8 @@ class NewKitchenItemForm(ModelForm):
         self.fields['upc'].label = "EAN-13 / UPC"
         self.fields['upc'].max_length = 13
 
-    upc = forms.CharField(max_length=13, required=False)
+
+    upc = forms.CharField(max_length=13, min_length=12, required=False)
     image = forms.ImageField(required=False)
 
     class Meta:
