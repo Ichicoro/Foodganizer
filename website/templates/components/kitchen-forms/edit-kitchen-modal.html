@@ -1,0 +1,22 @@
+{% load crispy_forms_tags %}
+
+<div class="modal fade" id="editKitchenModal" tabindex="-1" aria-labelledby="editKitchenModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form novalidate method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit kitchen {{ k.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form|crispy }}
+                </div>
+                <div class="modal-footer d-flex">
+                    <button type="button" class="btn btn-secondary flex-grow-0">Cancel</button>
+                    <button type="submit" class="btn btn-success flex-grow-1">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

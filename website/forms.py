@@ -92,9 +92,11 @@ class NewKitchenForm(ModelForm):
 
 
 class UpdateKitchenForm(ModelForm):
+    background_image = forms.ImageField(required=False)
+
     class Meta:
         model = Kitchen
-        fields = ['name']
+        fields = ['name', 'background_image']
 
 
 class NewKitchenItemForm(ModelForm):
