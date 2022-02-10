@@ -78,3 +78,10 @@
 
 .break-spaces *
   white-space: break-spaces // break text on content overflow
+
+
+@each $color in "danger", "warning", "success", "info", "primary", "secondary"
+  .text-#{$color}
+    color: var(--bs-#{$color})
+  .bg-#{$color}
+    background-color: var(--bs-#{$color})
