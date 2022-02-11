@@ -1,9 +1,13 @@
 .fg-header
-  //background-color: rgba(0,0,0,0.1)
-  //background-color: var(--bs-gray-dark) //rgba(59,59,59,0.5)
-  background-color: #121212d8 !important
-  backdrop-filter: blur(10px)
-  --webkit-backdrop-filter: blur(10px)
+  background-color: #121212 !important
+
+@supports (backdrop-filter: none) or (-webkit-backdrop-filter: none)
+  .fg-header
+    //background-color: #121212d8 !important
+    background-color: rgba(0, 0, 0, 0.45) !important
+    backdrop-filter: blur(10px)
+    --webkit-backdrop-filter: blur(10px)
+    border-bottom: 1px solid rgba(18, 18, 18, 0.2)    // todo: should we keep this?
 
 .navbar-toggler
   border: 0

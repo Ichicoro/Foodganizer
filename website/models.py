@@ -91,6 +91,7 @@ class Kitchen(models.Model):
     stored_items = ManyToManyField(Item, through='StoredItem', blank=True)
     public_access_uuid = models.UUIDField(null=True, default=None)
     join_confirmation = models.BooleanField(default=False)
+    background_image = models.ImageField(upload_to='backgrounds', blank=True)
 
     def __str__(self):
         return self.name

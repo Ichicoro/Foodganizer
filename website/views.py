@@ -224,16 +224,14 @@ def kitchen(request, id):
     open_edit_kitchen_name = False
     if user_membership.status == MembershipStatus.ADMIN:
         if request.method == 'POST':
-            update_kitchen_form = UpdateKitchenForm(request.POST)
-            print(request.POST)
+            update_kitchen_form = UpdateKitchenForm(request.POST, instance=k, files=request.FILES)
             if update_kitchen_form.is_valid():
-                form_kitchen: Kitchen = update_kitchen_form.save()
-                k.name = form_kitchen.name
-                k.save()
+                update_kitchen_form.save()
+                return redirect("kitchen", id=k.id)
             else:
                 open_edit_kitchen_name = True
         else:
-            update_kitchen_form = UpdateKitchenForm()
+            update_kitchen_form = UpdateKitchenForm(instance=k)
     else:
         update_kitchen_form = None
 
