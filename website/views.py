@@ -21,6 +21,7 @@ from django.views.decorators.http import require_POST
 from website.forms import UpdateUserForm, AddStoredItemForm, RemoveStoredItemForm, UpdateStoredItemForm, NewPostItForm, \
     AddShoppingCartItemForm, UpdateShoppingCartItemForm
 from .forms import NewKitchenForm, NewKitchenItemForm, ShareKitchenForm, UpdateKitchenForm, UserRegisterForm, InviteExistingUsers
+from .utils import superuser_required
 
 
 def _get_kitchen(request, id, status__in: List[MembershipStatus] = None):
@@ -122,6 +123,7 @@ def signup(request):
     return render(request, 'registration/signup.html', {'form': form}, status=status)
 
 
+@superuser_required
 def quaggatest(request):
     return render(request, "pages/quaggatest.html", {})
 
@@ -213,7 +215,7 @@ def kitchen(request, id):
     if k.public_access_uuid != None:
         share_url = request.build_absolute_uri(reverse("share_kitchen_link", args=[k.public_access_uuid]))
         whatsapp_share_query_params = urlencode({"text": f"Hey, join my kitchen on Foodganizer! { share_url }"})
-        telegram_share_query_params = urlencode({"url": share_url,"text": "Hey, join my kitchen on Foodganizer!"}) 
+        telegram_share_query_params = urlencode({"url": share_url,"text": "Hey, join my kitchen on Foodganizer!"})
         email_share_query_params = urlencode({"subject": "Join my kitchen on Foodganizer!","body": f"Hey, join my kitchen on Foodganizer at this link: {share_url}"}).replace("+","%20")
     else:
         share_url = None
@@ -234,6 +236,9 @@ def kitchen(request, id):
             update_kitchen_form = UpdateKitchenForm(instance=k)
     else:
         update_kitchen_form = None
+
+    shopping_cart_share_text = "Here's your shopping list:\n" \
+                               + "\n".join([f"- {item.quantity}x {item.item.title}" for item in shopping_cart])
 
     return render(request, 'pages/kitchen.html', {
         'kitchen': k,
@@ -256,7 +261,8 @@ def kitchen(request, id):
         'share_kitchen_url': share_url,
         'whatsapp_share_query_params': whatsapp_share_query_params,
         'telegram_share_query_params': telegram_share_query_params,
-        'email_share_query_params': email_share_query_params
+        'email_share_query_params': email_share_query_params,
+        'shopping_cart_share_text': shopping_cart_share_text
     })
 
 
@@ -686,7 +692,7 @@ def promote_membership(request, id):
     except Kitchen.DoesNotExist:
         messages.error(request, "You don't have the required permissions")
         return redirect('kitchen', id=m.kitchen.id)
-    
+
     if m.status == MembershipStatus.ADMIN:
         messages.error(request, f"@{m.user.username} is already an admin of {m.kitchen.name}")
         return redirect('kitchen', id=m.kitchen.id)

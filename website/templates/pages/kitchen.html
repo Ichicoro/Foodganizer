@@ -12,6 +12,20 @@
 {% block head %}
     {% include "csvalidation.html" %}
     <style>
+        .share-group {
+            border-left: 1px solid rgba(250, 250, 250, 0.125) !important;
+            border-right: 1px solid rgba(250, 250, 250, 0.125) !important;
+            border-radius: 0 !important;
+        }
+        .share-group > *:not(:last-child) {
+            border-top: none !important;
+            border-left: none !important;
+            border-bottom: none !important;
+            border-right: 1px solid rgba(250, 250, 250, 0.125) !important;
+        }
+        .share-group > * {
+            border: none !important;
+        }
         {% if kitchen.background_image %}
             /* enable only when backdrop-filter is supported */
             .kitchen-background-image {
@@ -460,7 +474,7 @@
 
             <div class="col-md-6 col-sm-12">
                 <h3 class="mt-3">Shopping Cart</h3>
-                <div class="list-group list-group-item-action">
+                <div class="list-group">
                     {% for item in shopping_cart|dictsort:"item.title" %}
                         <a class="list-group-item list-group-item-action cart-item-btn" data-item-id="{{ item.id }}" data-item-json="{{ item.item|json }}" data-cart-item-json="{{ item|json }}" data-item-name="{{ item.item.title }}" data-item-desc="{{ item.item.description }}" data-item-added-by="{{ item.added_by.username }}" data-item-quantity="{{ item.quantity }}">
                             <div class="d-flex my-1">
@@ -484,6 +498,12 @@
                             <i class="text-muted"><i class="bi bi-"></i>No items</i>
                         </a>
                     {% endfor %}
+                    <span class="btn-group share-group" role="group">
+                        <button style="border-radius: unset !important;" type="button" class="btn btn-share" data-link="{{ shopping_cart_share_text }}" onclick="copyToClipboard(this)"><i class="bi bi-clipboard"></i>&nbsp;&nbsp;Copy link</button>
+                        <a style="border-radius: unset !important;" target="_blank" href="https://api.whatsapp.com/send?text={{ shopping_cart_share_text|urlencode:"" }}" data-action="share/whatsapp/share" class="btn btn-share"><i class="bi bi-whatsapp"></i></a>
+                        <a style="border-radius: unset !important;" target="_blank" href="https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ shopping_cart_share_text|urlencode:"" }}" class="btn btn-share"><i class="bi bi-telegram"></i></a>
+                        <a style="border-radius: unset !important;" href="mailto:?subject={{ "Shopping list"|urlencode }}&body={{ shopping_cart_share_text|urlencode:"" }}" class="btn btn-share"><i class="bi bi-envelope"></i></a>
+                    </span>
                     <a class="list-group-item list-group-item-action list-group-item-success text-center" href="{% url 'add_cartitem_kitchen' id=kitchen.id %}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="You can also access this with <code>n</code> then <code>c</code>">
                         <i class="bi bi-plus-lg"></i>&nbsp;&nbsp;Add item
                     </a>
