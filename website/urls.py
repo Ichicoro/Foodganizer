@@ -46,10 +46,4 @@ urlpatterns = [
     path('api/products/search', api_endpoints.search_products, name='search_products_api'),
     path('api/product/search', api_endpoints.get_product_by_code, name='check_product_exists_api')
 
-    # # ex: /polls/5/
-    # path('<int:question_id>/', views., name='detail'),
-    # # ex: /polls/5/results/
-    # path('<int:question_id>/results/', views.results, name='results'),
-    # # ex: /polls/5/vote/
-    # path('<int:question_id>/vote/', views.vote, name='vote'),
 ]
