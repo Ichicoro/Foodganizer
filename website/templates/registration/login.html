@@ -10,7 +10,7 @@
 
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-md-8 col-sm-12">
+            <div class="col-12 mw-xs">
                 <form novalidate method="post" class="rounded border p-3 needs-validation" action="{% url 'login' %}">
                     {% csrf_token %}
                     <h2 class="mb-3">Login</h2>
@@ -27,7 +27,7 @@
                         <label for="{{ form.username.name }}" class="form-label">Username</label>
 
                         <div class="input-group has-validation">
-                            <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-at"></i></span>
+                            <span class="input-group-text" id="inputGroupPrepend">@</span>
                             <input class="form-control" name="{{ form.username.name }}" id="{{ form.username.name }}" aria-describedby="usernameHelp" required>
                             <div class="invalid-feedback">
                                 Missing username
@@ -51,6 +51,11 @@
                     {% endif %}
                     <button type="submit" class="btn btn-success w-100 mt-2">Login</button>
                     <input type="hidden" name="next" value="{{ next }}" />
+                    <div class="border-top mt-4 pt-3">
+                        <small class="text-muted">
+                            Don't have an account? <a class="ml-2" href="{% url 'signup' %}">Sign Up</a>
+                        </small>
+                    </div>
                 </form>
             </div>
         </div>

@@ -1,6 +1,7 @@
-
+from crispy_forms.bootstrap import PrependedText
+from crispy_forms.helper import FormHelper
 from django.forms.fields import BooleanField
-from crispy_forms.layout import Field
+from crispy_forms.layout import Field, Layout, HTML, Button
 
 from .models import Item, Kitchen, User, StoredItem, PostIt, ShoppingCartItem
 from django.forms import ModelForm
@@ -70,12 +71,25 @@ class MultiUserField(forms.Field):
 ## FORMS ##
 
 class UpdateUserForm(ModelForm):
+    email = forms.EmailField(required=False)
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'bio', 'profile_pic']
 
 
 class UserRegisterForm(UserCreationForm):
+    def __init__(self, *args, **kwargs):
+        super(UserRegisterForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            PrependedText('username', text='@'),
+            Field('email'),
+            Field('password1', placeholder="Password"),
+            Field('password2', placeholder="Password confirmation"),
+            Button('submit', 'Sign up', css_class='btn btn-success w-100')
+        )
+
     email = forms.EmailField()
 
     class Meta:
