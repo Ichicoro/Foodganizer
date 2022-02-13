@@ -38,3 +38,7 @@ poetry run python manage.py runserver 0.0.0.0:8000
 ```
 
 You'll be able to access the project at [`http://localhost:8000`](http://localhost:8000).
+
+### Run the tests
+
+To run the tests, run `poetry run python manage.py test website`.
