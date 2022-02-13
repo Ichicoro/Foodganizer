@@ -285,7 +285,7 @@
                                 {% comment %} <a href="{% url 'otherprofile' username=m.user.username %}"> {% endcomment %}
                                     <div class="rounded-user-pic-container card3d me-3">
                                         <a  href="{% url 'otherprofile' username=m.user.username %}">
-                                            <img class="rounded ratio-1x1 image-48" src="/static/media/{% firstof m.user.profile_pic "question_mark.png" %}" />
+                                            <img class="rounded ratio-1x1 image-48" src="/static/media/{% firstof m.user.profile_pic "profile_images/blank.png" %}" />
                                         </a>
                                     </div>
                                     <div class="me-auto">
