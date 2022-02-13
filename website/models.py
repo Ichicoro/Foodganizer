@@ -33,19 +33,6 @@ class User(AbstractUser):
     bio = models.TextField(max_length=1000, blank=True)
     profile_pic = models.ImageField(upload_to='profile_images', blank=True)
 
-    def is_member_of(self, k):
-        try:
-            m = self.membership_set.get(kitchen=k)
-            return m in [MembershipStatus.ACTIVE_MEMBERSHIP, MembershipStatus.ADMIN]
-        except ObjectDoesNotExist:
-            return False
-
-    def is_admin_of(self, k):
-        try:
-            m = self.membership_set.get(kitchen=k)
-            return m == MembershipStatus.ADMIN
-        except ObjectDoesNotExist:
-            return False
 
 
 class Item(models.Model):
