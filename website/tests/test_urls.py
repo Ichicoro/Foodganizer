@@ -56,6 +56,10 @@ class TestUrls(TestCase):
         url = reverse("delete_membership", args=[123])
         self.assertEqual(resolve(url).func, delete_membership)
     
+    def test_promote_membership_is_resolved(self):
+        url = reverse("promote_membership", args=[123])
+        self.assertEqual(resolve(url).func, promote_membership)
+   
     def test_set_kitchen_sharing_is_resolved(self):
         url = reverse("set_kitchen_sharing", args=[123])
         self.assertEqual(resolve(url).func, set_kitchen_sharing)
@@ -76,6 +80,10 @@ class TestUrls(TestCase):
         url = reverse("update_storeditem_kitchen", args=[123, 456])
         self.assertEqual(resolve(url).func, update_storeditem_kitchen)
     
+    def test_move_storeditem_kitchen_is_resolved(self):
+        url = reverse("move_storeditem_kitchen", args=[123, 456])
+        self.assertEqual(resolve(url).func, move_storeditem_kitchen)
+    
     def test_add_cartitem_kitchen_is_resolved(self):
         url = reverse("add_cartitem_kitchen", args=[123])
         self.assertEqual(resolve(url).func, add_cartitem_kitchen)
@@ -87,6 +95,10 @@ class TestUrls(TestCase):
     def test_delete_cartitem_kitchen_is_resolved(self):
         url = reverse("delete_cartitem_kitchen", args=[123, 456])
         self.assertEqual(resolve(url).func, delete_cartitem_kitchen)
+    
+    def test_move_cartitem_kitchen_is_resolved(self):
+        url = reverse("move_cartitem_kitchen", args=[123, 456])
+        self.assertEqual(resolve(url).func, move_cartitem_kitchen)
     
     def test_new_kitchen_item_is_resolved(self):
         url = reverse("new_kitchen_item", args=[123])

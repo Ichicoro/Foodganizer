@@ -7,12 +7,10 @@ from website.views import invite_users, kitchen, shared_kitchen
 from django.db.models.fields import EmailField
 from django.test.testcases import TestCase
 
-from website.models import Kitchen, Membership, MembershipStatus, User
+from website.models import Item, Kitchen, Membership, MembershipStatus, StoredItem, User
 from django.test import SimpleTestCase, client
 from django.urls import reverse, resolve
 
-## Here we check that the views work as 
-## intended in (kind of) every possible scenario
 
 class TestViews(TestCase):
     def setUp(self):
@@ -326,6 +324,19 @@ class TestViews(TestCase):
         self.assertTemplateUsed(res, "pages/kitchen.html")
         self.assertEqual(res.status_code, 200)
 
+    def test_kitchen_update_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ADMIN)
+        self.client.force_login(self.user_1)
+        url = reverse("kitchen", args=[self.k_1.id])
+
+        newName = "new kitchen name"
+        res = self.client.post(url, {
+            "name": newName
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context["kitchen"].name, newName)
+
     def test_kitchen_get_no_membership(self):
         self.client.force_login(self.user_1)
         url = reverse("kitchen", args=[self.k_1.id])
@@ -342,6 +353,8 @@ class TestViews(TestCase):
         }, follow=True)
         self.assertTemplateUsed(res, "pages/kitchen.html")
         self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context["pending_memberships"][0].user.username, self.user_2.username)
+        self.assertEqual(res.context["pending_memberships"][0].status, MembershipStatus.PENDING_INVITATION)
         self._assertMembership(self.user_2, self.k_1.name, MembershipStatus.PENDING_INVITATION)
         
     def test_kitchen_invite_users_post_invalid_user(self):
@@ -356,74 +369,146 @@ class TestViews(TestCase):
         data = self.client.session.get("invite_existing_users_form__invite_other_users")
         self.assertIsNotNone(data)
         self.assertEqual(data, invite_other_users)
-        
 
-    ## TODO: view tests for this urls
-    
-    # def test_kitchen_invite_users_is_resolved(self):
-    #     url = reverse("kitchen_invite_users", args=[123])
-    #     self.assertEqual(resolve(url).func, invite_users)
-    
-    # def test_delete_membership_is_resolved(self):
-    #     url = reverse("delete_membership", args=[123])
-    #     self.assertEqual(resolve(url).func, delete_membership)
-    
-    # def test_set_kitchen_sharing_is_resolved(self):
-    #     url = reverse("set_kitchen_sharing", args=[123])
-    #     self.assertEqual(resolve(url).func, set_kitchen_sharing)
-    
-    # def test_join_kitchen_is_resolved(self):
-    #     url = reverse("join_kitchen", args=[123])
-    #     self.assertEqual(resolve(url).func, join_kitchen)
-    
-    # def test_add_storeditem_kitchen_is_resolved(self):
-    #     url = reverse("add_storeditem_kitchen", args=[123])
-    #     self.assertEqual(resolve(url).func, add_storeditem_kitchen)
-    
-    # def test_delete_storeditem_kitchen_is_resolved(self):
-    #     url = reverse("delete_storeditem_kitchen", args=[123])
-    #     self.assertEqual(resolve(url).func, delete_storeditem_kitchen)
-    
-    # def test_update_storeditem_kitchen_is_resolved(self):
-    #     url = reverse("update_storeditem_kitchen", args=[123, 456])
-    #     self.assertEqual(resolve(url).func, update_storeditem_kitchen)
-    
-    # def test_add_cartitem_kitchen_is_resolved(self):
-    #     url = reverse("add_cartitem_kitchen", args=[123])
-    #     self.assertEqual(resolve(url).func, add_cartitem_kitchen)
-    
-    # def test_update_cartitem_kitchen_is_resolved(self):
-    #     url = reverse("update_cartitem_kitchen", args=[123, 456])
-    #     self.assertEqual(resolve(url).func, update_cartitem_kitchen)
-    
-    # def test_delete_cartitem_kitchen_is_resolved(self):
-    #     url = reverse("delete_cartitem_kitchen", args=[123, 456])
-    #     self.assertEqual(resolve(url).func, delete_cartitem_kitchen)
-    
-    # def test_new_kitchen_item_is_resolved(self):
-    #     url = reverse("new_kitchen_item", args=[123])
-    #     self.assertEqual(resolve(url).func, new_kitchen_item)
-    
-    # def test_delete_customitem_kitchen_is_resolved(self):
-    #     url = reverse("delete_customitem_kitchen", args=[123, 456])
-    #     self.assertEqual(resolve(url).func, delete_customitem_kitchen)
-    
-    # def test_create_postit_is_resolved(self):
-    #     url = reverse("create_postit", args=[123])
-    #     self.assertEqual(resolve(url).func, create_postit)
-    
-    # def test_edit_postit_is_resolved(self):
-    #     url = reverse("edit_postit", args=[123, 456])
-    #     self.assertEqual(resolve(url).func, edit_postit)
-    
-    # def test_delete_postit_is_resolved(self):
-    #     url = reverse("delete_postit", args=[123, 456])
-    #     self.assertEqual(resolve(url).func, delete_postit)
-    
-    # def test_search_products_api_is_resolved(self):
-    #     url = reverse("search_products_api")
-    #     self.assertEqual(resolve(url).func, search_products)
-    
-    # def test_check_product_exists_api_is_resolved(self):
-    #     url = reverse("check_product_exists_api")
-    #     self.assertEqual(resolve(url).func, get_product_by_code)
+    def test_join_kitchen_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.PENDING_INVITATION)
+        self.client.force_login(self.user_1)
+        url = reverse("join_kitchen", args=[self.k_1.id])
+        res = self.client.post(url, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchens.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context["active_memberships"][0].user.username, self.user_1.username)
+        self.assertEqual(res.context["active_memberships"][0].status, MembershipStatus.ACTIVE_MEMBERSHIP)
+        self._assertMembership(self.user_1, self.k_1.name, MembershipStatus.ACTIVE_MEMBERSHIP)
+
+    def test_remove_user_from_kitchen_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ADMIN)
+        m2: Membership = Membership.objects.create(user=self.user_2, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        
+        url = reverse("delete_membership", args=[m2.id])
+        res = self.client.post(url, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.context["memberships"]), 1)
+        self.assertEqual(res.context["memberships"][0].user.username, self.user_1.username)
+
+    def test_create_item_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        url = reverse("new_kitchen_item", args=[self.k_1.id])
+        upc = "3344556677889"
+        title = "test item from barcode"
+        res = self.client.post(url, {
+            'upc': upc,
+            'title': title
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/add-item-kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        item_list = Item.objects.filter(upc=upc)
+        self.assertEqual(len(item_list), 1)
+        self.assertEqual(item_list[0].title, title)
+
+    def test_create_custom_item_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        url = reverse("new_kitchen_item", args=[self.k_1.id])
+        title = "test custom item"
+        res = self.client.post(url, {
+            'upc': "",
+            'title': title,
+            'custom_item_kitchen': self.k_1.id
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/add-item-kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        item_list = Item.objects.filter(custom_item_kitchen=self.k_1)
+        self.assertEqual(len(item_list), 1)
+        self.assertEqual(item_list[0].title, title)
+
+    def test_add_item_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        i: Item = Item.objects.create(id=123, title="test product", upc="123123123123")
+        url = reverse("add_storeditem_kitchen", args=[self.k_1.id])
+        res = self.client.post(url, {
+            'item': i.id,
+            'quantity': 3
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.context['stored_items']), 1)
+        self.assertEqual(res.context['stored_items'][0].item.id, i.id)
+        self.assertEqual(res.context['stored_items'][0].quantity, 3)
+
+    def test_add_custom_item_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        i: Item = Item.objects.create(id=123, title="custom test product", custom_item_kitchen=self.k_1)
+        url = reverse("add_storeditem_kitchen", args=[self.k_1.id])
+        res = self.client.post(url, {
+            'item': i.id,
+            'quantity': 5
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.context['stored_items']), 1)
+        self.assertEqual(res.context['stored_items'][0].item.id, i.id)
+        self.assertEqual(res.context['stored_items'][0].quantity, 5)
+
+    def test_edit_item_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        i: Item = Item.objects.create(id=444, title="test product", upc="123123123123")
+        si: StoredItem = StoredItem.objects.create(id=555, item=i, kitchen=self.k_1, quantity=10)
+        url = reverse("update_storeditem_kitchen", args=[self.k_1.id, si.id])
+        res = self.client.post(url, {
+            'quantity': 100
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.context['stored_items']), 1)
+        self.assertEqual(res.context['stored_items'][0].id, si.id)
+        self.assertEqual(res.context['stored_items'][0].item.id, i.id)
+        self.assertEqual(res.context['stored_items'][0].quantity, 100)
+
+    def test_edit_custom_item_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        i: Item = Item.objects.create(id=99, title="custom test product", custom_item_kitchen=self.k_1)
+        si: StoredItem = StoredItem.objects.create(id=555, item=i, kitchen=self.k_1, quantity=10)
+        url = reverse("update_storeditem_kitchen", args=[self.k_1.id, si.id])
+        res = self.client.post(url, {
+            'quantity': 44
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.context['stored_items']), 1)
+        self.assertEqual(res.context['stored_items'][0].id, si.id)
+        self.assertEqual(res.context['stored_items'][0].item.id, i.id)
+        self.assertEqual(res.context['stored_items'][0].quantity, 44)
+
+    def test_remove_item_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        i: Item = Item.objects.create(id=333, title="test product", upc="123123123123")
+        si: StoredItem = StoredItem.objects.create(id=222, item=i, kitchen=self.k_1)
+        url = reverse("delete_storeditem_kitchen", args=[self.k_1.id])
+        res = self.client.post(url, {
+            'item': si.id
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.context['stored_items']), 0)
+
+    def test_remove_custom_item_post_ok(self):
+        Membership.objects.create(user=self.user_1, kitchen=self.k_1, status=MembershipStatus.ACTIVE_MEMBERSHIP)
+        self.client.force_login(self.user_1)
+        i: Item = Item.objects.create(id=345, title="custom test product", custom_item_kitchen=self.k_1)
+        si: StoredItem = StoredItem.objects.create(id=123, item=i, kitchen=self.k_1)
+        url = reverse("delete_storeditem_kitchen", args=[self.k_1.id])
+        res = self.client.post(url, {
+            'item': si.id
+        }, follow=True)
+        self.assertTemplateUsed(res, "pages/kitchen.html")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.context['stored_items']), 0)
