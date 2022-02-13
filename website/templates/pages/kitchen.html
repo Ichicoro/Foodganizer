@@ -206,9 +206,11 @@
             addUserCardModal(entry)
         })
 
-        $$onReady(() => {
-            $$("#div_id_background_image span.text-break").innerText = $$("#div_id_background_image a").href.replace(/.+backgrounds\//, "")
-        })
+        {% if user_membership.status == "ADMIN" %}
+            $$onReady(() => {
+                $$("#div_id_background_image span.text-break").innerText = $$("#div_id_background_image a").href.replace(/.+backgrounds\//, "")
+            })
+        {% endif %}
     </script>
     {% comment %}<script>
         // Edit kitchen name buttons
@@ -259,16 +261,18 @@
             <h1 id="kitchenName" style="padding-bottom: 6px" class="mb-3 d-inline-block">{{ kitchen.name }}</h1>
             <span class="mb-md-2 mb-3" style="transform: translateY(-5px);">
                 {% if kitchen.public_access_uuid %}
-                    <span class="btn-group me-2" role="group">
+                    <span class="btn-group {% if user_membership.status == "ADMIN" %}me-2{% endif %}" role="group">
                         <button type="button" class="btn btn-share {% if kitchen.background_image %}bg-blurred{% else %}btn-dark{% endif %}" data-link="{{ share_kitchen_url }}" onclick="copyToClipboard(this)"><i class="bi bi-clipboard"></i>&nbsp;&nbsp;Copy link</button>
                         <a target="_blank" href="https://api.whatsapp.com/send?{{ whatsapp_share_query_params }}" data-action="share/whatsapp/share" class="btn btn-share {% if kitchen.background_image %}bg-blurred{% else %}btn-dark{% endif %}"><i class="bi bi-whatsapp"></i></a>
                         <a target="_blank" href="https://t.me/share/url?{{ telegram_share_query_params }}" class="btn btn-share {% if kitchen.background_image %}bg-blurred{% else %}btn-dark{% endif %}"><i class="bi bi-telegram"></i></a>
                         <a href="mailto:?{{ email_share_query_params }}" class="btn btn-share {% if kitchen.background_image %}bg-blurred{% else %}btn-dark{% endif %}"><i class="bi bi-envelope"></i></a>
                     </span>
                 {% endif %}
-                <span class="btn-group" role="group">
-                    <button type="button" class="btn btn-share {% if kitchen.background_image %}bg-blurred{% else %}btn-dark{% endif %}" data-bs-toggle="modal" data-bs-target="#editKitchenModal"><i class="bi bi-gear-wide-connected"></i></button>
-                </span>
+                {% if user_membership.status == "ADMIN" %}
+                    <span class="btn-group" role="group">
+                        <button type="button" class="btn btn-share {% if kitchen.background_image %}bg-blurred{% else %}btn-dark{% endif %}" data-bs-toggle="modal" data-bs-target="#editKitchenModal"><i class="bi bi-gear-wide-connected"></i></button>
+                    </span>
+                {% endif %}
             </span>
         </div>
         <div class="row">
@@ -522,5 +526,7 @@
 
     {% include "components/kitchen-forms/user-card-modal.html" with k=kitchen %}
 
-    {% include "components/kitchen-forms/edit-kitchen-modal.html" with k=kitchen form=update_kitchen_form %}
+    {% if user_membership.status == "ADMIN" %}
+        {% include "components/kitchen-forms/edit-kitchen-modal.html" with k=kitchen form=update_kitchen_form %}
+    {% endif %}
 {% endblock %}
