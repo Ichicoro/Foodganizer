@@ -28,7 +28,6 @@ def json_dumps(data):
         return json_string
     except Exception:
         traceback.print_last()
-        print("error")
         return "{}"
 
 

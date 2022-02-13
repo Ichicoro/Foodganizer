@@ -338,13 +338,11 @@ def update_cartitem_kitchen(request, id, item_id):
     if request.method == 'POST':
         instance = k.shoppingcartitem_set.get(id=item_id)
         form = UpdateShoppingCartItemForm(request.POST or None, instance=instance)
-        print(form.data)
         if form.is_valid():
             form.save()
             messages.success(request, "Item updated successfully!")
             return redirect('kitchen', id=id)
         else:
-            print(form.errors)
             messages.error(request, "Error, please check console :(")
             return redirect('kitchen', id=id)
 
@@ -397,9 +395,7 @@ def delete_storeditem_kitchen(request, id):
         return redirect('kitchens')
 
     if request.method == 'POST':
-        print(k.storeditem_set.all())
         form = RemoveStoredItemForm(request.POST, item_set=k.storeditem_set.all())
-        print(form.data)
         if form.is_valid():
             item = form.cleaned_data.get("item")
             if form.cleaned_data.get("add_to_shopping_list"):
@@ -417,7 +413,6 @@ def delete_storeditem_kitchen(request, id):
             messages.success(request, "Item deleted successfully!")
             return redirect('kitchen', id=id)
         else:
-            print(form.errors)
             messages.error(request, "Error, please check console :(")
             return redirect('kitchen', id=id)
 
@@ -457,13 +452,11 @@ def update_storeditem_kitchen(request, id, item_id):
     if request.method == 'POST':
         instance = k.storeditem_set.get(id=item_id)
         form = UpdateStoredItemForm(request.POST or None, instance=instance)
-        print(form.data)
         if form.is_valid():
             form.save()
             messages.success(request, "Item updated successfully!")
             return redirect('kitchen', id=id)
         else:
-            print(form.errors)
             messages.error(request, "Error, please check console :(")
             return redirect('kitchen', id=id)
 
@@ -480,7 +473,6 @@ def new_kitchen_item(request, id):
     if form.is_valid():
         i = form.save(commit=False)  # https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method
         i.added_by = request.user
-        print(form.cleaned_data)
         upc_data = form.data["upc"]
         if upc_data == "":
             i.custom_item_kitchen = k
@@ -491,7 +483,6 @@ def new_kitchen_item(request, id):
         next_url = request.GET.get("next", reverse("add_storeditem_kitchen", args={id}))
         return redirect(next_url)
     else:
-        print(form.errors)
         messages.error(request, f"{form.errors}")
         return redirect(reverse("add_storeditem_kitchen", args={id}))
 
@@ -733,7 +724,6 @@ def edit_postit(request, id, postit_id):
     if request.method == 'POST':
         instance = k.postit_set.get(id=postit_id)
         form = NewPostItForm(request.POST or None, instance=instance)
-        print(form.data)
         if form.is_valid():
             editable_instance = form.save(commit=False)
             editable_instance.last_edited_by = request.user
@@ -741,7 +731,6 @@ def edit_postit(request, id, postit_id):
             messages.success(request, "Item updated successfully!")
             return redirect('kitchen', id=id)
         else:
-            print(form.errors)
             messages.error(request, "Error, please check console :(")
             return redirect('kitchen', id=id)
 
@@ -755,7 +744,6 @@ def delete_postit(request, id, postit_id):
     try:
         postit = k.postit_set.get(id=postit_id)
         if postit:
-            print(postit)
             postit.delete()
             messages.success(request, "Item deleted successfully!")
         else:
