@@ -494,7 +494,7 @@
                         </a>
                     {% endfor %}
                     <span class="btn-group share-group" role="group">
-                        <button style="border-radius: unset !important;" type="button" class="btn btn-share" data-link="{{ shopping_cart_share_text }}" onclick="copyToClipboard(this)"><i class="bi bi-clipboard"></i>&nbsp;&nbsp;Copy link</button>
+                        <button style="border-radius: unset !important;" type="button" class="btn btn-share" data-link="{{ shopping_cart_share_text }}" onclick="copyToClipboard(this)"><i class="bi bi-clipboard"></i>&nbsp;&nbsp;Copy</button>
                         <a style="border-radius: unset !important;" target="_blank" href="https://api.whatsapp.com/send?text={{ shopping_cart_share_text|urlencode:"" }}" data-action="share/whatsapp/share" class="btn btn-share"><i class="bi bi-whatsapp"></i></a>
                         <a style="border-radius: unset !important;" target="_blank" href="https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ shopping_cart_share_text|urlencode:"" }}" class="btn btn-share"><i class="bi bi-telegram"></i></a>
                         <a style="border-radius: unset !important;" href="mailto:?subject={{ "Shopping list"|urlencode }}&body={{ shopping_cart_share_text|urlencode:"" }}" class="btn btn-share"><i class="bi bi-envelope"></i></a>
