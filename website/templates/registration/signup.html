@@ -13,7 +13,8 @@
             <form method="POST">
                 {% csrf_token %}
                 <h2 class="mb-3">Sign up</h2>
-                {% crispy form %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-success w-100">Sign up</button>
                 <div class="border-top mt-4 pt-3">
                     <small class="text-muted">
                         Already have an account? <a class="ml-2" href="{% url 'login' %}">Log In</a>
